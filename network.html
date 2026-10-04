@@ -21,14 +21,6 @@
         <section class="note">
             <h2>#1 http://castlechat.com/ 입력 + Enter &rarr; 브라우저 화면 Rendering</h2>
 
-            <!-- 흐름 요약. 적어둔 문장만 그대로 둔다. -->
-            <ol class="bsum">
-                <li>node_modules 에서 필요한 (13개) 패키지 + 컴포넌트 .jsx + hooks 등 .js
-                    &rarr; build/static/js/main.e83d3066.js</li>
-                <li>모든 .css &rarr; build/static/css/main.0bd4de65.css</li>
-                <li>index.html &nbsp; 빈 껍데기. &lt;div id="root"&gt;&lt;/div&gt;</li>
-            </ol>
-
             <div class="side-by-side">
                 <div class="callout">
                     <span class="tag">큰 그림</span>
@@ -1162,7 +1154,16 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
 
         <div class="note modal-note">
             <h2>렌더링 &mdash; 어디까지가 렌더링인가</h2>
-            <p>파일 3개로 화면을 만드는 전 과정을 "렌더링" 이라 부르는 건 <em>넓은 의미로만 맞다.</em>
+
+            <h3>흐름 요약</h3>
+            <ol class="bsum">
+                <li>node_modules 에서 필요한 (13개) 패키지 + 컴포넌트 .jsx + hooks 등 .js
+                    &rarr; build/static/js/main.e83d3066.js</li>
+                <li>모든 .css &rarr; build/static/css/main.0bd4de65.css</li>
+                <li>index.html &nbsp; 빈 껍데기. &lt;div id="root"&gt;&lt;/div&gt;</li>
+            </ol>
+
+            <p>이 파일 3개로 화면을 만드는 전 과정을 "렌더링" 이라 부르는 건 <em>넓은 의미로만 맞다.</em>
                 좁은 의미의 Rendering 은 그중 마지막 단계만 가리킨다.</p>
 
             <h3>브라우저가 하는 일은 세 종류다</h3>
