@@ -873,6 +873,25 @@ pre.code code {
     }
 }
 
+/* 넓어지면 카드를 좁히고 남는 칸에 결론 문장을 둔다. */
+@media (min-width: 1100px) {
+    .trio {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* 결론 문장. 카드가 아니므로 테두리도 배경도 주지 않는다. */
+.kind-note {
+    align-self: center;
+    margin: 0;
+    padding: 0 4px;
+    border: none;
+    background: none;
+    font-size: 13.5px;
+    line-height: 1.7;
+    word-break: keep-all;
+}
+
 .kind {
     padding: 14px 15px;
     border: 1px solid var(--line);

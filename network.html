@@ -1157,8 +1157,8 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
 
             <div class="head-row">
                 <h3>흐름 요약</h3>
-                <p class="head-note">이 파일 3개로 화면을 만드는 전 과정의 정식 명칭이
-                    <strong class="danger">Critical Rendering Path</strong> (중요 렌더링 경로) 다.</p>
+                <p class="head-note">이 파일 3개로 화면을 만드는 전 과정
+                    &nbsp;===&nbsp; <strong class="danger">Critical Rendering Path</strong> (중요 렌더링 경로)</p>
             </div>
             <ol class="bsum">
                 <li>node_modules 에서 필요한 (13개) 패키지 + 컴포넌트 .jsx + hooks 등 .js
@@ -1204,8 +1204,9 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
                     <p class="kind-desc">구조를 실제 픽셀로 바꾸는 일</p>
                     <span class="kind-tag on">좁은 의미의 렌더링은 이것만</span>
                 </div>
+
+                <p class="kind-note"><em>①②는 렌더링이 아니다.</em><br>파싱이고 실행이다.</p>
             </div>
-            <p><em>①②는 렌더링이 아니다.</em> 파싱이고 실행이다.</p>
 
             <h3>실제 순서</h3>
             <div class="route">
