@@ -19,20 +19,18 @@
 
         <!-- ===================================================== -->
         <section class="note">
-            <h2>#1 주소창에 Enter &rarr; 화면이 뜨기까지</h2>
-            <p>가장 핵심이다. 면접 단골 질문이고, 여기에 네트워크 &middot; 서버 &middot; 브라우저가 전부 들어간다.
-                캐슬챗 <code>http://43.202.208.133/</code> 기준으로 정리했다.</p>
+            <h2>#1 http://43.202.208.133/ 입력 + Enter &rarr; 브라우저 화면 렌더링</h2>
 
             <div class="side-by-side">
                 <div class="callout">
                     <span class="tag">큰 그림</span>
                     <p><em>네트워크 구간</em>과 <em>렌더링 구간</em>으로 나뉜다.
-                        흰 화면이 먼저 뜨고 JS 가 나중에 채우는 것이 CSR 의 특징이다.</p>
+                        흰 화면이 먼저 뜨고 JS 가 나중에 채우는 것이 CSR 의 특징.</p>
                 </div>
                 <div class="callout bad">
                     <span class="tag">빠뜨리기 쉬운 두 지점</span>
-                    <p>① HTTP 보다 <em>TCP 3-way handshake 가 먼저</em>다.
-                        ② 핸드셰이크는 <em>커널</em>이 하고 NginX 는 완성된 연결만 받는다.</p>
+                    <p>① HTTP 보다 <em>TCP 3-way Handshake 가 먼저</em>다.</p>
+                    <p>② Handshake 는 <em>Kernel</em>이 하고 NginX 는 완성된 연결만 받는다.</p>
                 </div>
             </div>
 
@@ -42,21 +40,42 @@
                     <em>IP 를 직접 쳤으므로 DNS 조회가 없다.</em> 도메인이었다면 여기서 DNS 질의가 들어간다.</li>
                 <li><span class="who">브라우저</span> 포트를 생략했으므로 <code>http</code> 의 기본값인
                     <em>80 번</em>으로 정한다. <code>https</code> 였다면 443 이다.</li>
-                <li><span class="who k">내 PC 커널</span> <code>43.202.208.133:80</code> 으로 TCP 연결 수립.
-                    브라우저는 <code>connect()</code> 로 부탁만 하고 패킷은 커널이 만든다.</li>
+                <li><span class="who k">Client PC Kernel</span> <code>43.202.208.133:80</code> 으로 TCP 연결 수립.
+                    브라우저는 <code>connect()</code> 로 부탁만 하고 패킷은 Kernel이 만든다.</li>
             </ol>
 
-            <h4>TCP 3-way handshake &mdash; HTTP 는 아직 한 글자도 안 보냈다</h4>
-            <pre class="code"><code>Client                                  Server
-  |  ------------ SYN --------------->  |   "연결하고 싶다"
-  |  <---------- SYN + ACK -----------  |   "좋다. 나도 연결하겠다"
-  |  ------------ ACK --------------->  |   "확인했다"
-  |                                     |
-  |  == 여기까지 TCP. 이제야 HTTP ==      |
-  |  --------- GET / HTTP/1.1 ------->  |</code></pre>
+            <h4>TCP 3-way Handshake &mdash; HTTP 는 아직 한 글자도 안 보냈다</h4>
+            <div class="hsq">
+                <div class="hsq-heads">
+                    <div class="hsq-lane">
+                        <span class="hsq-head">Client</span>
+                        <span class="hsq-head">Server</span>
+                    </div>
+                </div>
+
+                <div class="hsq-step">
+                    <div class="hsq-arrow to-right"><span>SYN</span></div>
+                    <div class="hsq-note">"연결하고 싶다"</div>
+                </div>
+                <div class="hsq-step">
+                    <div class="hsq-arrow to-left"><span>SYN + ACK</span></div>
+                    <div class="hsq-note">"좋다. 나도 연결하겠다"</div>
+                </div>
+                <div class="hsq-step">
+                    <div class="hsq-arrow to-right"><span>ACK</span></div>
+                    <div class="hsq-note">"확인했다"</div>
+                </div>
+
+                <div class="hsq-cut"><span>여기까지 TCP. 이제야 HTTP</span></div>
+
+                <div class="hsq-step">
+                    <div class="hsq-arrow to-right http"><span>GET / HTTP/1.1</span></div>
+                    <div class="hsq-note">첫 HTTP 요청</div>
+                </div>
+            </div>
             <div class="callout">
                 <span class="tag">주체</span>
-                <p>SYN+ACK 를 보내는 건 <em>서버의 리눅스 커널</em>이다. NginX 도 Spring Boot 도 아니다.
+                <p>SYN+ACK 를 보내는 건 <em>서버의 Linux Kernel</em>이다. NginX 도 Spring Boot 도 아니다.
                     NginX 는 <code>accept()</code> 로 <em>완성된 연결</em>만 건네받는다. 자세한 건 #2 참고.</p>
             </div>
 
@@ -127,7 +146,7 @@ ETag: "6aa4110f-224"
 GET /static/js/main.e83d3066.js
 GET /favicon.ico  등</code></pre>
             <p><code>Connection: keep-alive</code> 덕분에 <em>1 단계의 TCP 연결을 재사용</em>한다.
-                핸드셰이크를 다시 하지 않는다. NginX 는 이것도 같은 <code>location /</code> 에서 정적 파일로 내준다.</p>
+                Handshake를 다시 하지 않는다. NginX 는 이것도 같은 <code>location /</code> 에서 정적 파일로 내준다.</p>
 
             <h3>6 &mdash; 렌더링 파이프라인</h3>
             <pre class="code"><code>HTML --파싱--> DOM 트리  -+
@@ -145,7 +164,7 @@ CSS  --파싱--> CSSOM 트리 -+
             <h3>7 &mdash; JS 실행, React 등장</h3>
             <p>DOM 파싱이 끝났으니 미뤄둔 <code>defer</code> 스크립트가 실행된다.</p>
             <ol class="seq">
-                <li><span class="who">브라우저</span> <code>crypto.randomUUID</code> 폴리필 적용.
+                <li><span class="who">브라우저</span> <code>crypto.randomUUID</code> polyfill 적용.
                     배포가 <code>http</code> 라 보안 컨텍스트가 아니어서 이 API 가 없다.</li>
                 <li><span class="who">React</span> <code>ReactDOM.createRoot(#root)</code> &rarr;
                     Provider / BrowserRouter / QueryClient 로 감싸고 App 렌더.</li>
@@ -159,7 +178,7 @@ CSS  --파싱--> CSSOM 트리 -+
                 <li><span class="who">React</span> AppShell 의 <code>useMe()</code> 가
                     <code>GET /user/isMe</code> 호출.</li>
                 <li><span class="who">NginX</span> <code>location ~ ^/(user|friend|chat|room|uploads)/</code>
-                    에 걸려 <code>domain-service:8080</code> 으로 프록시. <em>이때 A&harr;B 핸드셰이크가 한 번 더
+                    에 걸려 <code>domain-service:8080</code> 으로 프록시. <em>이때 A&harr;B Handshake가 한 번 더
                     일어난다.</em></li>
                 <li><span class="who">Spring Boot</span> 쿠키의 세션 ID 로 Redis 세션 조회.</li>
                 <li><span class="who">Spring Boot</span> 세션 없음 &rarr; 비로그인 응답.</li>
@@ -178,7 +197,7 @@ CSS  --파싱--> CSSOM 트리 -+
             <h3>한 장 요약</h3>
             <pre class="code"><code>[입력]   Enter
    |
-[커널]   SYN -> SYN+ACK -> ACK          <- NginX 가 아니라 커널이 한다
+[Kernel]   SYN -> SYN+ACK -> ACK          <- NginX 가 아니라 Kernel이 한다
    |
 [HTTP]   GET / + 헤더 + 빈 줄
    |
@@ -200,17 +219,17 @@ CSS  --파싱--> CSSOM 트리 -+
                 <span class="tag">면접에서 강조할 두 가지</span>
                 <p>① <em>흰 화면이 먼저 뜨고 JS 가 나중에 채운다.</em> CSR 의 특징이고,
                     그래서 초기 로딩이 느리면 빈 화면이 보인다. SSR 을 쓰는 이유가 여기서 나온다.</p>
-                <p>② <em>핸드셰이크는 커널이 하고 NginX 는 완성된 연결만 받는다.</em>
+                <p>② <em>Handshake는 Kernel이 하고 NginX 는 완성된 연결만 받는다.</em>
                     "NginX 가 SYN 을 받는다" 고 답하면 틀린다.</p>
             </div>
         </section>
 
         <!-- ===================================================== -->
         <section class="note">
-            <h2>#2 서버를 분리하면 &mdash; 커널은 2개, 핸드셰이크는 누가 하나</h2>
+            <h2>#2 서버를 분리하면 &mdash; Kernel은 2개, Handshake는 누가 하나</h2>
 
-            <h3>먼저 &mdash; 도커 컨테이너는 커널을 공유한다</h3>
-            <p>캐슬챗은 Lightsail 한 대에 컨테이너로 다 올려놨는데, 이때 <em>커널은 하나다.</em></p>
+            <h3>먼저 &mdash; 도커 컨테이너는 Kernel을 공유한다</h3>
+            <p>캐슬챗은 Lightsail 한 대에 컨테이너로 다 올려놨는데, 이때 <em>Kernel은 하나다.</em></p>
             <div class="side-by-side">
                 <div class="scroll-x">
                     <table>
@@ -220,13 +239,13 @@ CSS  --파싱--> CSSOM 트리 -+
                             <th>가상머신(VM)</th>
                         </tr>
                         <tr>
-                            <th>커널</th>
+                            <th>Kernel</th>
                             <td>호스트 것 <em>1개를 공유</em></td>
                             <td>각자 따로</td>
                         </tr>
                         <tr>
                             <th>격리 단위</th>
-                            <td>프로세스 (네임스페이스)</td>
+                            <td>프로세스 (namespace)</td>
                             <td>OS 전체</td>
                         </tr>
                         <tr>
@@ -238,8 +257,8 @@ CSS  --파싱--> CSSOM 트리 -+
                 </div>
                 <div class="callout">
                     <span class="tag">핵심</span>
-                    <p>컨테이너는 <em>격리된 OS 가 아니라 격리된 프로세스</em>다. 네트워크 네임스페이스가 따로라서
-                        각자 IP 를 갖고 서로 안 보이지만, 커널 코드는 호스트 것 하나를 같이 쓴다.</p>
+                    <p>컨테이너는 <em>격리된 OS 가 아니라 격리된 프로세스</em>다. 네트워크 namespace가 따로라서
+                        각자 IP 를 갖고 서로 안 보이지만, Kernel 코드는 호스트 것 하나를 같이 쓴다.</p>
                 </div>
             </div>
 
@@ -252,7 +271,7 @@ CSS  --파싱--> CSSOM 트리 -+
                 <div class="machine">
                     <div class="machine-title">클라이언트 PC</div>
                     <div class="layer"><strong>브라우저</strong></div>
-                    <div class="layer kernel">Windows 커널</div>
+                    <div class="layer kernel">Windows Kernel</div>
                     <div class="layer"><strong>NIC</strong></div>
                     <div class="machine-foot">공인 IP 없음</div>
                 </div>
@@ -260,7 +279,7 @@ CSS  --파싱--> CSSOM 트리 -+
                 <div class="machine edge">
                     <div class="machine-title">Web 서버 (A)</div>
                     <div class="layer"><strong>NginX</strong><small>listen :80</small></div>
-                    <div class="layer kernel">리눅스 커널 A</div>
+                    <div class="layer kernel">Linux Kernel A</div>
                     <div class="layer"><strong>NIC</strong></div>
                     <div class="machine-foot">공인 203.0.113.10<br>사설 10.0.1.10<br>외부에 노출된 유일한 지점</div>
                 </div>
@@ -268,21 +287,21 @@ CSS  --파싱--> CSSOM 트리 -+
                 <div class="machine">
                     <div class="machine-title">WAS 서버 (B)</div>
                     <div class="layer"><strong>Spring Boot</strong><small>listen :8080</small></div>
-                    <div class="layer kernel">리눅스 커널 B</div>
+                    <div class="layer kernel">Linux Kernel B</div>
                     <div class="layer"><strong>NIC</strong></div>
                     <div class="machine-foot">공인 IP 없음<br>사설 10.0.1.20<br>인터넷에서 닿을 수 없다</div>
                 </div>
             </div>
-            <h3>핸드셰이크는 커널이 한다 &mdash; NginX 가 아니다</h3>
+            <h3>Handshake는 Kernel이 한다 &mdash; NginX 가 아니다</h3>
             <div class="callout bad">
                 <span class="tag">흔한 오해</span>
                 <p>"NginX 가 SYN 을 받아서 SYN+ACK 를 보낸다" &mdash; <em>틀렸다.</em>
-                    NginX 는 SYN 을 보지도 못한다. 커널이 핸드셰이크를 혼자 다 끝낸 뒤에 NginX 에게 넘긴다.</p>
+                    NginX 는 SYN 을 보지도 못한다. Kernel이 Handshake를 혼자 다 끝낸 뒤에 NginX 에게 넘긴다.</p>
             </div>
 
             <h4>전화 비유</h4>
             <ul>
-                <li><em>커널 = 교환원.</em> 벨이 울리면 받아서 통화를 성립시킨다.</li>
+                <li><em>Kernel = 교환원.</em> 벨이 울리면 받아서 통화를 성립시킨다.</li>
                 <li><em>NginX = 담당 직원.</em> 교환원이 연결해준 통화를 건네받아 실제 대화를 한다.</li>
                 <li>직원은 벨소리와 "연결 중" 신호에 참여하지 않는다. 수화기를 받았을 때 통화는 이미 성립돼 있다.</li>
             </ul>
@@ -299,25 +318,25 @@ CSS  --파싱--> CSSOM 트리 -+
                     <tr>
                         <td>1</td>
                         <td><code>SYN</code></td>
-                        <td><em>클라이언트 PC 의 커널</em><br>(브라우저가 <code>connect()</code> 로 부탁)</td>
-                        <td><em>서버 A 의 리눅스 커널</em></td>
+                        <td><em>Client PC Kernel</em><br>(브라우저가 <code>connect()</code> 로 부탁)</td>
+                        <td><em>서버 A 의 Linux Kernel</em></td>
                     </tr>
                     <tr>
                         <td>2</td>
                         <td><code>SYN+ACK</code></td>
-                        <td><em>서버 A 의 리눅스 커널</em></td>
-                        <td>클라이언트 PC 의 커널</td>
+                        <td><em>서버 A 의 Linux Kernel</em></td>
+                        <td>Client PC Kernel</td>
                     </tr>
                     <tr>
                         <td>3</td>
                         <td><code>ACK</code></td>
-                        <td>클라이언트 PC 의 커널</td>
-                        <td>서버 A 의 리눅스 커널</td>
+                        <td>Client PC Kernel</td>
+                        <td>서버 A 의 Linux Kernel</td>
                     </tr>
                     <tr>
                         <td>4</td>
                         <td>연결 성립</td>
-                        <td>커널 A 가 accept 큐에 적립</td>
+                        <td>Kernel A 가 accept 큐에 적립</td>
                         <td><em>NginX 가 <code>accept()</code> 로 꺼냄</em><br>&larr; NginX 첫 등장</td>
                     </tr>
                     <tr>
@@ -334,7 +353,7 @@ CSS  --파싱--> CSSOM 트리 -+
                     </tr>
                 </table>
             </div>
-            <p><em>1~3 번에 NginX 가 없다.</em> TCP 핸드셰이크는 TCP 프로토콜의 일이고 TCP 구현체가 커널 안에 있기
+            <p><em>1~3 번에 NginX 가 없다.</em> TCP Handshake는 TCP 프로토콜의 일이고 TCP 구현체가 Kernel 안에 있기
                 때문이다. 유저랜드 프로그램이 매번 직접 악수하게 만들면 모든 서버 프로그램이 TCP 를 새로 구현해야 한다.</p>
 
             <h3>SYN 이 실제로 가는 경로</h3>
@@ -346,7 +365,7 @@ CSS  --파싱--> CSSOM 트리 -+
 |  |  dst IP : 43.202.208.133                  |  |  <-- 라우터가 보는 건 이것만
 |  |  +- TCP segment (L4) -----------------+   |  |
 |  |  |  src port : 51234  (OS 가 임의 배정) |   |  |
-|  |  |  dst port : 80                     |   |  |  <-- 최종 서버 커널만 본다
+|  |  |  dst port : 80                     |   |  |  <-- 최종 Server Kernel만 본다
 |  |  |  flags    : SYN                    |   |  |
 |  |  +------------------------------------+   |  |
 |  +-------------------------------------------+  |
@@ -354,15 +373,15 @@ CSS  --파싱--> CSSOM 트리 -+
 
             <ol class="seq">
                 <li><span class="who">브라우저</span> <code>socket()</code> + <code>connect()</code> 호출.
-                    여기서 브라우저 역할은 끝이고 나머지는 커널이 한다.</li>
-                <li><span class="who k">내 PC 커널</span> "목적지가 내 서브넷에 없네" 판단 &rarr;
+                    여기서 브라우저 역할은 끝이고 나머지는 Kernel이 한다.</li>
+                <li><span class="who k">Client PC Kernel</span> "목적지가 내 서브넷에 없네" 판단 &rarr;
                     기본 게이트웨이(공유기)로 보내기로 결정. ARP 로 공유기 MAC 을 알아내 전송.</li>
                 <li><span class="who">공유기</span> NAT. 출발지 IP 를 사설 &rarr; 공인으로 바꿔치기하고,
                     돌아올 응답을 누구에게 줄지 포트로 기억해둔다.</li>
                 <li><span class="who">라우터들</span> ISP &rarr; 백본 &rarr; AWS. 수십 홉을 목적지 IP 만 보고 전달한다.</li>
                 <li><span class="who">방화벽</span> 보안그룹이 80 번 허용을 확인한다. 막혀 있으면 여기서 조용히
                     버려지고 브라우저는 타임아웃이 난다.</li>
-                <li><span class="who k">서버 커널</span> "80 번 듣는 소켓 있음(NginX)" &rarr;
+                <li><span class="who k">Server Kernel</span> "80 번 듣는 소켓 있음(NginX)" &rarr;
                     <em>SYN+ACK 발사.</em> 여기가 답이다.</li>
             </ol>
 
@@ -371,21 +390,21 @@ CSS  --파싱--> CSSOM 트리 -+
                 <div class="machine">
                     <div class="machine-title">클라이언트 PC</div>
                     <div class="layer"><strong>브라우저</strong></div>
-                    <div class="layer kernel">Windows 커널</div>
+                    <div class="layer kernel">Windows Kernel</div>
                     <div class="machine-foot">렌더링은 여기서만</div>
                 </div>
                 <div class="topo-arrow" aria-hidden="true"></div>
                 <div class="machine edge">
                     <div class="machine-title">Web 서버 (A)</div>
                     <div class="layer"><strong>NginX</strong></div>
-                    <div class="layer kernel">리눅스 커널 A</div>
+                    <div class="layer kernel">Linux Kernel A</div>
                     <div class="machine-foot">정적 파일을 혼자 다 내준다</div>
                 </div>
                 <div class="topo-arrow cut" aria-hidden="true"></div>
                 <div class="machine idle">
                     <div class="machine-title">WAS 서버 (B)</div>
                     <div class="layer"><strong>Spring Boot</strong></div>
-                    <div class="layer kernel">리눅스 커널 B</div>
+                    <div class="layer kernel">Linux Kernel B</div>
                     <div class="machine-foot">참여 없음</div>
                 </div>
             </div>
@@ -394,9 +413,9 @@ CSS  --파싱--> CSSOM 트리 -+
                 <table>
                     <tr>
                         <th>단계</th>
-                        <th>커널 A</th>
+                        <th>Kernel A</th>
                         <th>NginX</th>
-                        <th>커널 B</th>
+                        <th>Kernel B</th>
                         <th>Spring Boot</th>
                     </tr>
                     <tr>
@@ -462,7 +481,7 @@ CSS  --파싱--> CSSOM 트리 -+
                 <li><span class="who">브라우저</span> DOM 트리 구축. <code>&lt;div id="root"&gt;</code> 가 비어 있어
                     아직 흰 화면이다.</li>
                 <li><span class="who">브라우저</span> CSS / JS 추가 GET. <code>keep-alive</code> 덕분에
-                    같은 TCP 연결을 재사용하고 핸드셰이크를 다시 하지 않는다.</li>
+                    같은 TCP 연결을 재사용하고 Handshake를 다시 하지 않는다.</li>
                 <li><span class="who">브라우저</span> DOM + CSSOM &rarr; 렌더트리 &rarr; Layout &rarr; Paint.
                     흰 화면이 실제로 모니터에 출력된다.</li>
                 <li><span class="who">브라우저</span> <code>defer</code> 스크립트 실행.
@@ -479,19 +498,19 @@ CSS  --파싱--> CSSOM 트리 -+
                     CSS 없이 그리면 스타일 없는 날것이 번쩍 보였다가 바뀌므로 브라우저가 일부러 기다린다.</li>
             </ul>
 
-            <h3>B 가 필요해지면 핸드셰이크가 한 번 더</h3>
+            <h3>B 가 필요해지면 Handshake가 한 번 더</h3>
             <pre class="code"><code>location ~ ^/(user|friend|chat|room|uploads)/ {
     proxy_pass http://10.0.1.20:8080;      # 여기엔 proxy_pass 가 있다
 }</code></pre>
             <ul>
-                <li>① 브라우저 &rarr; 커널 A 핸드셰이크 &nbsp;(클라이언트 &harr; A)</li>
-                <li>② NginX &rarr; 커널 B 핸드셰이크 &nbsp;(A &harr; B) &mdash; <em>완전히 별개의 연결</em></li>
+                <li>① 브라우저 &rarr; Kernel A Handshake &nbsp;(클라이언트 &harr; A)</li>
+                <li>② NginX &rarr; Kernel B Handshake &nbsp;(A &harr; B) &mdash; <em>완전히 별개의 연결</em></li>
             </ul>
             <div class="callout">
                 <span class="tag">역할이 뒤집힌다</span>
                 <p>NginX 는 브라우저에 대해서는 <em>서버</em>(SYN 을 받는 쪽), Spring Boot 에 대해서는
                     <em>클라이언트</em>(SYN 을 보내는 쪽)가 된다.</p>
-                <p>②의 SYN+ACK 를 보내는 건 커널 B 다. 이때도 톰캣은 악수에 참여하지 않고
+                <p>②의 SYN+ACK 를 보내는 건 Kernel B 다. 이때도 톰캣은 악수에 참여하지 않고
                     <code>accept()</code> 로 완성된 연결만 받는다. A 에서 일어난 일이 B 에서 똑같이 반복된다.</p>
                 <p>그리고 B 가 보는 접속 IP 는 브라우저가 아니라 <em>NginX</em> 가 된다. 그래서
                     <code>X-Forwarded-For</code> 가 필요하다.</p>
