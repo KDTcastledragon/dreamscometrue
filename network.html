@@ -19,7 +19,195 @@
 
         <!-- ===================================================== -->
         <section class="note">
-            <h2>#1 서버를 분리하면 &mdash; 커널은 2개, 핸드셰이크는 누가 하나</h2>
+            <h2>#1 주소창에 Enter &rarr; 화면이 뜨기까지</h2>
+            <p>가장 핵심이다. 면접 단골 질문이고, 여기에 네트워크 &middot; 서버 &middot; 브라우저가 전부 들어간다.
+                캐슬챗 <code>http://43.202.208.133/</code> 기준으로 정리했다.</p>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">큰 그림</span>
+                    <p><em>네트워크 구간</em>과 <em>렌더링 구간</em>으로 나뉜다.
+                        흰 화면이 먼저 뜨고 JS 가 나중에 채우는 것이 CSR 의 특징이다.</p>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">빠뜨리기 쉬운 두 지점</span>
+                    <p>① HTTP 보다 <em>TCP 3-way handshake 가 먼저</em>다.
+                        ② 핸드셰이크는 <em>커널</em>이 하고 NginX 는 완성된 연결만 받는다.</p>
+                </div>
+            </div>
+
+            <h3>1 &mdash; 브라우저 (주소 해석과 연결)</h3>
+            <ol class="seq">
+                <li><span class="who">브라우저</span> <code>http://43.202.208.133/</code> 입력 + Enter.
+                    <em>IP 를 직접 쳤으므로 DNS 조회가 없다.</em> 도메인이었다면 여기서 DNS 질의가 들어간다.</li>
+                <li><span class="who">브라우저</span> 포트를 생략했으므로 <code>http</code> 의 기본값인
+                    <em>80 번</em>으로 정한다. <code>https</code> 였다면 443 이다.</li>
+                <li><span class="who k">내 PC 커널</span> <code>43.202.208.133:80</code> 으로 TCP 연결 수립.
+                    브라우저는 <code>connect()</code> 로 부탁만 하고 패킷은 커널이 만든다.</li>
+            </ol>
+
+            <h4>TCP 3-way handshake &mdash; HTTP 는 아직 한 글자도 안 보냈다</h4>
+            <pre class="code"><code>Client                                  Server
+  |  ------------ SYN --------------->  |   "연결하고 싶다"
+  |  <---------- SYN + ACK -----------  |   "좋다. 나도 연결하겠다"
+  |  ------------ ACK --------------->  |   "확인했다"
+  |                                     |
+  |  == 여기까지 TCP. 이제야 HTTP ==      |
+  |  --------- GET / HTTP/1.1 ------->  |</code></pre>
+            <div class="callout">
+                <span class="tag">주체</span>
+                <p>SYN+ACK 를 보내는 건 <em>서버의 리눅스 커널</em>이다. NginX 도 Spring Boot 도 아니다.
+                    NginX 는 <code>accept()</code> 로 <em>완성된 연결</em>만 건네받는다. 자세한 건 #2 참고.</p>
+            </div>
+
+            <h3>2 &mdash; GET 요청 전송</h3>
+            <p>한 줄이 아니라 요청 라인 + 헤더 묶음이다. 쿠키도 여기 실린다. 자세한 건 상단 <em>헤더</em> 버튼.</p>
+            <pre class="code"><code>GET / HTTP/1.1
+Host: 43.202.208.133
+User-Agent: Mozilla/5.0 ...
+Accept: text/html,application/xhtml+xml
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Cookie: JSESSIONID=...          &lt;-- 있으면 브라우저가 자동으로 붙인다
+                                &lt;-- 빈 줄 하나가 "헤더 끝" 신호</code></pre>
+
+            <h3>3 &mdash; NginX (정적 파일 반환)</h3>
+            <pre class="code"><code>location / {
+    try_files $uri $uri/ /index.html;
+}
+
+# $uri = "/" 이므로 왼쪽부터 순서대로 시도한다
+#   1차 $uri   -> /usr/share/nginx/html/   디렉토리라서 실패
+#   2차 $uri/  -> 디렉토리 맞음 -> index 지시자 -> index.html 발견. 성공</code></pre>
+            <p><code>location /</code> 에는 <code>proxy_pass</code> 가 없다. 즉 <em>Spring Boot 에게 물어볼
+                필요가 없다.</em> NginX 가 자기 디스크에서 읽어 바로 돌려준다.</p>
+            <pre class="code"><code>HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Content-Type: text/html          &lt;-- 브라우저의 다음 행동을 결정한다
+Content-Length: 548
+Connection: keep-alive
+ETag: "6aa4110f-224"
+
+&lt;!doctype html&gt;...  (548 바이트)</code></pre>
+
+            <h3>4 &mdash; 브라우저 파싱 (아직 흰 화면)</h3>
+            <p><code>Content-Type: text/html</code> 을 보고 HTML 파서를 가동한다.
+                <em>확장자가 아니라 이 헤더가 기준이다.</em> 받은 548 바이트의 알맹이는 이게 전부다.</p>
+            <pre class="code"><code>&lt;script defer src="/static/js/main.e83d3066.js"&gt;&lt;/script&gt;
+&lt;link href="/static/css/main.0bd4de65.css" rel="stylesheet"&gt;
+&lt;div id="root"&gt;&lt;/div&gt;                &lt;-- 텅 비어 있다</code></pre>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>태그</th>
+                        <th>파싱을 멈추나</th>
+                        <th>렌더링을 멈추나</th>
+                    </tr>
+                    <tr>
+                        <th><code>&lt;script defer&gt;</code></th>
+                        <td>아니다. 다운로드만 하고 <em>실행은 파싱 끝난 뒤</em></td>
+                        <td>아니다</td>
+                    </tr>
+                    <tr>
+                        <th><code>&lt;script&gt;</code> (그냥)</th>
+                        <td><em>멈춘다.</em> 그만큼 화면이 늦게 뜬다</td>
+                        <td>멈춘다</td>
+                    </tr>
+                    <tr>
+                        <th><code>&lt;link rel=stylesheet&gt;</code></th>
+                        <td>아니다</td>
+                        <td><em>멈춘다.</em> 스타일 없는 날것이 번쩍이는 걸 막으려고</td>
+                    </tr>
+                </table>
+            </div>
+            <p><code>root</code> 가 비어 있으니 <em>그릴 내용이 없다. 흰 화면이다.</em></p>
+
+            <h3>5 &mdash; JS / CSS 추가 요청</h3>
+            <pre class="code"><code>GET /static/css/main.0bd4de65.css
+GET /static/js/main.e83d3066.js
+GET /favicon.ico  등</code></pre>
+            <p><code>Connection: keep-alive</code> 덕분에 <em>1 단계의 TCP 연결을 재사용</em>한다.
+                핸드셰이크를 다시 하지 않는다. NginX 는 이것도 같은 <code>location /</code> 에서 정적 파일로 내준다.</p>
+
+            <h3>6 &mdash; 렌더링 파이프라인</h3>
+            <pre class="code"><code>HTML --파싱--> DOM 트리  -+
+                          +--> 렌더 트리 --> Layout --> Paint --> Composite
+CSS  --파싱--> CSSOM 트리 -+
+                             (보일 것만)   (좌표/크기)  (픽셀)   (레이어 합성)</code></pre>
+            <ul>
+                <li><em>렌더 트리</em> &mdash; DOM 과 CSSOM 을 합친 것. <code>display:none</code> 은 빠진다.</li>
+                <li><em>Layout(Reflow)</em> &mdash; 각 요소의 좌표와 크기를 계산한다.</li>
+                <li><em>Paint</em> &mdash; 색 &middot; 글자 &middot; 테두리를 픽셀로 칠한다.</li>
+                <li><em>Composite</em> &mdash; 레이어를 합쳐 화면에 출력한다.</li>
+            </ul>
+            <p>여기까지 돌면 <em>흰 화면이 실제로 모니터에 나타난다.</em> 아직 비어 있다.</p>
+
+            <h3>7 &mdash; JS 실행, React 등장</h3>
+            <p>DOM 파싱이 끝났으니 미뤄둔 <code>defer</code> 스크립트가 실행된다.</p>
+            <ol class="seq">
+                <li><span class="who">브라우저</span> <code>crypto.randomUUID</code> 폴리필 적용.
+                    배포가 <code>http</code> 라 보안 컨텍스트가 아니어서 이 API 가 없다.</li>
+                <li><span class="who">React</span> <code>ReactDOM.createRoot(#root)</code> &rarr;
+                    Provider / BrowserRouter / QueryClient 로 감싸고 App 렌더.</li>
+                <li><span class="who">React</span> AppShell 마운트. <em>비어 있던 root 가 채워진다.</em>
+                    네트워크가 아니라 순수 DOM 조작이다.</li>
+                <li><span class="who">브라우저</span> DOM 이 바뀌었으니 Layout &rarr; Paint 를 다시 돈다.</li>
+            </ol>
+
+            <h3>8 &mdash; 로그인 여부 확인 (여기서 처음 Spring Boot 가 깨어난다)</h3>
+            <ol class="seq">
+                <li><span class="who">React</span> AppShell 의 <code>useMe()</code> 가
+                    <code>GET /user/isMe</code> 호출.</li>
+                <li><span class="who">NginX</span> <code>location ~ ^/(user|friend|chat|room|uploads)/</code>
+                    에 걸려 <code>domain-service:8080</code> 으로 프록시. <em>이때 A&harr;B 핸드셰이크가 한 번 더
+                    일어난다.</em></li>
+                <li><span class="who">Spring Boot</span> 쿠키의 세션 ID 로 Redis 세션 조회.</li>
+                <li><span class="who">Spring Boot</span> 세션 없음 &rarr; 비로그인 응답.</li>
+            </ol>
+
+            <h3>9 &mdash; 라우팅 분기와 최종 화면</h3>
+            <ol class="seq">
+                <li><span class="who">React</span> me 없음 + 현재 경로가 <code>/</code> 라 공개 경로가 아니다.</li>
+                <li><span class="who">React</span> <code>navigate('/login', { replace: true })</code> &rarr;
+                    주소창이 <code>/login</code> 으로 바뀐다.</li>
+                <li><span class="who none">서버</span> <em>서버에 다시 요청하지 않는다.</em>
+                    이미 받은 JS 안에서 화면만 교체한다. 이것이 SPA 다.</li>
+                <li><span class="who">브라우저</span> 로그인 폼 렌더링. <em>완료.</em></li>
+            </ol>
+
+            <h3>한 장 요약</h3>
+            <pre class="code"><code>[입력]   Enter
+   |
+[커널]   SYN -> SYN+ACK -> ACK          <- NginX 가 아니라 커널이 한다
+   |
+[HTTP]   GET / + 헤더 + 빈 줄
+   |
+[NginX]  try_files -> index.html 548B
+   |
+[파싱]   DOM 트리 (root 비어있음) -> CSS/JS 추가 GET
+   |
+[렌더]   DOM + CSSOM -> 렌더트리 -> Layout -> Paint      =  흰 화면
+   |
+[JS]     React 가 root 를 채움
+   |
+[렌더]   Layout -> Paint 다시                            =  화면 출력
+   |
+[API]    GET /user/isMe -> Spring Boot -> 비로그인
+   |
+[SPA]    navigate('/login')  서버 요청 없이 화면만 교체   =  로그인 화면</code></pre>
+
+            <div class="callout">
+                <span class="tag">면접에서 강조할 두 가지</span>
+                <p>① <em>흰 화면이 먼저 뜨고 JS 가 나중에 채운다.</em> CSR 의 특징이고,
+                    그래서 초기 로딩이 느리면 빈 화면이 보인다. SSR 을 쓰는 이유가 여기서 나온다.</p>
+                <p>② <em>핸드셰이크는 커널이 하고 NginX 는 완성된 연결만 받는다.</em>
+                    "NginX 가 SYN 을 받는다" 고 답하면 틀린다.</p>
+            </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <section class="note">
+            <h2>#2 서버를 분리하면 &mdash; 커널은 2개, 핸드셰이크는 누가 하나</h2>
 
             <h3>먼저 &mdash; 도커 컨테이너는 커널을 공유한다</h3>
             <p>캐슬챗은 Lightsail 한 대에 컨테이너로 다 올려놨는데, 이때 <em>커널은 하나다.</em></p>
@@ -312,7 +500,7 @@
 
         <!-- ===================================================== -->
         <section class="note">
-            <h2>#2 공인 IP &middot; 사설 IP &middot; 도메인 &mdash; 배포 구성 두 가지</h2>
+            <h2>#3 공인 IP &middot; 사설 IP &middot; 도메인 &mdash; 배포 구성 두 가지</h2>
 
             <h3>"백엔드에 IP 가 없다" 는 말의 정확한 뜻</h3>
             <p>IP 가 없는 게 아니라 <em>공인 IP 가 없다.</em></p>
