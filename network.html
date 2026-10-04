@@ -21,26 +21,13 @@
         <section class="note">
             <h2>#1 http://castlechat.com/ 입력 + Enter &rarr; 브라우저 화면 Rendering</h2>
 
-            <!-- 배포본이 결국 파일 3개라는 걸 먼저 박아두고 시작한다. -->
-            <div class="bsum">
-                <div class="bsum-item">
-                    <code>static/js/main.e83d3066.js</code>
-                    <b>461 KB</b>
-                    <span>node_modules 13개 패키지 + 컴포넌트 <code>.jsx</code> +
-                        hooks 등 <code>.js</code></span>
-                </div>
-                <div class="bsum-item">
-                    <code>static/css/main.0bd4de65.css</code>
-                    <b>71 KB</b>
-                    <span>모든 <code>.css</code> 합본</span>
-                </div>
-                <div class="bsum-item">
-                    <code>index.html</code>
-                    <b>548 B</b>
-                    <span>빈 껍데기. <code>&lt;div id="root"&gt;&lt;/div&gt;</code> 뿐</span>
-                </div>
-                <div class="bsum-out">이 셋으로 브라우저가 조립 &rarr; 화면</div>
-            </div>
+            <!-- 흐름 요약. 적어둔 문장만 그대로 둔다. -->
+            <ol class="bsum">
+                <li>node_modules 에서 필요한 (13개) 패키지 + 컴포넌트 .jsx + hooks 등 .js
+                    &rarr; build/static/js/main.e83d3066.js</li>
+                <li>모든 .css &rarr; build/static/css/main.0bd4de65.css</li>
+                <li>index.html &nbsp; 빈 껍데기. &lt;div id="root"&gt;&lt;/div&gt;</li>
+            </ol>
 
             <div class="side-by-side">
                 <div class="callout">
