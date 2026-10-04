@@ -313,20 +313,94 @@ pre.code code {
     margin-bottom: 0;
 }
 
+/* ===== 표와 설명을 좌우로 ===== */
+/* 표가 가로로 휑하게 남아서 옆에 핵심 상자를 붙인다. */
+.side-by-side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+    margin: 4px 0 14px;
+}
+
+@media (min-width: 900px) {
+    .side-by-side {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+.side-by-side > .scroll-x,
+.side-by-side > .callout {
+    margin: 0;
+}
+
+/* ===== 제목 옆에 붙는 보충 문구 ===== */
+.head-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 18px;
+    margin: 22px 0 8px;
+}
+
+.head-row h3 {
+    flex: none;
+    margin: 0;
+}
+
+.head-note {
+    flex: 1 1 320px;
+    min-width: 0;
+    margin: 0;
+    color: var(--muted);
+    font-size: 13.5px;
+    word-break: keep-all;
+}
+
+.danger {
+    color: var(--warn);
+    font-weight: 700;
+}
+
 /* ===== 구조 다이어그램 (CSS 박스) ===== */
 /* ASCII 로 그리면 한글 글자폭 때문에 정렬이 깨지므로 박스로 그린다. */
 .topo {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
     margin: 14px 0;
 }
 
 @media (min-width: 720px) {
     .topo {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
         align-items: start;
     }
+}
+
+/* 통신한다는 표시. 좁은 화면에서는 박스가 세로로 쌓이므로 화살표도 세로로 바꾼다.
+   글자를 회전시키면 폭이 틀어지므로 문자 자체를 갈아끼운다. */
+.topo-arrow {
+    align-self: center;
+    justify-self: center;
+    color: var(--accent);
+    font-size: 26px;
+    line-height: 1;
+}
+
+.topo-arrow::before {
+    content: "\2195";
+}
+
+@media (min-width: 720px) {
+    .topo-arrow::before {
+        content: "\2194";
+    }
+}
+
+/* 참여하지 않는 구간은 흐리게 */
+.topo-arrow.cut {
+    color: #c3ccc8;
 }
 
 .machine {
