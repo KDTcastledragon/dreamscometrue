@@ -82,7 +82,7 @@
 
                     <article class="fnode dns" style="left:12.5%;top:13%">
                         <span class="fnode-type">DNS</span>
-                        <strong>이름 &rarr; IP</strong>
+                        <strong>castlechat.com &rarr; IP</strong>
                         <small>캐시 &rarr; Recursive Resolver<br>UDP 53 &middot; 첫 패킷은 ARP</small>
                     </article>
 
@@ -187,7 +187,7 @@
                 </div>
 
                 <div class="farch-legend">
-                    <span><i class="sw dns"></i>이름 해석</span>
+                    <span><i class="sw dns"></i>DNS 조회</span>
                     <span><i class="sw client"></i>브라우저가 보내는 쪽</span>
                     <span><i class="sw kernel"></i>Kernel 이 일하는 구간</span>
                     <span><i class="sw net"></i>네트워크 장비</span>
@@ -204,7 +204,7 @@
                     경로 <code>/</code></em> 로 나눈다.</li>
                 <li><span class="who">브라우저</span> 포트를 생략했으므로 <code>http</code> 의 기본값인
                     <em>80 번</em>으로 정한다. <code>https</code> 였다면 443 이다.</li>
-                <li><span class="who">브라우저</span> <em>호스트 이름만으로는 아무것도 못 한다.</em>
+                <li><span class="who">브라우저</span> <em><code>castlechat.com</code> 만으로는 아무것도 못 한다.</em>
                     IP 를 알아야 패킷을 만들 수 있으므로 DNS 조회가 먼저다.</li>
             </ol>
 
@@ -216,7 +216,7 @@
                     설명은 도메인을 쓰는 일반적인 경우로 적는다.</p>
             </div>
 
-            <h3>1-1 &mdash; 이름을 IP 로 바꾼다 (DNS 조회)</h3>
+            <h3>1-1 &mdash; castlechat.com 을 IP 로 바꾼다 (DNS 조회)</h3>
             <p><em>여기서 랜선을 타고 나가는 첫 패킷이 생긴다.</em> TCP SYN 이 아니다.
                 DNS 질의도 엄연한 네트워크 패킷이라 <em>홈 라우터를 똑같이 거친다.</em></p>
 
@@ -250,7 +250,7 @@
             <div class="scroll-x">
                 <table>
                     <tr>
-                        <th>이름</th>
+                        <th>구분</th>
                         <th>어디 있나</th>
                         <th>하는 일</th>
                     </tr>

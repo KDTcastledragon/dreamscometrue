@@ -617,7 +617,7 @@ pre.code code {
     color: #3d5173;
 }
 
-/* 이름 해석 구간 */
+/* DNS 조회 구간 */
 .fnode.dns {
     border-color: #c6a9c4;
     background: #f1e7f0;
