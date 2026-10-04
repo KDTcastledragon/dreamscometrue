@@ -1130,6 +1130,72 @@ pre.code code {
     min-width: 440px;
 }
 
+/* ===== 배포본 요약 (섹션 맨 위) ===== */
+/* 자리를 적게 쓰는 게 목적이라 한 줄짜리 띠로 둔다. */
+.bsum {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin: 10px 0 16px;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fbfcfc;
+}
+
+@media (min-width: 820px) {
+    .bsum {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+        align-items: center;
+        gap: 10px 14px;
+    }
+}
+
+.bsum-item {
+    min-width: 0;
+    padding-left: 9px;
+    border-left: 3px solid var(--accent);
+}
+
+.bsum-item > code {
+    display: block;
+    padding: 0;
+    background: none;
+    color: var(--accent);
+    font-size: 11.5px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.bsum-item > b {
+    font-size: 12.5px;
+}
+
+.bsum-item > span {
+    display: block;
+    margin-top: 1px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+.bsum-item > span code {
+    padding: 0 3px;
+    font-size: 10.5px;
+}
+
+.bsum-out {
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+}
+
 /* ===== 소제목 옆 모달 버튼 ===== */
 .h3-btn {
     display: flex;
