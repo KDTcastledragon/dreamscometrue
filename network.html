@@ -150,6 +150,151 @@
                     브라우저는 <code>connect()</code> 로 부탁만 하고 패킷은 Kernel이 만든다.</li>
             </ol>
 
+            <h3>1-1 &mdash; 도메인이었다면 (DNS 조회)</h3>
+            <p>IP 를 직접 쳤으므로 <em>이 과정이 통째로 생략된다.</em> 하지만 면접에서는 도메인을 전제로 묻는다.
+                <code>castlechat.com</code> 이었다면 연결을 시도하기 전에 이 단계가 먼저 돌아간다.</p>
+
+            <div class="side-by-side">
+                <div>
+                    <h4>① 캐시부터 뒤진다 (여기서 끝나는 경우가 대부분)</h4>
+                    <ol class="seq">
+                        <li><span class="who">브라우저 캐시</span> 크롬은 자체 DNS 캐시를 들고 있다.
+                            <code>chrome://net-internals/#dns</code> 에서 볼 수 있다.</li>
+                        <li><span class="who k">OS 캐시</span> Windows 는 <code>ipconfig /displaydns</code>.</li>
+                        <li><span class="who k">hosts 파일</span>
+                            <code>C:\Windows\System32\drivers\etc\hosts</code>.
+                            <em>여기 적으면 DNS 서버보다 먼저 먹는다.</em> 로컬 개발에서 자주 쓴다.</li>
+                    </ol>
+                </div>
+                <div>
+                    <h4>② 캐시에 없으면 재귀 질의</h4>
+                    <ol class="seq">
+                        <li><span class="who">리졸버</span> ISP DNS 또는 <code>8.8.8.8</code> 에게 묻는다.
+                            이때부터는 <em>UDP 53 번</em>을 쓴다.</li>
+                        <li><span class="who">Root 네임서버</span> "<code>.com</code> 은 저쪽에 물어봐."</li>
+                        <li><span class="who">TLD 네임서버</span> "<code>castlechat.com</code> 은 저 네임서버가 안다."</li>
+                        <li><span class="who">권한 네임서버</span> "<code>43.202.208.133</code> 이다." &rarr;
+                            TTL 만큼 각 캐시에 저장된다.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="callout">
+                <span class="tag">면접 포인트</span>
+                <p>DNS 는 <em>TCP 가 아니라 UDP 53</em> 을 쓴다. 응답이 작고 빨라야 하며, 실패하면 그냥 다시 물으면
+                    되기 때문이다. 다만 응답이 512 바이트를 넘거나 영역 전송(zone transfer) 일 때는 TCP 로 넘어간다.</p>
+            </div>
+
+            <h3>1-2 &mdash; 패킷이 실제로 가는 길</h3>
+            <p>여기가 "네트워크를 아느냐" 를 가르는 지점이다. <code>connect()</code> 한 번에 아래가 전부 일어난다.</p>
+
+            <div class="route">
+                <div class="rnode">
+                    <span class="rnode-type">App</span>
+                    <strong>브라우저</strong>
+                    <small>connect() 호출.<br>여기서 역할 끝</small>
+                </div>
+                <div class="rnode k">
+                    <span class="rnode-type">L3 / L2</span>
+                    <strong>Client PC Kernel</strong>
+                    <small>서브넷 판단 &middot; ARP<br>패킷 조립</small>
+                </div>
+                <div class="rnode">
+                    <span class="rnode-type">NAT</span>
+                    <strong>공유기</strong>
+                    <small>사설 &rarr; 공인 IP<br>포트로 세션 기억</small>
+                </div>
+                <div class="rnode">
+                    <span class="rnode-type">Router</span>
+                    <strong>ISP &rarr; 백본</strong>
+                    <small>목적지 IP 만 보고 전달<br>홉마다 TTL &minus;1</small>
+                </div>
+                <div class="rnode fw">
+                    <span class="rnode-type">Firewall</span>
+                    <strong>AWS 보안그룹</strong>
+                    <small>80 번 허용 확인<br>막히면 조용히 폐기</small>
+                </div>
+                <div class="rnode k">
+                    <span class="rnode-type">L4</span>
+                    <strong>Lightsail Kernel</strong>
+                    <small>iptables DNAT<br>컨테이너로 전달</small>
+                </div>
+                <div class="rnode last">
+                    <span class="rnode-type">Process</span>
+                    <strong>NginX</strong>
+                    <small>accept() 로<br>완성된 연결 수령</small>
+                </div>
+            </div>
+
+            <h4>Kernel 이 패킷을 조립하는 순서</h4>
+            <ol class="seq">
+                <li><span class="who k">서브넷 판단</span> 내 IP <code>192.168.0.5</code> 와 서브넷 마스크
+                    <code>255.255.255.0</code> 을 AND 해서 내 망은 <code>192.168.0.0/24</code> 임을 안다.
+                    목적지 <code>43.202.208.133</code> 은 <em>여기 없다</em> &rarr; 기본 게이트웨이로 보낸다.</li>
+                <li><span class="who k">ARP</span> 게이트웨이의 <em>IP 는 아는데 MAC 을 모른다.</em>
+                    "<code>192.168.0.1</code> 쓰는 사람 MAC 알려줘" 를 브로드캐스트로 뿌려 알아낸다.
+                    <em>ARP 는 같은 랜 안에서만 동작한다.</em></li>
+                <li><span class="who k">포트 배정</span> 출발지 포트를 <em>임시 포트(49152~65535)</em> 중에서 하나 고른다.
+                    응답이 어느 프로그램 것인지 구분하는 열쇠다.</li>
+                <li><span class="who k">캡슐화</span> TCP 헤더 &rarr; IP 헤더 &rarr; Ethernet 헤더 순으로 감싼다.</li>
+            </ol>
+
+            <h4>계층별로 누가 무엇을 보는가</h4>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>계층</th>
+                        <th>헤더에 담기는 것</th>
+                        <th>이걸 보는 장비</th>
+                        <th>어디까지 유지되나</th>
+                    </tr>
+                    <tr>
+                        <th>L2 Ethernet</th>
+                        <td>출발지/목적지 <em>MAC</em></td>
+                        <td>스위치, 공유기</td>
+                        <td><em>홉마다 새로 쓰인다</em></td>
+                    </tr>
+                    <tr>
+                        <th>L3 IP</th>
+                        <td>출발지/목적지 <em>IP</em>, TTL</td>
+                        <td>라우터</td>
+                        <td>끝까지 유지 (NAT 구간 제외)</td>
+                    </tr>
+                    <tr>
+                        <th>L4 TCP</th>
+                        <td><em>포트</em>, 플래그, 순서번호</td>
+                        <td><em>최종 목적지 Kernel 만</em></td>
+                        <td>끝까지 유지</td>
+                    </tr>
+                    <tr>
+                        <th>L7 HTTP</th>
+                        <td>메서드, 헤더, 바디</td>
+                        <td>NginX, Spring Boot</td>
+                        <td>끝까지 유지</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">MAC 은 왜 홉마다 바뀌나</span>
+                    <p>MAC 은 <em>"옆집까지 가는 주소"</em>, IP 는 <em>"최종 목적지 주소"</em> 다.
+                        택배로 치면 IP 는 받는 사람 주소, MAC 은 지금 이 트럭이 들를 다음 물류센터다.</p>
+                    <p>그래서 라우터를 하나 지날 때마다 L2 헤더는 새로 쓰이고 L3 는 그대로다.</p>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">자주 틀리는 것</span>
+                    <p>"라우터가 포트 80 을 보고 보낸다" &mdash; <em>틀렸다.</em>
+                        라우터는 <em>L3 까지만</em> 본다. 포트는 L4 라 최종 목적지 Kernel 에서야 읽힌다.</p>
+                    <p>예외는 NAT 다. 공유기는 세션을 구분해야 해서 포트까지 들여다본다.</p>
+                </div>
+            </div>
+
+            <h4>돌아오는 길</h4>
+            <p>응답은 같은 경로를 되짚어 온다. 공유기가 나갈 때 기록해둔 <em>NAT 테이블</em>이 열쇠다.
+                "공인 IP:51234 로 온 응답은 사설 <code>192.168.0.5:51234</code> 에게" 라는 기록이 없으면
+                공유기는 그 패킷을 누구에게 줘야 할지 몰라서 버린다.</p>
+
             <h4>TCP 3-way Handshake &mdash; HTTP 는 아직 한 글자도 안 보냈다</h4>
             <div class="side-by-side">
                 <div class="hsq">
@@ -186,6 +331,84 @@
                     <p>SYN+ACK 를 보내는 건 <em>서버의 Linux Kernel</em>이다. NginX 도 Spring Boot 도 아니다.</p>
                     <p>NginX 는 <code>accept()</code> 로 <em>완성된 연결</em>만 건네받는다. 자세한 건 #2 참고.</p>
                 </div>
+            </div>
+
+            <h4>왜 2번이 아니라 3번인가</h4>
+            <p>면접에서 거의 반드시 꼬리질문으로 나온다. 답은 <em>양쪽 모두 "내 말이 상대에게 닿는다" 를
+                확인해야 하기 때문</em>이다.</p>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>단계</th>
+                        <th>이걸 받고 나면 확인되는 것</th>
+                    </tr>
+                    <tr>
+                        <th>SYN</th>
+                        <td>서버가 "클라이언트 &rarr; 나" 경로가 살아 있음을 안다</td>
+                    </tr>
+                    <tr>
+                        <th>SYN + ACK</th>
+                        <td>클라이언트가 <em>양방향</em>이 모두 살아 있음을 안다</td>
+                    </tr>
+                    <tr>
+                        <th>ACK</th>
+                        <td>서버도 <em>"나 &rarr; 클라이언트"</em> 경로가 살아 있음을 안다</td>
+                    </tr>
+                </table>
+            </div>
+            <p>2번에서 멈추면 <em>서버는 자기가 보낸 SYN+ACK 가 도착했는지 모른다.</em>
+                그 상태로 데이터를 보내면 허공에 쏘는 꼴이 된다.</p>
+
+            <div class="side-by-side">
+                <div>
+                    <h4>SYN 에 실제로 실리는 것</h4>
+                    <ul>
+                        <li><em>순서번호(ISN)</em> &mdash; 임의의 값으로 시작한다. 0 부터 시작하면 예전 연결의
+                            패킷과 섞이거나 위조가 쉬워진다.</li>
+                        <li><em>MSS</em> &mdash; 한 번에 받을 수 있는 최대 조각 크기. 보통 1460 바이트다.</li>
+                        <li><em>Window Size</em> &mdash; 버퍼 여유. 흐름 제어의 기준이 된다.</li>
+                        <li><em>Window Scale, SACK</em> &mdash; 고속 회선용 확장 옵션.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Kernel 의 연결 상태 전이</h4>
+                    <pre class="code"><code>Client                    Server
+CLOSED                    LISTEN      &lt;- NginX 가 listen(80)
+  |  --- SYN ------------>  |
+SYN_SENT                  SYN_RCVD
+  |  &lt;-- SYN+ACK ---------  |
+  |  --- ACK ------------>  |
+ESTABLISHED               ESTABLISHED
+                            |
+                            +-> accept() 큐에 적립
+                                NginX 가 꺼내감</code></pre>
+                </div>
+            </div>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">backlog 큐</span>
+                    <p>Handshake 가 끝난 연결은 <em>accept 큐</em>에 쌓인다. NginX 가 바쁘면 큐가 차고,
+                        가득 차면 새 연결이 거절되거나 지연된다.</p>
+                    <p>트래픽이 몰릴 때 "연결은 되는데 느리다" 가 여기서 나온다.
+                        <code>somaxconn</code>, <code>backlog</code> 튜닝 대상이다.</p>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">SYN Flood</span>
+                    <p>SYN 만 잔뜩 보내고 ACK 를 안 보내면 서버의 <em>SYN_RCVD 상태가 쌓여</em>
+                        정상 연결을 못 받는다. 고전적인 DoS 수법이다.</p>
+                    <p>방어책이 <em>SYN Cookie</em> 다. 상태를 저장하지 않고 순서번호 자체에 정보를 인코딩해서,
+                        ACK 가 돌아올 때 복원한다.</p>
+                </div>
+            </div>
+
+            <div class="callout">
+                <span class="tag">연결을 끊을 때는 4번</span>
+                <p>종료는 <code>FIN &rarr; ACK &rarr; FIN &rarr; ACK</code> 로 <em>4-way</em> 다.
+                    TCP 는 양방향이 독립적이라 한쪽이 "나는 보낼 거 다 보냈다" 해도
+                    반대쪽은 아직 보낼 게 남아 있을 수 있기 때문이다.</p>
+                <p>이때 먼저 닫은 쪽이 <code>TIME_WAIT</code> 로 한동안 남는다. 서버 재시작 직후
+                    "Address already in use" 가 뜨는 이유가 이것이다.</p>
             </div>
 
             <h3>2 &mdash; GET 요청 전송</h3>

@@ -692,6 +692,109 @@ pre.code code {
     }
 }
 
+/* ===== 경로 체인 (패킷이 지나가는 구간) ===== */
+/* 분기 없는 일직선이라 SVG 없이 flex 로 흘린다. 좁아지면 자연스럽게 줄바꿈된다. */
+.route {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 22px 26px;
+    margin: 14px 0 18px;
+    padding: 16px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #eef6f1;
+    background-image:
+        linear-gradient(rgb(47 109 85 / 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(47 109 85 / 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+}
+
+.rnode {
+    position: relative;
+    flex: 1 1 150px;
+    min-width: 0;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #f9fdfb;
+    box-shadow: 0 10px 22px rgb(37 91 63 / 0.11);
+}
+
+/* 칸 사이 화살표. 줄 끝 노드에도 붙지만 다음 줄로 이어지는 흐름이라 뜻이 통한다. */
+.rnode:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -18px;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid var(--accent);
+    transform: translateY(-50%);
+}
+
+.rnode-type {
+    color: var(--accent);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.rnode strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 13.5px;
+    letter-spacing: -0.025em;
+    word-break: keep-all;
+}
+
+.rnode small {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 10.5px;
+    line-height: 1.45;
+    word-break: keep-all;
+}
+
+/* Kernel 이 일하는 구간 */
+.rnode.k {
+    border-color: #9ec7b6;
+    background: #d6e9e0;
+}
+
+/* 막히면 여기서 끝나는 구간 */
+.rnode.fw {
+    border-color: #d9a99c;
+    background: #fbeeea;
+}
+
+.rnode.fw .rnode-type {
+    color: var(--warn);
+}
+
+.rnode.last {
+    border-color: #6fa889;
+    background: #7fcaa4;
+}
+
+.rnode.last .rnode-type {
+    color: #14402c;
+}
+
+.rnode.last small {
+    color: #1c4a35;
+}
+
+/* side-by-side 안에 들어간 소제목은 위 여백을 줄여 두 칸의 첫 줄을 맞춘다. */
+.side-by-side > div > h4:first-child {
+    margin-top: 0;
+}
+
 /* ===== Handshake 순서 그림 ===== */
 /* ASCII 로 그리면 한글 글자폭 때문에 세로줄이 어긋나므로 박스와 선으로 그린다. */
 .hsq {
