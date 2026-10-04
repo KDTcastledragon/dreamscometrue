@@ -35,76 +35,108 @@
             </div>
 
             <!-- 전체 구조를 먼저 한 번 훑고 아래에서 단계별로 파고든다.
-                 칩 번호가 아래 h3 번호와 1:1 로 대응한다. -->
+                 노드 번호가 아래 h3 번호와 1:1 로 대응한다.
+                 포트폴리오 캐슬챗 아키텍처와 같은 구조 - 그리드 캔버스 + SVG 흐름선 + 노드. -->
             <h3>전체 흐름 한눈에</h3>
-            <div class="flowmap">
-                <div class="fm-band">
-                    <div class="fm-band-title net">네트워크</div>
-                    <div class="fm-row">
-                        <div class="fm-step">
-                            <span class="fm-no">1</span>
-                            <strong>주소 해석 + 연결</strong>
-                            <small>DNS 없음 &middot; 포트 80<br>TCP 3-way Handshake</small>
-                        </div>
-                        <div class="fm-ar"></div>
-                        <div class="fm-step">
-                            <span class="fm-no">2</span>
-                            <strong>GET 요청 전송</strong>
-                            <small>요청 라인 + 헤더<br>끝은 빈 줄</small>
-                        </div>
-                        <div class="fm-ar"></div>
-                        <div class="fm-step">
-                            <span class="fm-no">3</span>
-                            <strong>NginX 응답</strong>
-                            <small>try_files &rarr; index.html<br>200 OK &middot; 548 바이트</small>
-                        </div>
-                    </div>
+            <div class="farch">
+                <div class="farch-canvas">
+                    <svg class="farch-lines" viewBox="0 0 1400 620" preserveAspectRatio="none"
+                        aria-hidden="true">
+                        <defs>
+                            <marker id="fa" markerWidth="9" markerHeight="9" refX="7" refY="3"
+                                orient="auto" markerUnits="strokeWidth">
+                                <path d="M 0 0 L 7 3 L 0 6 z" class="farch-head" />
+                            </marker>
+                        </defs>
+
+                        <!-- 1행 -->
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 338 110 L 586 110" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 805 110 L 1053 110" />
+                        <!-- 1행 끝 -> 2행 처음 -->
+                        <path class="farch-flow wrap" marker-end="url(#fa)"
+                            d="M 1167 157 L 1167 198 Q 1167 210 1155 210 L 245 210 Q 233 210 233 222 L 233 254" />
+
+                        <!-- 2행 -->
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 338 310 L 586 310" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 805 310 L 1053 310" />
+                        <!-- 2행 끝 -> 3행 처음 -->
+                        <path class="farch-flow wrap" marker-end="url(#fa)"
+                            d="M 1167 357 L 1167 398 Q 1167 410 1155 410 L 245 410 Q 233 410 233 422 L 233 454" />
+
+                        <!-- 3행 -->
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 338 510 L 586 510" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 805 510 L 1053 510" />
+                    </svg>
+
+                    <article class="fnode client" style="left:16.6%;top:17.7%">
+                        <span class="fnode-no">1</span>
+                        <span class="fnode-type">Client</span>
+                        <strong>주소 해석 + 연결</strong>
+                        <small>DNS 없음 &middot; 포트 80<br>TCP 3-way Handshake</small>
+                    </article>
+
+                    <article class="fnode client" style="left:50%;top:17.7%">
+                        <span class="fnode-no">2</span>
+                        <span class="fnode-type">Client</span>
+                        <strong>GET 요청 전송</strong>
+                        <small>요청 라인 + 헤더<br>끝은 빈 줄</small>
+                    </article>
+
+                    <article class="fnode server" style="left:83.4%;top:17.7%">
+                        <span class="fnode-no">3</span>
+                        <span class="fnode-type">Web Server</span>
+                        <strong>NginX 응답</strong>
+                        <small>try_files &rarr; index.html<br>200 OK &middot; 548 바이트</small>
+                    </article>
+
+                    <article class="fnode browser" style="left:16.6%;top:50%">
+                        <span class="fnode-no">4</span>
+                        <span class="fnode-type">Browser</span>
+                        <strong>HTML 파싱</strong>
+                        <small>DOM 트리 생성<br>root 는 비어 있음</small>
+                    </article>
+
+                    <article class="fnode browser" style="left:50%;top:50%">
+                        <span class="fnode-no">5</span>
+                        <span class="fnode-type">Browser</span>
+                        <strong>JS / CSS 추가 요청</strong>
+                        <small>같은 TCP 연결 재사용<br>Handshake 생략</small>
+                    </article>
+
+                    <article class="fnode out" style="left:83.4%;top:50%">
+                        <span class="fnode-no">6</span>
+                        <span class="fnode-type">Rendering</span>
+                        <strong>Layout &rarr; Paint</strong>
+                        <small>Render Tree 생성<br><em>흰 화면 출력</em></small>
+                    </article>
+
+                    <article class="fnode browser" style="left:16.6%;top:82.3%">
+                        <span class="fnode-no">7</span>
+                        <span class="fnode-type">React</span>
+                        <strong>root 를 채움</strong>
+                        <small>defer 실행<br>Layout &rarr; Paint 재실행</small>
+                    </article>
+
+                    <article class="fnode server" style="left:50%;top:82.3%">
+                        <span class="fnode-no">8</span>
+                        <span class="fnode-type">WAS</span>
+                        <strong>GET /user/isMe</strong>
+                        <small>Spring Boot 가 처음 깨어남<br>세션 없음 &rarr; 비로그인</small>
+                    </article>
+
+                    <article class="fnode out" style="left:83.4%;top:82.3%">
+                        <span class="fnode-no">9</span>
+                        <span class="fnode-type">SPA</span>
+                        <strong>navigate('/login')</strong>
+                        <small>서버 요청 없이 화면 교체<br><em>로그인 화면 출력</em></small>
+                    </article>
                 </div>
 
-                <div class="fm-band">
-                    <div class="fm-band-title render">Rendering</div>
-                    <div class="fm-row">
-                        <div class="fm-step">
-                            <span class="fm-no">4</span>
-                            <strong>HTML 파싱</strong>
-                            <small>DOM 트리 생성<br>root 는 비어 있음</small>
-                        </div>
-                        <div class="fm-ar"></div>
-                        <div class="fm-step">
-                            <span class="fm-no">5</span>
-                            <strong>JS / CSS 추가 요청</strong>
-                            <small>같은 TCP 연결 재사용<br>Handshake 생략</small>
-                        </div>
-                        <div class="fm-ar"></div>
-                        <div class="fm-step out">
-                            <span class="fm-no">6</span>
-                            <strong>Layout &rarr; Paint</strong>
-                            <small>Render Tree 생성<br><em>흰 화면 출력</em></small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="fm-band">
-                    <div class="fm-band-title js">JS &middot; SPA</div>
-                    <div class="fm-row">
-                        <div class="fm-step">
-                            <span class="fm-no">7</span>
-                            <strong>React 가 root 를 채움</strong>
-                            <small>defer 스크립트 실행<br>Layout &rarr; Paint 재실행</small>
-                        </div>
-                        <div class="fm-ar"></div>
-                        <div class="fm-step">
-                            <span class="fm-no">8</span>
-                            <strong>GET /user/isMe</strong>
-                            <small>Spring Boot 가 처음 깨어남<br>세션 없음 &rarr; 비로그인</small>
-                        </div>
-                        <div class="fm-ar"></div>
-                        <div class="fm-step out">
-                            <span class="fm-no">9</span>
-                            <strong>navigate('/login')</strong>
-                            <small>서버 요청 없이 화면 교체<br><em>로그인 화면 출력</em></small>
-                        </div>
-                    </div>
+                <div class="farch-legend">
+                    <span><i class="sw client"></i>Client &middot; 브라우저가 보내는 쪽</span>
+                    <span><i class="sw server"></i>서버 프로세스</span>
+                    <span><i class="sw browser"></i>브라우저 내부 작업</span>
+                    <span><i class="sw out"></i>화면에 결과가 나오는 지점</span>
                 </div>
             </div>
 

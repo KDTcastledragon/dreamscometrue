@@ -460,137 +460,235 @@ pre.code code {
     color: #c3ccc8;
 }
 
-/* ===== 전체 흐름 요약 그림 ===== */
-/* 아래 단계별 설명으로 들어가기 전에 구조를 한 번 훑는 용도.
-   칩 번호가 아래 h3 번호와 1:1 로 대응한다. */
-.flowmap {
-    display: grid;
-    gap: 10px;
+/* ===== 전체 흐름 아키텍처 그림 ===== */
+/* 포트폴리오 캐슬챗 아키텍처와 같은 구조로 그린다.
+   그리드 캔버스 + 그 위의 SVG 흐름선 + 그림자 달린 노드.
+   노드 폭을 % 로 두는 게 핵심이다. px 로 두면 화면 폭이 바뀔 때
+   SVG 선(viewBox 비례)과 노드 가장자리가 어긋나 선이 박스를 뚫는다. */
+.farch {
     margin: 10px 0 18px;
-}
-
-.fm-band {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-    padding: 12px;
     border: 1px solid var(--line);
-    border-radius: 10px;
-    background: #fbfcfc;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-@media (min-width: 760px) {
-    .fm-band {
-        grid-template-columns: 96px minmax(0, 1fr);
-        align-items: center;
-        gap: 14px;
-    }
+.farch-canvas {
+    position: relative;
+    height: 620px;
+    isolation: isolate;
+    background: #eef6f1;
 }
 
-.fm-band-title {
-    padding: 5px 10px;
-    border-radius: 999px;
-    font-size: 12.5px;
-    font-weight: 700;
-    text-align: center;
-    white-space: nowrap;
+.farch-canvas::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image:
+        linear-gradient(rgb(47 109 85 / 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(47 109 85 / 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
 }
 
-.fm-band-title.net {
-    background: var(--accent-soft);
-    color: var(--accent);
+.farch-lines {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
 }
 
-.fm-band-title.render {
-    background: #e4e9f2;
-    color: #3d5173;
+.farch-flow {
+    fill: none;
+    stroke: #3f7a64;
+    stroke-width: 2;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
 }
 
-.fm-band-title.js {
-    background: #f3e9dd;
-    color: #8a5a28;
+/* 줄이 바뀌는 구간은 흐름이 끊긴 게 아니라는 뜻으로 점선 */
+.farch-flow.wrap {
+    stroke: #6b9a85;
+    stroke-dasharray: 7 6;
 }
 
-.fm-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
-    gap: 8px;
+.farch-head {
+    fill: #3f7a64;
+    stroke: none;
 }
 
-@media (min-width: 760px) {
-    .fm-row {
-        grid-template-columns:
-            minmax(0, 1fr) 22px minmax(0, 1fr) 22px minmax(0, 1fr);
-    }
-}
-
-.fm-step {
-    padding: 10px 12px;
+.fnode {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 13.5%;
+    min-height: 94px;
+    padding: 13px 15px;
     border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--surface);
+    border-radius: 14px;
+    background: #f9fdfb;
+    box-shadow: 0 12px 28px rgb(37 91 63 / 0.13);
+    transform: translate(-50%, -50%);
 }
 
-/* 눈에 보이는 결과가 나오는 칸은 테두리를 진하게 */
-.fm-step.out {
-    border-color: var(--accent);
-}
-
-.fm-no {
-    display: inline-block;
-    width: 19px;
-    height: 19px;
-    margin-bottom: 4px;
+.fnode-no {
+    position: absolute;
+    top: -9px;
+    left: -9px;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #fff;
     border-radius: 50%;
     background: var(--accent);
     color: #fff;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
-    line-height: 19px;
+    line-height: 20px;
     text-align: center;
 }
 
-.fm-step strong {
-    display: block;
-    font-size: 13.5px;
-    letter-spacing: -0.01em;
+.fnode-type {
+    color: var(--accent);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.fnode strong {
+    margin-top: 5px;
+    font-size: 14px;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
     word-break: keep-all;
 }
 
-.fm-step small {
+.fnode small {
     display: block;
-    margin-top: 4px;
+    margin-top: 6px;
     color: var(--muted);
-    font-size: 11.5px;
-    line-height: 1.5;
+    font-size: 10.5px;
+    line-height: 1.45;
     word-break: keep-all;
 }
 
-.fm-step small em {
+.fnode small em {
     color: var(--accent);
     font-style: normal;
     font-weight: 700;
 }
 
-/* 칸 사이 화살표. 좁은 화면에서는 아래를 가리킨다. */
-.fm-ar {
-    position: relative;
-    justify-self: center;
-    align-self: center;
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 9px solid var(--accent);
+/* 역할별 색. 포트폴리오의 infrastructure / primary / event 노드와 같은 구분이다. */
+.fnode.client {
+    background: #f9fdfb;
 }
 
-@media (min-width: 760px) {
-    .fm-ar {
-        border-left: 9px solid var(--accent);
-        border-right: none;
-        border-top: 6px solid transparent;
-        border-bottom: 6px solid transparent;
+.fnode.server {
+    border-color: #6fa889;
+    background: #7fcaa4;
+}
+
+.fnode.server .fnode-type {
+    color: #14402c;
+}
+
+.fnode.server small {
+    color: #1c4a35;
+}
+
+.fnode.browser {
+    border-color: #9ec7b6;
+    background: #d6e9e0;
+}
+
+/* 화면에 결과가 나오는 지점만 테두리를 세게 준다 */
+.fnode.out {
+    border: 2px solid var(--accent);
+    background: #ffffff;
+}
+
+.farch-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.farch-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.farch-legend .sw {
+    width: 13px;
+    height: 13px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+}
+
+.farch-legend .sw.client {
+    background: #f9fdfb;
+}
+
+.farch-legend .sw.server {
+    border-color: #6fa889;
+    background: #7fcaa4;
+}
+
+.farch-legend .sw.browser {
+    border-color: #9ec7b6;
+    background: #d6e9e0;
+}
+
+.farch-legend .sw.out {
+    border: 2px solid var(--accent);
+    background: #fff;
+}
+
+/* 좁은 화면에서는 절대배치를 풀어 세로로 쌓는다.
+   캔버스를 그대로 두면 노드가 겹쳐서 읽을 수 없다. */
+@media (max-width: 899px) {
+    .farch-canvas {
+        height: auto;
+        padding: 10px 12px 4px;
+    }
+
+    .farch-lines {
+        display: none;
+    }
+
+    .fnode {
+        position: relative;
+        left: auto !important;
+        top: auto !important;
+        width: auto;
+        margin: 9px 0 30px;
+        transform: none;
+    }
+
+    .fnode:last-of-type {
+        margin-bottom: 8px;
+    }
+
+    .fnode:not(:last-of-type)::after {
+        content: "";
+        position: absolute;
+        bottom: -21px;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        border-top: 10px solid var(--accent);
+        transform: translateX(-50%);
     }
 }
 
