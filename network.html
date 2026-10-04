@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>네트워크 · HTTP</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="note-page">
+    <div class="top-bar">
+        <a class="back-link" href="./index.html">&larr; 뒤로가기</a>
+    </div>
+
+    <main class="note-flow">
+
+        <!-- ===================================================== -->
+        <section class="note">
+            <h2>#1 HTTP 요청 헤더 &mdash; 개발자 필수 정리</h2>
+
+            <h3>요청 라인</h3>
+            <pre class="code"><code>GET / HTTP/1.1</code></pre>
+            <ul>
+                <li><code>GET</code> &mdash; 메서드. GET, POST, PUT, PATCH, DELETE</li>
+                <li><code>/</code> &mdash; 경로</li>
+                <li><code>HTTP/1.1</code> &mdash; 프로토콜 버전</li>
+            </ul>
+
+            <!-- ---------- 1순위 ---------- -->
+            <h3><span class="rank">1순위</span> 모르면 안 되는 것</h3>
+
+            <div class="hdr">
+                <div class="hdr-name">Host: 43.202.208.133</div>
+                <p><em>HTTP/1.1 에서 유일한 필수 헤더.</em> IP 하나에 여러 사이트를 올릴 수 있게 해주는 헤더다.</p>
+                <p>nginx 가 <code>server_name</code> 으로 어느 사이트인지 가르는 기준이 이것이다.</p>
+                <pre class="code"><code>server_name _;    # 지금은 "뭐든 다 받음". 도메인 사면 여기에 적는다</code></pre>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Cookie: JSESSIONID=...</div>
+                <p>HTTP 는 상태가 없다(stateless). 서버는 매 요청을 처음 보는 사람으로 취급한다.</p>
+                <p>그걸 뚫고 <em>"나 아까 그 사람이야"</em> 를 증명하는 수단이다. 브라우저가 자동으로 붙인다.
+                    첫 방문이면 없다.</p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Content-Type: application/json</div>
+                <p>GET 에는 바디가 없어 안 붙지만 <em>POST / PUT 에서는 필수</em>다. 실무에서 가장 많이 깨지는 지점.</p>
+                <div class="scroll-x">
+                    <table>
+                        <tr>
+                            <th>값</th>
+                            <th>쓰임</th>
+                        </tr>
+                        <tr>
+                            <td><code>application/json</code></td>
+                            <td>REST API 기본</td>
+                        </tr>
+                        <tr>
+                            <td><code>multipart/form-data</code></td>
+                            <td>파일 업로드</td>
+                        </tr>
+                        <tr>
+                            <td><code>application/x-www-form-urlencoded</code></td>
+                            <td>HTML form 기본값</td>
+                        </tr>
+                    </table>
+                </div>
+                <p>Spring 의 <code>@RequestBody</code> 가 안 먹는 사고 대부분이 이 헤더 문제다.</p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Content-Length: 348</div>
+                <p>바디의 바이트 길이. 서버가 어디까지 읽어야 하는지 아는 기준이다. GET 에는 없다.</p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Authorization: Bearer &lt;token&gt;</div>
+                <p>JWT 방식 인증. 쿠키(세션) 대신 쓰는 다른 축이다.</p>
+                <p><em>면접에서 "세션 vs JWT" 비교는 거의 반드시 나온다.</em></p>
+                <ul>
+                    <li>세션 &mdash; 서버가 상태를 들고 있음(Redis 등). 강제 로그아웃이 쉽다.</li>
+                    <li>JWT &mdash; 서버가 상태를 안 들고 있음. 확장이 쉽지만 즉시 폐기가 어렵다.</li>
+                </ul>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Origin: http://43.202.208.133</div>
+                <p><em>CORS 의 정체가 이 헤더다.</em> 브라우저가 강제로 붙이고 JS 로 위조가 불가능하다.
+                    서버는 이걸 보고 "허용된 출처냐" 를 판단한다.</p>
+                <p>캐슬챗에 CORS 설정이 없는 이유 &mdash; 모든 요청이 nginx 한 곳으로 가서 출처가 하나뿐이고,
+                    출처가 같으면 브라우저가 CORS 검사 자체를 하지 않는다.</p>
+            </div>
+
+            <!-- ---------- 2순위 ---------- -->
+            <h3><span class="rank">2순위</span> 알아두면 실력 차이가 나는 것</h3>
+
+            <div class="hdr">
+                <div class="hdr-name">If-None-Match / If-Modified-Since</div>
+                <p>캐시 재검증용. 응답의 <code>ETag</code> / <code>Last-Modified</code> 와 짝을 이룬다.</p>
+                <pre class="code"><code>1회차 응답 : ETag: "6aa4110f-224"        + 본문 548 바이트
+2회차 요청 : If-None-Match: "6aa4110f-224"
+2회차 응답 : 304 Not Modified            + 본문 없음   <-- 전송량 절약</code></pre>
+                <p>JS 번들이 수백 KB 일 때 효과가 크다.</p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Accept-Encoding: gzip, deflate</div>
+                <p>"압축해서 줘도 된다" 는 신고. 서버가 압축하면 응답에 <code>Content-Encoding: gzip</code> 이 붙는다.</p>
+                <p>현재 캐슬챗 서버는 안 붙여준다. nginx.conf 에 <code>gzip on;</code> 이 없어서다.
+                    한 줄 추가로 체감 로딩이 줄어든다. <em>"성능 개선 경험" 소재.</em></p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Connection: keep-alive</div>
+                <p>"응답 주고 연결 끊지 마." 3-way handshake 를 파일마다 반복하지 않게 해준다. HTTP/1.1 기본값.</p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Accept: text/html,application/xhtml+xml,*/*;q=0.8</div>
+                <p>"이런 형식으로 줘." 콘텐츠 협상에 쓴다. <code>q=0.8</code> 은 선호도 가중치(0~1)로,
+                    숫자가 클수록 선호한다는 뜻이다.</p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">X-Forwarded-For: 203.0.113.42</div>
+                <p>프록시를 거치면 뒷단 서버가 보는 접속 IP 는 <em>nginx 의 IP</em> 가 된다.
+                    진짜 사용자 IP 를 알려주려고 nginx 가 끼워넣는 헤더다.</p>
+                <p>로그 분석, IP 차단에 필수. <code>X-</code> 접두사는 "표준이 아닌 관례" 라는 뜻이다.</p>
+                <pre class="code"><code>proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+proxy_set_header X-Real-IP         $remote_addr;
+proxy_set_header X-Forwarded-Proto $scheme;</code></pre>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Cache-Control: no-cache</div>
+                <p>캐시 정책. 요청과 응답 양쪽에 다 붙을 수 있다. 요청에 붙으면 "캐시 쓰지 말고 새로 줘" 이고,
+                    브라우저에서 <code>Ctrl+Shift+R</code> 이 이것이다.</p>
+            </div>
+
+            <!-- ---------- 3순위 ---------- -->
+            <h3><span class="rank">3순위</span> 존재만 알면 되는 것</h3>
+
+            <div class="hdr">
+                <div class="hdr-name">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131</div>
+                <p><em>절대 신뢰하면 안 된다.</em> 누구나 조작한다. curl 로 크롬인 척하는 것도 한 줄이면 된다.</p>
+                <p>통계와 로그 용도로만 쓸 것. 인증이나 분기 판단에 쓰면 사고로 이어진다.</p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Referer: http://43.202.208.133/login</div>
+                <p>어디서 눌러서 왔는지. <em>스펠링이 틀린 게 표준이다</em>(Referrer 가 맞는 철자).
+                    초기 오타가 그대로 굳었다.</p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8</div>
+                <p>다국어 사이트의 기본 언어 결정용.</p>
+            </div>
+
+            <div class="hdr">
+                <div class="hdr-name">Range: bytes=1024-2047</div>
+                <p>파일의 일부만 요청한다. 동영상 중간으로 점프하는 기능이 이것이다.
+                    응답의 <code>Accept-Ranges: bytes</code> 가 "나 이거 지원함" 표시다.</p>
+            </div>
+
+            <!-- ---------- 형식 규칙 ---------- -->
+            <h3>형식 규칙</h3>
+            <ul>
+                <li>각 줄 끝은 <code>\n</code> 이 아니라 <code>\r\n</code> (CRLF) 다.</li>
+                <li>헤더 블록 끝에 <em>빈 줄 하나가 더 붙는다.</em> 이게 "헤더 끝" 신호이고,
+                    안 보내면 서버가 헤더가 더 올 줄 알고 영원히 기다린다.</li>
+                <li>헤더 순서는 정해져 있지 않다. <code>Host</code> 만 필수다.</li>
+                <li>헤더 이름은 대소문자를 구분하지 않는다.</li>
+                <li><code>http</code> 는 전부 평문이다. <em>쿠키까지 중간에서 그대로 읽힌다.</em>
+                    실서비스는 HTTPS 필수.</li>
+            </ul>
+
+            <h4>실제로 소켓에 흘러가는 바이트</h4>
+            <pre class="code"><code>GET / HTTP/1.1\r\n
+Host: 43.202.208.133\r\n
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131\r\n
+Accept: text/html,application/xhtml+xml\r\n
+Accept-Encoding: gzip, deflate\r\n
+Accept-Language: ko-KR,ko;q=0.9\r\n
+Connection: keep-alive\r\n
+Cookie: JSESSIONID=...\r\n
+\r\n                        <-- 이 빈 줄이 끝 신호</code></pre>
+        </section>
+
+        <!-- ===================================================== -->
+        <section class="note">
+            <h2>#2 서버를 분리하면 &mdash; 커널은 2개, 핸드셰이크는 누가 하나</h2>
+
+            <h3>먼저 &mdash; 도커 컨테이너는 커널을 공유한다</h3>
+            <p>캐슬챗은 Lightsail 한 대에 컨테이너로 다 올려놨는데, 이때 <em>커널은 하나다.</em></p>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>컨테이너</th>
+                        <th>가상머신(VM)</th>
+                    </tr>
+                    <tr>
+                        <th>커널</th>
+                        <td>호스트 것 <em>1개를 공유</em></td>
+                        <td>각자 따로</td>
+                    </tr>
+                    <tr>
+                        <th>격리 단위</th>
+                        <td>프로세스 (네임스페이스)</td>
+                        <td>OS 전체</td>
+                    </tr>
+                    <tr>
+                        <th>무게</th>
+                        <td>가볍다</td>
+                        <td>무겁다</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="callout">
+                <span class="tag">핵심</span>
+                <p>컨테이너는 <em>격리된 OS 가 아니라 격리된 프로세스</em>다. 네트워크 네임스페이스가 따로라서
+                    각자 IP 를 갖고 서로 안 보이지만, 커널 코드는 호스트 것 하나를 같이 쓴다.</p>
+            </div>
+
+            <h3>온프레미스 &mdash; 물리적으로 분리한 구조</h3>
+            <div class="topo">
+                <div class="machine">
+                    <div class="machine-title">클라이언트 PC</div>
+                    <div class="layer"><strong>브라우저</strong></div>
+                    <div class="layer kernel">Windows 커널</div>
+                    <div class="layer"><strong>NIC</strong></div>
+                    <div class="machine-foot">공인 IP 없음</div>
+                </div>
+                <div class="machine edge">
+                    <div class="machine-title">Web 서버 (A)</div>
+                    <div class="layer"><strong>nginx</strong><small>listen :80</small></div>
+                    <div class="layer kernel">리눅스 커널 A</div>
+                    <div class="layer"><strong>NIC</strong></div>
+                    <div class="machine-foot">공인 203.0.113.10<br>사설 10.0.1.10<br>외부에 노출된 유일한 지점</div>
+                </div>
+                <div class="machine">
+                    <div class="machine-title">WAS 서버 (B)</div>
+                    <div class="layer"><strong>Spring Boot</strong><small>listen :8080</small></div>
+                    <div class="layer kernel">리눅스 커널 B</div>
+                    <div class="layer"><strong>NIC</strong></div>
+                    <div class="machine-foot">공인 IP 없음<br>사설 10.0.1.20<br>인터넷에서 닿을 수 없다</div>
+                </div>
+            </div>
+            <p>B 에 공인 IP 가 없는 것이 <em>분리하는 가장 큰 이유</em>다. 공격자가 Spring Boot 를 직접 때릴 경로가
+                물리적으로 존재하지 않고, 반드시 A 를 거쳐야 한다.</p>
+
+            <h3>핸드셰이크는 커널이 한다 &mdash; nginx 가 아니다</h3>
+            <div class="callout bad">
+                <span class="tag">흔한 오해</span>
+                <p>"nginx 가 SYN 을 받아서 SYN+ACK 를 보낸다" &mdash; <em>틀렸다.</em>
+                    nginx 는 SYN 을 보지도 못한다. 커널이 핸드셰이크를 혼자 다 끝낸 뒤에 nginx 에게 넘긴다.</p>
+            </div>
+
+            <h4>전화 비유</h4>
+            <ul>
+                <li><em>커널 = 교환원.</em> 벨이 울리면 받아서 통화를 성립시킨다.</li>
+                <li><em>nginx = 담당 직원.</em> 교환원이 연결해준 통화를 건네받아 실제 대화를 한다.</li>
+                <li>직원은 벨소리와 "연결 중" 신호에 참여하지 않는다. 수화기를 받았을 때 통화는 이미 성립돼 있다.</li>
+            </ul>
+
+            <h4>누가 보내고 누가 받나</h4>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>#</th>
+                        <th>패킷 / 동작</th>
+                        <th>보내는 주체</th>
+                        <th>받는 주체</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td><code>SYN</code></td>
+                        <td><em>클라이언트 PC 의 커널</em><br>(브라우저가 <code>connect()</code> 로 부탁)</td>
+                        <td><em>서버 A 의 리눅스 커널</em></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><code>SYN+ACK</code></td>
+                        <td><em>서버 A 의 리눅스 커널</em></td>
+                        <td>클라이언트 PC 의 커널</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><code>ACK</code></td>
+                        <td>클라이언트 PC 의 커널</td>
+                        <td>서버 A 의 리눅스 커널</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>연결 성립</td>
+                        <td>커널 A 가 accept 큐에 적립</td>
+                        <td><em>nginx 가 <code>accept()</code> 로 꺼냄</em><br>&larr; nginx 첫 등장</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><code>GET / HTTP/1.1</code></td>
+                        <td>브라우저</td>
+                        <td>nginx</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td><code>200 OK</code> + html</td>
+                        <td>nginx</td>
+                        <td>브라우저</td>
+                    </tr>
+                </table>
+            </div>
+            <p><em>1~3 번에 nginx 가 없다.</em> TCP 핸드셰이크는 TCP 프로토콜의 일이고 TCP 구현체가 커널 안에 있기
+                때문이다. 유저랜드 프로그램이 매번 직접 악수하게 만들면 모든 서버 프로그램이 TCP 를 새로 구현해야 한다.</p>
+
+            <h3>SYN 이 실제로 가는 경로</h3>
+            <p>패킷은 층으로 포개져 있고, <em>중간 라우터는 봉투 안을 뜯어보지 않는다.</em></p>
+            <pre class="code"><code>+- Ethernet frame (L2) ---------------------------+
+|  dst MAC : 공유기 MAC      <-- ARP 로 알아냄      |
+|  +- IP packet (L3) --------------------------+  |
+|  |  src IP : 192.168.0.5    (내 PC 사설)      |  |
+|  |  dst IP : 43.202.208.133                  |  |  <-- 라우터가 보는 건 이것만
+|  |  +- TCP segment (L4) -----------------+   |  |
+|  |  |  src port : 51234  (OS 가 임의 배정) |   |  |
+|  |  |  dst port : 80                     |   |  |  <-- 최종 서버 커널만 본다
+|  |  |  flags    : SYN                    |   |  |
+|  |  +------------------------------------+   |  |
+|  +-------------------------------------------+  |
++-------------------------------------------------+</code></pre>
+
+            <ol class="seq">
+                <li><span class="who">브라우저</span> <code>socket()</code> + <code>connect()</code> 호출.
+                    여기서 브라우저 역할은 끝이고 나머지는 커널이 한다.</li>
+                <li><span class="who k">내 PC 커널</span> "목적지가 내 서브넷에 없네" 판단 &rarr;
+                    기본 게이트웨이(공유기)로 보내기로 결정. ARP 로 공유기 MAC 을 알아내 전송.</li>
+                <li><span class="who">공유기</span> NAT. 출발지 IP 를 사설 &rarr; 공인으로 바꿔치기하고,
+                    돌아올 응답을 누구에게 줄지 포트로 기억해둔다.</li>
+                <li><span class="who">라우터들</span> ISP &rarr; 백본 &rarr; AWS. 수십 홉을 목적지 IP 만 보고 전달한다.</li>
+                <li><span class="who">방화벽</span> 보안그룹이 80 번 허용을 확인한다. 막혀 있으면 여기서 조용히
+                    버려지고 브라우저는 타임아웃이 난다.</li>
+                <li><span class="who k">서버 커널</span> "80 번 듣는 소켓 있음(nginx)" &rarr;
+                    <em>SYN+ACK 발사.</em> 여기가 답이다.</li>
+            </ol>
+
+            <h3>입력 &rarr; 렌더링 동안 B 서버는 깨어나지 않는다</h3>
+            <div class="topo">
+                <div class="machine">
+                    <div class="machine-title">클라이언트 PC</div>
+                    <div class="layer"><strong>브라우저</strong></div>
+                    <div class="layer kernel">Windows 커널</div>
+                    <div class="machine-foot">렌더링은 여기서만</div>
+                </div>
+                <div class="machine edge">
+                    <div class="machine-title">Web 서버 (A)</div>
+                    <div class="layer"><strong>nginx</strong></div>
+                    <div class="layer kernel">리눅스 커널 A</div>
+                    <div class="machine-foot">정적 파일을 혼자 다 내준다</div>
+                </div>
+                <div class="machine idle">
+                    <div class="machine-title">WAS 서버 (B)</div>
+                    <div class="layer"><strong>Spring Boot</strong></div>
+                    <div class="layer kernel">리눅스 커널 B</div>
+                    <div class="machine-foot">참여 없음</div>
+                </div>
+            </div>
+
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>단계</th>
+                        <th>커널 A</th>
+                        <th>nginx</th>
+                        <th>커널 B</th>
+                        <th>Spring Boot</th>
+                    </tr>
+                    <tr>
+                        <td>SYN / SYN+ACK / ACK</td>
+                        <td><em>담당</em></td>
+                        <td>없음</td>
+                        <td>없음</td>
+                        <td>없음</td>
+                    </tr>
+                    <tr>
+                        <td>GET 수신</td>
+                        <td>전달만</td>
+                        <td><em>담당</em></td>
+                        <td>없음</td>
+                        <td>없음</td>
+                    </tr>
+                    <tr>
+                        <td>index.html 읽기</td>
+                        <td>전달만</td>
+                        <td><em>담당</em></td>
+                        <td>없음</td>
+                        <td>없음</td>
+                    </tr>
+                    <tr>
+                        <td>JS / CSS 반환</td>
+                        <td>전달만</td>
+                        <td><em>담당</em></td>
+                        <td>없음</td>
+                        <td>없음</td>
+                    </tr>
+                    <tr>
+                        <td>렌더링</td>
+                        <td>없음</td>
+                        <td>없음</td>
+                        <td>없음</td>
+                        <td>없음</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="callout">
+                <span class="tag">면접 포인트</span>
+                <p>로그인 화면이 뜨기까지 Spring Boot 는 전원만 켜져 있을 뿐이다.
+                    <em>B 서버를 꺼놔도 로그인 화면은 똑같이 뜬다.</em>
+                    React 빌드 산출물은 그냥 정적 파일이라 WAS 가 필요 없다. 이게 CSR 구조의 특징이다.</p>
+            </div>
+
+            <h3>GET 이후 렌더링까지</h3>
+            <p><code>location /</code> 에는 <code>proxy_pass</code> 가 없다. 즉 "B 에게 물어볼 필요 없음" 이다.</p>
+            <pre class="code"><code>location / {
+    try_files $uri $uri/ /index.html;
+}
+
+# $uri = "/" 이므로 왼쪽부터 순서대로 시도한다
+#   1차 $uri   -> /usr/share/nginx/html/   디렉토리라서 실패
+#   2차 $uri/  -> 디렉토리 맞음 -> index 지시자 -> index.html 발견. 성공
+#   3차 /index.html  -> 갈 필요 없었음</code></pre>
+
+            <ol class="seq">
+                <li><span class="who">nginx</span> 자기 디스크에서 <code>index.html</code> 을 읽어
+                    <code>200 OK</code> + 548 바이트 반환.</li>
+                <li><span class="who">브라우저</span> <code>Content-Type: text/html</code> 을 보고 HTML 파서 가동.
+                    <em>확장자가 아니라 이 헤더가 기준이다.</em></li>
+                <li><span class="who">브라우저</span> DOM 트리 구축. <code>&lt;div id="root"&gt;</code> 가 비어 있어
+                    아직 흰 화면이다.</li>
+                <li><span class="who">브라우저</span> CSS / JS 추가 GET. <code>keep-alive</code> 덕분에
+                    같은 TCP 연결을 재사용하고 핸드셰이크를 다시 하지 않는다.</li>
+                <li><span class="who">브라우저</span> DOM + CSSOM &rarr; 렌더트리 &rarr; Layout &rarr; Paint.
+                    흰 화면이 실제로 모니터에 출력된다.</li>
+                <li><span class="who">브라우저</span> <code>defer</code> 스크립트 실행.
+                    React 가 비어 있던 root 를 채운다. 네트워크가 아닌 순수 DOM 조작이다.</li>
+                <li><span class="who">브라우저</span> DOM 이 바뀌었으니 Layout &rarr; Paint 를 다시 돈다.
+                    <em>로그인 화면이 보인다.</em></li>
+            </ol>
+
+            <h4>스크립트 두 종류의 차이</h4>
+            <ul>
+                <li><code>&lt;script defer&gt;</code> &mdash; 다운로드는 즉시, <em>실행은 파싱이 끝난 뒤.</em>
+                    HTML 파싱을 멈추지 않는다. 없으면 그만큼 화면이 늦게 뜬다.</li>
+                <li><code>&lt;link rel="stylesheet"&gt;</code> &mdash; 반대로 <em>렌더링을 막는다</em>(render-blocking).
+                    CSS 없이 그리면 스타일 없는 날것이 번쩍 보였다가 바뀌므로 브라우저가 일부러 기다린다.</li>
+            </ul>
+
+            <h3>B 가 필요해지면 핸드셰이크가 한 번 더</h3>
+            <pre class="code"><code>location ~ ^/(user|friend|chat|room|uploads)/ {
+    proxy_pass http://10.0.1.20:8080;      # 여기엔 proxy_pass 가 있다
+}</code></pre>
+            <ul>
+                <li>① 브라우저 &rarr; 커널 A 핸드셰이크 &nbsp;(클라이언트 &harr; A)</li>
+                <li>② nginx &rarr; 커널 B 핸드셰이크 &nbsp;(A &harr; B) &mdash; <em>완전히 별개의 연결</em></li>
+            </ul>
+            <div class="callout">
+                <span class="tag">역할이 뒤집힌다</span>
+                <p>nginx 는 브라우저에 대해서는 <em>서버</em>(SYN 을 받는 쪽), Spring Boot 에 대해서는
+                    <em>클라이언트</em>(SYN 을 보내는 쪽)가 된다.</p>
+                <p>②의 SYN+ACK 를 보내는 건 커널 B 다. 이때도 톰캣은 악수에 참여하지 않고
+                    <code>accept()</code> 로 완성된 연결만 받는다. A 에서 일어난 일이 B 에서 똑같이 반복된다.</p>
+                <p>그리고 B 가 보는 접속 IP 는 브라우저가 아니라 <em>nginx</em> 가 된다. 그래서
+                    <code>X-Forwarded-For</code> 가 필요하다.</p>
+            </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <section class="note">
+            <h2>#3 공인 IP &middot; 사설 IP &middot; 도메인 &mdash; 배포 구성 두 가지</h2>
+
+            <h3>"백엔드에 IP 가 없다" 는 말의 정확한 뜻</h3>
+            <p>IP 가 없는 게 아니라 <em>공인 IP 가 없다.</em></p>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>B 서버</th>
+                        <th>상태</th>
+                        <th>뜻</th>
+                    </tr>
+                    <tr>
+                        <td>사설 IP <code>10.0.1.20</code></td>
+                        <td><em>있다</em></td>
+                        <td>내부망에서는 이걸로 통신한다</td>
+                    </tr>
+                    <tr>
+                        <td>공인 IP</td>
+                        <td>없다</td>
+                        <td>인터넷에서 닿을 경로가 없다</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="callout">
+                <span class="tag">비유</span>
+                <p>사설 IP 는 집 안에서만 쓰는 호수, 공인 IP 는 전 세계에서 찾아올 수 있는 주소다.
+                    B 는 아파트 안의 1203 호인데 그 아파트 주소가 비공개인 상태다.
+                    같은 아파트 사람(A 서버)은 1203 호를 찾아갈 수 있지만 외부인은 아파트 자체를 못 찾는다.</p>
+            </div>
+
+            <h3>도메인은 프로세스에 붙는 게 아니다</h3>
+            <div class="callout bad">
+                <span class="tag">흔한 오해</span>
+                <p>"Spring Boot 의 도메인" 이라는 말은 엄밀히는 성립하지 않는다.
+                    정확히는 <em>"Spring Boot 앞단에 노출된 공인 IP 의 도메인"</em> 이다.</p>
+            </div>
+            <pre class="code"><code>도메인  --DNS A 레코드-->  공인 IP 하나
+
+castlechat.com  ->  203.0.113.10  ->  A 서버 (nginx)
+                                          |
+                                          +-> 10.0.1.20 (Spring Boot)
+                                              도메인 불필요. 공인 IP 불필요</code></pre>
+            <p>도메인을 산다는 건 <em>외부 노출 지점 하나에 이름을 붙이는 것</em>이고, 그 지점이 nginx 다.</p>
+
+            <h3>구성 1 &mdash; 단일 출처 (리버스 프록시). 캐슬챗 방식</h3>
+            <pre class="code"><code>castlechat.com  ->  nginx  (공인 203.0.113.10)
+   (도메인 1개)        |
+                      |  /          -> 자기 디스크의 정적 파일
+                      |  /user/...  -> 10.0.1.20:8080  --> Spring Boot
+                      |  /chat/...  -> 10.0.1.20:8080  --> (도메인 없음)</code></pre>
+            <ul>
+                <li><em>도메인 1 개로 끝난다.</em> 백엔드는 공인 IP 도, 도메인도 필요 없다.</li>
+                <li>브라우저 입장에서 출처가 하나뿐이라 <em>CORS 가 발생하지 않는다.</em></li>
+            </ul>
+            <p>캐슬챗 compose 파일 주석에 그대로 적혀 있는 내용이다.</p>
+            <pre class="code"><code># 브라우저 입장에서 출처가 nginx 하나뿐이라 CORS도 발생하지 않는다.
+# 밖으로 여는 포트는 nginx의 80 하나뿐이다. 다른 컨테이너 포트를 publish 하면
+# 출처가 늘어나면서 CORS가 되살아난다.</code></pre>
+
+            <h3>구성 2 &mdash; 분리 출처. "서버쪽 도메인" 이 필요한 경우</h3>
+            <pre class="code"><code>www.site.com  ->  프론트엔드   (S3 + CloudFront / Vercel / Netlify)
+                   빌드된 html, js, css 만 올라감
+
+api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요하다
+                   Spring Boot</code></pre>
+            <p>프론트를 정적 호스팅에 올리고 백엔드를 따로 두는 구성이다. 브라우저의 JS 가
+                <code>api.site.com</code> 으로 직접 요청을 쏘기 때문에 <em>백엔드도 외부 접근이 가능해야 한다.</em></p>
+            <h4>대신 대가가 있다</h4>
+            <pre class="code"><code>출처가 2개 (www.site.com != api.site.com)
+   -> 브라우저가 CORS 검사 발동
+   -> 백엔드에 CORS 설정 필수
+        @CrossOrigin / WebMvcConfigurer#addCorsMappings
+        Access-Control-Allow-Origin 헤더
+        preflight(OPTIONS) 요청 처리
+        쿠키 쓰려면 allowCredentials + SameSite 까지</code></pre>
+
+            <h3>두 구성 비교</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>구성 1 (리버스 프록시)</th>
+                        <th>구성 2 (분리 출처)</th>
+                    </tr>
+                    <tr>
+                        <th>도메인</th>
+                        <td><em>1 개</em></td>
+                        <td>1 개 + 서브도메인</td>
+                    </tr>
+                    <tr>
+                        <th>백엔드 공인 IP</th>
+                        <td><em>불필요</em></td>
+                        <td><em>필요</em></td>
+                    </tr>
+                    <tr>
+                        <th>CORS</th>
+                        <td><em>없음</em></td>
+                        <td>설정 필수</td>
+                    </tr>
+                    <tr>
+                        <th>인증서(HTTPS)</th>
+                        <td>1 장</td>
+                        <td>2 장 (또는 와일드카드 1 장)</td>
+                    </tr>
+                    <tr>
+                        <th>백엔드 공격 노출</th>
+                        <td>없음</td>
+                        <td>있음 (방화벽으로 막아야)</td>
+                    </tr>
+                    <tr>
+                        <th>프론트 배포</th>
+                        <td>서버에 파일 올림</td>
+                        <td>CDN 에 올림. 전송이 빠름</td>
+                    </tr>
+                    <tr>
+                        <th>프론트/백 독립 배포</th>
+                        <td>어려움</td>
+                        <td>쉬움</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>캐슬챗의 현재 상태</h3>
+            <p>구성 1 이고, <em>도메인을 사지도 않았다.</em> <code>43.202.208.133</code> 이라는 공인 IP 를
+                직접 쓰고 있다. nginx 설정에 증거가 있다.</p>
+            <pre class="code"><code>server_name _;    # "도메인 안 가림. 뭐든 다 받음"</code></pre>
+            <p>도메인을 사면 이 자리에 <code>server_name castlechat.com;</code> 을 적게 된다.
+                <em>nginx 설정 한 줄 + DNS A 레코드 하나가 끝이고, Spring Boot 는 한 글자도 안 고친다.</em></p>
+
+            <h3>추가로 알아둘 것</h3>
+            <h4>서브도메인은 공짜다</h4>
+            <p><code>api.site.com</code> 을 위해 도메인을 또 살 필요가 없다. <code>site.com</code> 하나 사면
+                <code>api.</code>, <code>www.</code>, <code>admin.</code> 등을 무한히 만들 수 있다.
+                DNS 레코드만 추가하면 된다.</p>
+
+            <h4>구성 2 에서도 Spring Boot 를 맨몸으로 노출하지 않는다</h4>
+            <pre class="code"><code>api.site.com -> ALB (공인 IP) -> Spring Boot #1 (사설 IP)
+                              -> Spring Boot #2 (사설 IP)
+                              -> Spring Boot #3 (사설 IP)</code></pre>
+            <p>즉 <code>api.site.com</code> 이 가리키는 건 톰캣이 아니라 <em>로드밸런서의 공인 IP</em> 다.</p>
+            <div class="callout">
+                <span class="tag">결론</span>
+                <p>어느 구성이든 <em>Spring Boot 자체는 사설 IP 만 갖는다.</em>
+                    공인 IP 를 받는 건 항상 그 앞단(nginx 또는 로드밸런서)이다.
+                    그래야 서버를 여러 대로 늘릴 수 있고, 도메인이 특정 인스턴스에 묶이지 않는다.</p>
+            </div>
+            <div class="callout">
+                <span class="tag">면접에서 쓸 한 줄</span>
+                <p>"도메인은 외부 노출 지점에 붙는다. 캐슬챗은 nginx 를 단일 출처로 두는 리버스 프록시 구성이라
+                    도메인 하나로 충분하고, 그 덕에 CORS 설정이 아예 필요 없다."</p>
+            </div>
+        </section>
+
+    </main>
+</body>
+
+</html>

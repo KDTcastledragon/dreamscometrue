@@ -1,0 +1,466 @@
+/* 공부 정리 공용 스타일.
+   etc_docs_legacy 의 노트 스타일을 가져와 수식 관련을 걷어내고 다이어그램용을 더했다.
+   모바일에서 먼저 읽히도록 좁은 화면 기준으로 짜고, 넓어지면 칸이 늘어나게 둔다. */
+
+:root {
+    --bg: #f5f7f6;
+    --surface: #ffffff;
+    --line: #dfe5e2;
+    --text: #1d2a24;
+    --muted: #65756d;
+    --accent: #2f6d55;
+    --accent-soft: #e8f1ed;
+    --warn: #b4452f;
+    --warn-soft: #fbeeea;
+
+    --radius: 14px;
+    --content: 880px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0 16px 64px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+}
+
+.wrap {
+    max-width: var(--content);
+    margin: 0 auto;
+}
+
+.page-head {
+    padding: 32px 0 24px;
+}
+
+.page-head h1 {
+    margin: 0;
+    font-size: clamp(24px, 5vw, 34px);
+    letter-spacing: -0.02em;
+}
+
+/* ===== 홈의 주제 카드 ===== */
+.subject-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
+@media (min-width: 640px) {
+    .subject-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.subject-card {
+    display: block;
+    padding: 24px 20px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s;
+}
+
+.subject-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.subject-card strong {
+    display: block;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+}
+
+/* ===== 본문 펼침 페이지 ===== */
+.note-page {
+    padding: 0 0 48px;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+}
+
+.note-page .back-link {
+    margin: 0;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.note-page .back-link:hover {
+    color: var(--accent);
+}
+
+/* 다이어그램과 코드 블록이 들어가므로 읽기 폭을 넓게 쓰는 한 줄 흐름으로 둔다.
+   수학 노트처럼 2~3단으로 쪼개면 그림이 찌그러진다. */
+.note-flow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 8px;
+}
+
+@media (min-width: 560px) {
+    .note-flow {
+        padding: 0 24px;
+    }
+}
+
+.note {
+    padding: 18px 18px 22px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+@media (min-width: 560px) {
+    .note {
+        padding: 18px 22px 22px;
+    }
+}
+
+.note > h2 {
+    margin: 0 0 4px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+    font-size: 18px;
+    letter-spacing: -0.02em;
+}
+
+.note h3 {
+    margin: 22px 0 8px;
+    padding-left: 11px;
+    border-left: 3px solid var(--accent);
+    font-size: 16px;
+    letter-spacing: -0.02em;
+}
+
+.note h4 {
+    margin: 16px 0 6px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.note ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.note li {
+    margin-bottom: 10px;
+    word-break: keep-all;
+}
+
+.note p {
+    margin: 0 0 10px;
+    word-break: keep-all;
+}
+
+.note em {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 700;
+}
+
+.note table {
+    width: 100%;
+    margin: 4px 0 14px;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.note th,
+.note td {
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    text-align: left;
+    word-break: keep-all;
+}
+
+.note th {
+    background: var(--accent-soft);
+    white-space: nowrap;
+}
+
+/* ===== 코드 / HTTP 원문 ===== */
+/* 순수 ASCII 만 넣는다. 한글을 넣으면 폰트에 따라 정렬이 깨진다. */
+pre.code {
+    margin: 8px 0 14px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f7f9f8;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    tab-size: 4;
+}
+
+code {
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--accent-soft);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.92em;
+    word-break: break-all;
+}
+
+pre.code code {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+    word-break: normal;
+}
+
+/* ===== 헤더 우선순위 항목 ===== */
+.hdr {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    background: #fbfcfc;
+}
+
+.hdr-name {
+    margin: 0 0 6px;
+    overflow-x: auto;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+}
+
+.hdr p {
+    margin: 0 0 6px;
+    font-size: 14px;
+}
+
+.hdr p:last-child {
+    margin-bottom: 0;
+}
+
+.rank {
+    display: inline-block;
+    margin-bottom: 2px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* ===== 강조 상자 ===== */
+.callout {
+    margin: 12px 0;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent-soft);
+    font-size: 14px;
+    word-break: keep-all;
+}
+
+.callout.bad {
+    border-left-color: var(--warn);
+    background: var(--warn-soft);
+}
+
+.callout .tag {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.callout.bad .tag {
+    color: var(--warn);
+}
+
+.callout p {
+    margin: 0 0 6px;
+}
+
+.callout p:last-child {
+    margin-bottom: 0;
+}
+
+/* ===== 구조 다이어그램 (CSS 박스) ===== */
+/* ASCII 로 그리면 한글 글자폭 때문에 정렬이 깨지므로 박스로 그린다. */
+.topo {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 14px 0;
+}
+
+@media (min-width: 720px) {
+    .topo {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
+    }
+}
+
+.machine {
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    background: #fbfcfc;
+    overflow: hidden;
+}
+
+.machine.edge {
+    border-color: var(--accent);
+}
+
+.machine.idle {
+    opacity: 0.62;
+}
+
+.machine-title {
+    padding: 7px 10px;
+    background: var(--accent-soft);
+    font-size: 12.5px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.machine.idle .machine-title {
+    background: #eef1f0;
+}
+
+.layer {
+    padding: 9px 10px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    text-align: center;
+}
+
+.layer:first-of-type {
+    border-top: none;
+}
+
+.layer strong {
+    display: block;
+    font-size: 13.5px;
+}
+
+.layer small {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+.layer.kernel {
+    background: var(--accent-soft);
+    font-weight: 700;
+}
+
+.machine.idle .layer.kernel {
+    background: #eef1f0;
+}
+
+.machine-foot {
+    padding: 7px 10px;
+    border-top: 1px dashed var(--line);
+    color: var(--muted);
+    font-size: 11.5px;
+    text-align: center;
+    word-break: keep-all;
+}
+
+/* ===== 순서 흐름 ===== */
+.seq {
+    margin: 14px 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: seq;
+}
+
+.seq li {
+    position: relative;
+    margin: 0;
+    padding: 9px 0 9px 34px;
+    border-bottom: 1px dashed var(--line);
+    font-size: 14px;
+    word-break: keep-all;
+}
+
+.seq li:last-child {
+    border-bottom: none;
+}
+
+.seq li::before {
+    counter-increment: seq;
+    content: counter(seq);
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 22px;
+    text-align: center;
+}
+
+.seq li.off::before {
+    background: #c3ccc8;
+}
+
+.seq .who {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.seq .who.k {
+    background: #e4e9f2;
+    color: #3d5173;
+}
+
+.seq .who.none {
+    background: #eef1f0;
+    color: var(--muted);
+}
+
+/* 표가 좁은 화면에서 넘칠 때 그 표만 가로로 밀 수 있게 둔다. */
+.scroll-x {
+    overflow-x: auto;
+    margin: 4px 0 14px;
+}
+
+.scroll-x table {
+    margin: 0;
+    min-width: 440px;
+}
