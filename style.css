@@ -617,6 +617,16 @@ pre.code code {
     color: #3d5173;
 }
 
+/* 이름 해석 구간 */
+.fnode.dns {
+    border-color: #c6a9c4;
+    background: #f1e7f0;
+}
+
+.fnode.dns .fnode-type {
+    color: #744370;
+}
+
 /* 네트워크 장비 */
 .fnode.net {
     border-color: #cbb79b;
@@ -679,6 +689,11 @@ pre.code code {
 .farch-legend .sw.net {
     border-color: #cbb79b;
     background: #f5efe5;
+}
+
+.farch-legend .sw.dns {
+    border-color: #c6a9c4;
+    background: #f1e7f0;
 }
 
 .farch-legend .sw.out {

@@ -19,7 +19,7 @@
 
         <!-- ===================================================== -->
         <section class="note">
-            <h2>#1 http://43.202.208.133/ 입력 + Enter &rarr; 브라우저 화면 Rendering</h2>
+            <h2>#1 http://castlechat.com/ 입력 + Enter &rarr; 브라우저 화면 Rendering</h2>
 
             <div class="side-by-side">
                 <div class="callout">
@@ -80,16 +80,16 @@
                     <!-- 1행 : 네트워크 경로. 좌 -> 우 -->
                     <div class="farch-band" style="top:1.5%">네트워크 경로</div>
 
-                    <article class="fnode client" style="left:12.5%;top:13%">
-                        <span class="fnode-type">Client</span>
-                        <strong>브라우저</strong>
-                        <small>connect() 호출<br>여기서 역할 끝</small>
+                    <article class="fnode dns" style="left:12.5%;top:13%">
+                        <span class="fnode-type">DNS</span>
+                        <strong>이름 &rarr; IP</strong>
+                        <small>캐시 &rarr; Recursive Resolver<br>UDP 53 &middot; 첫 패킷은 ARP</small>
                     </article>
 
                     <article class="fnode kernel" style="left:37.5%;top:13%">
                         <span class="fnode-type">L3 &middot; L2</span>
                         <strong>Client PC Kernel</strong>
-                        <small>서브넷 판단 &middot; ARP<br>임시포트 &middot; 캡슐화</small>
+                        <small>connect() &middot; 서브넷 판단<br>ARP &middot; 임시포트 &middot; 캡슐화</small>
                     </article>
 
                     <article class="fnode net" style="left:62.5%;top:13%">
@@ -187,6 +187,7 @@
                 </div>
 
                 <div class="farch-legend">
+                    <span><i class="sw dns"></i>이름 해석</span>
                     <span><i class="sw client"></i>브라우저가 보내는 쪽</span>
                     <span><i class="sw kernel"></i>Kernel 이 일하는 구간</span>
                     <span><i class="sw net"></i>네트워크 장비</span>
@@ -196,25 +197,36 @@
                 </div>
             </div>
 
-            <h3>1 &mdash; 브라우저 (주소 해석과 연결)</h3>
+            <h3>1 &mdash; 브라우저 (주소 해석)</h3>
             <ol class="seq">
-                <li><span class="who">브라우저</span> <code>http://43.202.208.133/</code> 입력 + Enter.
-                    <em>IP 를 직접 쳤으므로 DNS 조회가 없다.</em> 도메인이었다면 여기서 DNS 질의가 들어간다.</li>
+                <li><span class="who">브라우저</span> <code>http://castlechat.com/</code> 입력 + Enter.
+                    URL 을 쪼개서 <em>스킴 <code>http</code> &middot; 호스트 <code>castlechat.com</code> &middot;
+                    경로 <code>/</code></em> 로 나눈다.</li>
                 <li><span class="who">브라우저</span> 포트를 생략했으므로 <code>http</code> 의 기본값인
                     <em>80 번</em>으로 정한다. <code>https</code> 였다면 443 이다.</li>
-                <li><span class="who k">Client PC Kernel</span> <code>43.202.208.133:80</code> 으로 TCP 연결 수립.
-                    브라우저는 <code>connect()</code> 로 부탁만 하고 패킷은 Kernel이 만든다.</li>
+                <li><span class="who">브라우저</span> <em>호스트 이름만으로는 아무것도 못 한다.</em>
+                    IP 를 알아야 패킷을 만들 수 있으므로 DNS 조회가 먼저다.</li>
             </ol>
 
-            <h3>1-1 &mdash; 도메인이었다면 (DNS 조회)</h3>
-            <p>IP 를 직접 쳤으므로 <em>이 과정이 통째로 생략된다.</em> 다만 <code>castlechat.com</code> 같은 도메인이었다면 연결을 시도하기 전에 이 단계가 먼저 돌아간다.</p>
+            <div class="callout">
+                <span class="tag">실제 배포 기준</span>
+                <p>캐슬챗은 도메인을 사지 않아서 <code>http://43.202.208.133/</code> 로 접속한다.
+                    <em>IP 를 직접 치면 1-1 의 DNS 단계가 통째로 생략된다.</em></p>
+                <p>아래에 나오는 응답 헤더와 바이트 수는 그 상태에서 실제로 받아온 값이다.
+                    설명은 도메인을 쓰는 일반적인 경우로 적는다.</p>
+            </div>
+
+            <h3>1-1 &mdash; 이름을 IP 로 바꾼다 (DNS 조회)</h3>
+            <p><em>여기서 랜선을 타고 나가는 첫 패킷이 생긴다.</em> TCP SYN 이 아니다.
+                DNS 질의도 엄연한 네트워크 패킷이라 <em>홈 라우터를 똑같이 거친다.</em></p>
 
             <div class="side-by-side">
                 <div>
                     <h4>① 캐시부터 뒤진다 (여기서 끝나는 경우가 대부분)</h4>
                     <ol class="seq">
                         <li><span class="who">브라우저 캐시</span> 크롬은 자체 DNS 캐시를 들고 있다.
-                            <code>chrome://net-internals/#dns</code> 에서 볼 수 있다.</li>
+                            <code>chrome://net-internals/#dns</code> 에서 볼 수 있다.
+                            <em><code>ipconfig /flushdns</code> 로는 안 지워진다.</em></li>
                         <li><span class="who k">OS 캐시</span> Windows 는 <code>ipconfig /displaydns</code>.</li>
                         <li><span class="who k">hosts 파일</span>
                             <code>C:\Windows\System32\drivers\etc\hosts</code>.
@@ -222,22 +234,78 @@
                     </ol>
                 </div>
                 <div>
-                    <h4>② 캐시에 없으면 재귀 질의</h4>
+                    <h4>② 캐시에 없으면 밖으로 묻는다</h4>
                     <ol class="seq">
-                        <li><span class="who">리졸버</span> ISP DNS 또는 <code>8.8.8.8</code> 에게 묻는다.
-                            이때부터는 <em>UDP 53 번</em>을 쓴다.</li>
-                        <li><span class="who">Root 네임서버</span> "<code>.com</code> 은 저쪽에 물어봐."</li>
-                        <li><span class="who">TLD 네임서버</span> "<code>castlechat.com</code> 은 저 네임서버가 안다."</li>
-                        <li><span class="who">권한 네임서버</span> "<code>43.202.208.133</code> 이다." &rarr;
-                            TTL 만큼 각 캐시에 저장된다.</li>
+                        <li><span class="who k">Stub Resolver</span> 내 PC 안에 있다.
+                            <em>딱 한 번만 묻고 기다린다.</em> Root 니 TLD 니 직접 돌지 않는다.</li>
+                        <li><span class="who">Recursive Resolver</span> 질의를 받아 <em>대신 돌아다니는 쪽</em>이다.
+                            Root &rarr; TLD &rarr; 권한 네임서버를 차례로 묻는다.</li>
+                        <li><span class="who">권한 네임서버</span> "<code>43.202.208.133</code> 이다."
+                            &rarr; TTL 만큼 ①의 캐시들에 저장된다.</li>
                     </ol>
                 </div>
             </div>
 
-            <div class="callout">
-                <span class="tag">짚을 점</span>
-                <p>DNS 는 <em>TCP 가 아니라 UDP 53</em> 을 쓴다. 응답이 작고 빨라야 하며, 실패하면 그냥 다시 물으면
-                    되기 때문이다. 다만 응답이 512 바이트를 넘거나 영역 전송(zone transfer) 일 때는 TCP 로 넘어간다.</p>
+            <h4>Resolver 가 두 종류인 걸 구분해야 한다</h4>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>이름</th>
+                        <th>어디 있나</th>
+                        <th>하는 일</th>
+                    </tr>
+                    <tr>
+                        <th>Stub Resolver</th>
+                        <td>내 PC (OS 안, 크롬도 자체 보유)</td>
+                        <td>"나 대신 알아봐줘" 하고 <em>한 번만</em> 묻는다</td>
+                    </tr>
+                    <tr>
+                        <th>Recursive Resolver</th>
+                        <td>홈 라우터 / ISP DNS / <code>8.8.8.8</code></td>
+                        <td>Root &rarr; TLD &rarr; 권한 네임서버를 <em>직접 돌아다닌다</em></td>
+                    </tr>
+                </table>
+            </div>
+            <p>"DNS 가 <code>8.8.8.8</code> 에서 IP 를 받아온다" 는 말은, 정확히는
+                <em>Stub Resolver 가 Recursive Resolver 에게 물어서 받는다</em> 는 뜻이다.
+                Root 와 TLD 를 도는 건 내 PC 가 아니다.</p>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">기본 DNS 서버는 8.8.8.8 이 아니다</span>
+                    <p><code>8.8.8.8</code> 은 직접 지정했을 때 얘기다. 아무것도 안 건드렸으면 DHCP 가 알려준
+                        DNS 서버는 보통 <em>홈 라우터 자신(<code>192.168.0.1</code>)</em> 이다.</p>
+                    <p>이 경우 질의는 라우터에서 끝나고 라우터가 ISP DNS 로 대신 물어본다.
+                        <code>ipconfig /all</code> 의 <code>DNS Servers</code> 에서 확인할 수 있다.</p>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">순서를 틀리기 쉽다</span>
+                    <p>첫 패킷은 SYN 이 아니다. 게이트웨이 MAC 을 모르면 <em>ARP 가 가장 먼저</em> 나간다.</p>
+                    <p>그래서 실제 순서는
+                        <em>ARP &rarr; DNS 질의 &rarr; TCP SYN</em> 이고,
+                        <em>홈 라우터를 두 번 지난다.</em></p>
+                </div>
+            </div>
+
+            <h4>랜선을 타고 나가는 순서</h4>
+            <pre class="code"><code>[1차]  ARP        게이트웨이 MAC 확보          (같은 랜 안에서만)
+[2차]  DNS 질의   UDP 53  -> 홈 라우터 -> NAT -> Recursive Resolver
+                  &lt;- 응답 : 43.202.208.133
+[3차]  TCP SYN    목적지 43.202.208.133:80 -> 홈 라우터 -> NAT -> 서버</code></pre>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">왜 UDP 53 인가</span>
+                    <p>응답이 작고 빨라야 하며, 실패하면 그냥 다시 물으면 되기 때문이다.
+                        연결을 맺는 비용이 질의 자체보다 크다.</p>
+                    <p>다만 응답이 512 바이트를 넘거나 영역 전송(zone transfer) 일 때는 <em>TCP 로 넘어간다.</em></p>
+                </div>
+                <div class="callout">
+                    <span class="tag">DoH 가 켜져 있으면 다르다</span>
+                    <p>크롬의 "보안 DNS 사용"(<code>chrome://settings/security</code>) 이 켜져 있으면
+                        질의가 <em>UDP 53 이 아니라 TCP 443 위의 HTTPS</em> 로 나간다.</p>
+                    <p>즉 DNS 조회 자체가 또 하나의 TCP 연결과 TLS Handshake 를 끌고 온다.</p>
+                </div>
             </div>
 
             <h3>1-2 &mdash; 패킷이 실제로 가는 길</h3>
@@ -279,6 +347,12 @@
                     <strong>NginX</strong>
                     <small>accept() 로<br>완성된 연결 수령</small>
                 </div>
+            </div>
+
+            <div class="callout">
+                <span class="tag">같은 길을 두 번 간다</span>
+                <p>위 경로는 TCP SYN 기준이지만, <em>1-1 의 DNS 질의도 똑같은 길을 지난다.</em>
+                    목적지만 Recursive Resolver 로 바뀔 뿐 Kernel &rarr; 공유기 NAT &rarr; 라우터 순서는 같다.</p>
             </div>
 
             <h4>Kernel 이 패킷을 조립하는 순서</h4>
@@ -581,8 +655,12 @@ CSS  --파싱--> CSSOM 트리 -+
             </ol>
 
             <h3>한 장 요약</h3>
-            <pre class="code"><code>[Input]   Enter
+            <pre class="code"><code>[Input]   castlechat.com + Enter
    |
+[ARP]     게이트웨이 MAC 확보
+   |      랜선으로 나가는 진짜 첫 패킷
+[DNS]     캐시 -> Recursive Resolver -> 43.202.208.133
+   |      UDP 53. 이 질의도 홈 라우터를 거친다
 [Kernel]  SYN -> SYN+ACK -> ACK
    |      NginX 가 아니라 Kernel 이 한다
 [HTTP]    GET / + 헤더 + 빈 줄
