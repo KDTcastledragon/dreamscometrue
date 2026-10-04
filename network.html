@@ -1155,7 +1155,11 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
         <div class="note modal-note">
             <h2>렌더링 &mdash; 어디까지가 렌더링인가</h2>
 
-            <h3>흐름 요약</h3>
+            <div class="head-row">
+                <h3>흐름 요약</h3>
+                <p class="head-note">이 파일 3개로 화면을 만드는 전 과정의 정식 명칭이
+                    <strong class="danger">Critical Rendering Path</strong> (중요 렌더링 경로) 다.</p>
+            </div>
             <ol class="bsum">
                 <li>node_modules 에서 필요한 (13개) 패키지 + 컴포넌트 .jsx + hooks 등 .js
                     &rarr; build/static/js/main.e83d3066.js</li>
@@ -1167,38 +1171,70 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
                 좁은 의미의 Rendering 은 그중 마지막 단계만 가리킨다.</p>
 
             <h3>브라우저가 하는 일은 세 종류다</h3>
-            <pre class="code"><code>① Parsing (파싱)
-   HTML --> DOM 트리
-   CSS  --> CSSOM 트리
-   = 텍스트를 구조로 바꾸는 일.          렌더링 아님
+            <div class="trio">
+                <div class="kind">
+                    <span class="kind-no">1</span>
+                    <h4>Parsing &middot; 파싱</h4>
+                    <div class="kind-flow">
+                        <span>HTML</span> &rarr; <em>DOM 트리</em><br>
+                        <span>CSS</span> &rarr; <em>CSSOM 트리</em>
+                    </div>
+                    <p class="kind-desc">텍스트를 구조로 바꾸는 일</p>
+                    <span class="kind-tag">렌더링 아님</span>
+                </div>
 
-② Script Execution (JS 실행)
-   V8 엔진이 main.e83d3066.js 를 실행
-   React 가 DOM 을 조작해서 root 를 채움
-   = 코드를 돌리는 일.                  렌더링 아님
+                <div class="kind">
+                    <span class="kind-no">2</span>
+                    <h4>Script Execution &middot; JS 실행</h4>
+                    <div class="kind-flow">
+                        <span>V8 엔진</span> &rarr; <em>main.e83d3066.js 실행</em><br>
+                        <span>React</span> &rarr; <em>DOM 조작, root 채움</em>
+                    </div>
+                    <p class="kind-desc">코드를 돌리는 일</p>
+                    <span class="kind-tag">렌더링 아님</span>
+                </div>
 
-③ Rendering (렌더링)                  &lt;-- 좁은 의미는 이것만
-   DOM + CSSOM --> Render Tree --> Layout --> Paint --> Composite
-   = 구조를 실제 픽셀로 바꾸는 일</code></pre>
+                <div class="kind is-render">
+                    <span class="kind-no">3</span>
+                    <h4>Rendering &middot; 렌더링</h4>
+                    <div class="kind-flow">
+                        <span>DOM + CSSOM</span> &rarr; <em>Render Tree</em><br>
+                        &rarr; <em>Layout</em> &rarr; <em>Paint</em> &rarr; <em>Composite</em>
+                    </div>
+                    <p class="kind-desc">구조를 실제 픽셀로 바꾸는 일</p>
+                    <span class="kind-tag on">좁은 의미의 렌더링은 이것만</span>
+                </div>
+            </div>
             <p><em>①②는 렌더링이 아니다.</em> 파싱이고 실행이다.</p>
 
-            <h3>전체를 부르는 이름은 따로 있다</h3>
-            <pre class="code"><code>              Critical Rendering Path  (중요 렌더링 경로)
-  +----------------------------------------------------------+
-  |  ① Parsing      ② JS 실행        ③ Rendering             |
-  |     HTML->DOM       React 가         Render Tree          |
-  |     CSS->CSSOM      root 채움        Layout               |
-  |                                      Paint                |
-  |                                      Composite            |
-  +----------------------------------------------------------+
-     "파일 3개로 화면을 만드는 전 과정" 의 정식 명칭이 이것</code></pre>
-
             <h3>실제 순서</h3>
-            <pre class="code"><code>1  index.html 받음  --> 파싱 --> DOM                  [①]
-2  main.css   받음  --> 파싱 --> CSSOM                [①]
-3  DOM + CSSOM --> Render Tree --> Layout --> Paint   [③]  = 흰 화면 출력
-4  main.js    실행  --> React 가 root 를 채움          [②]
-5  DOM 이 바뀜  --> Layout --> Paint 다시              [③]  = 실제 화면 출력</code></pre>
+            <div class="route">
+                <div class="rnode">
+                    <span class="rnode-type">① Parsing</span>
+                    <strong>index.html 받음</strong>
+                    <small>파싱 &rarr; DOM 트리</small>
+                </div>
+                <div class="rnode">
+                    <span class="rnode-type">① Parsing</span>
+                    <strong>main.css 받음</strong>
+                    <small>파싱 &rarr; CSSOM 트리</small>
+                </div>
+                <div class="rnode out">
+                    <span class="rnode-type">③ Rendering</span>
+                    <strong>Render Tree &rarr; Layout &rarr; Paint</strong>
+                    <small>DOM + CSSOM 합성<br><em>흰 화면 출력</em></small>
+                </div>
+                <div class="rnode k">
+                    <span class="rnode-type">② JS 실행</span>
+                    <strong>main.js 실행</strong>
+                    <small>React 가 root 를 채움</small>
+                </div>
+                <div class="rnode out">
+                    <span class="rnode-type">③ Rendering</span>
+                    <strong>Layout &rarr; Paint 다시</strong>
+                    <small>DOM 이 바뀌었으므로<br><em>실제 화면 출력</em></small>
+                </div>
+            </div>
             <p><em>3번과 5번만 렌더링이다.</em> 4번은 렌더링이 아니라 JS 실행이고,
                 그 결과로 렌더링이 <em>다시</em> 일어난다. 아래 <code>6 &mdash; Rendering 파이프라인</code> 과
                 <code>7 &mdash; JS 실행, React 등장</code> 을 따로 나눠둔 이유다.</p>

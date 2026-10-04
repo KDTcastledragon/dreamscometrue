@@ -846,6 +846,111 @@ pre.code code {
     color: #1c4a35;
 }
 
+/* 결과가 화면으로 나오는 칸 */
+.rnode.out {
+    border: 2px solid var(--accent);
+    background: #ffffff;
+}
+
+.rnode small em {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 700;
+}
+
+/* ===== 세 종류 카드 ===== */
+.trio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    margin: 12px 0 14px;
+}
+
+@media (min-width: 860px) {
+    .trio {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.kind {
+    padding: 14px 15px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fbfcfc;
+}
+
+/* 셋 중 이것만 진짜 렌더링이라 테두리를 세게 준다. */
+.kind.is-render {
+    border: 2px solid var(--accent);
+    background: #ffffff;
+}
+
+.kind-no {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 22px;
+    text-align: center;
+    vertical-align: 1px;
+}
+
+.kind h4 {
+    display: inline;
+    margin: 0 0 0 7px;
+    font-size: 13.5px;
+    letter-spacing: -0.02em;
+}
+
+.kind-flow {
+    margin: 10px 0 8px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 11.5px;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+}
+
+.kind-flow span {
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: #fff;
+}
+
+.kind-flow em {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 700;
+}
+
+.kind-desc {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    word-break: keep-all;
+}
+
+.kind-tag {
+    display: inline-block;
+    margin-top: 9px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #eef1f0;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.kind-tag.on {
+    background: var(--accent);
+    color: #fff;
+}
+
 /* side-by-side 안에 들어간 소제목은 위 여백을 줄여 두 칸의 첫 줄을 맞춘다. */
 .side-by-side > div > h4:first-child {
     margin-top: 0;
