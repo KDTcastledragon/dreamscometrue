@@ -89,6 +89,7 @@ body {
 .top-bar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 14px 18px;
 }
 
@@ -105,19 +106,26 @@ body {
 }
 
 /* 다이어그램과 코드 블록이 들어가므로 읽기 폭을 넓게 쓰는 한 줄 흐름으로 둔다.
-   수학 노트처럼 2~3단으로 쪼개면 그림이 찌그러진다. */
+   수학 노트처럼 2~3단으로 쪼개면 그림이 찌그러진다.
+   표와 구조도가 많아 1000px 로는 좁았다. 화면을 거의 다 쓰되 초광폭 모니터에서만 멈춘다. */
+/* 1fr 은 minmax(auto,1fr) 이라 안의 넓은 표·코드가 칸을 밀어내 페이지 전체에 가로
+   스크롤이 생긴다. minmax(0,1fr) 로 막아야 .scroll-x 와 pre 가 제 역할을 한다. */
 .note-flow {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
-    max-width: 1000px;
+    max-width: 1860px;
     margin: 0 auto;
-    padding: 0 8px;
+    padding: 0 10px;
+}
+
+.note-flow > .note {
+    min-width: 0;
 }
 
 @media (min-width: 560px) {
     .note-flow {
-        padding: 0 24px;
+        padding: 0 18px;
     }
 }
 
@@ -463,4 +471,79 @@ pre.code code {
 .scroll-x table {
     margin: 0;
     min-width: 440px;
+}
+
+/* ===== 상단 "헤더" 버튼과 모달 ===== */
+.hdr-btn {
+    padding: 6px 16px;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.hdr-btn:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* 내용이 길어서 본문만큼 넓게 열고 세로로 스크롤시킨다.
+   dialog 라 ESC 로 닫히는 건 브라우저가 해준다. */
+.hdr-modal {
+    position: relative;
+    width: min(1500px, 94vw);
+    max-height: 90vh;
+    padding: 26px 20px 28px;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+}
+
+@media (min-width: 560px) {
+    .hdr-modal {
+        padding: 28px 30px 30px;
+    }
+}
+
+.hdr-modal::backdrop {
+    background: rgba(29, 42, 36, 0.45);
+}
+
+.hdr-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.hdr-close:hover {
+    border-color: var(--text);
+    color: var(--text);
+}
+
+/* 모달 안에서도 .note 규칙을 그대로 쓰되 카드 테두리만 걷어낸다. */
+.modal-note {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+}
+
+.modal-note > h2 {
+    margin-right: 40px;
+    font-size: 19px;
 }
