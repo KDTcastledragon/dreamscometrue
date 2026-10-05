@@ -523,7 +523,7 @@ pre.code code {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: 16%;
+    width: 15%;
     min-height: 84px;
     padding: 9px 11px;
     border: 1px solid var(--line);
@@ -533,9 +533,27 @@ pre.code code {
     transform: translate(-50%, -50%);
 }
 
+.fnode-no {
+    position: absolute;
+    top: -9px;
+    left: -9px;
+    width: 21px;
+    height: 21px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+}
+
+/* 행바뀜 화살표가 좌우 끝(10% / 90%)에 떨어지므로 라벨은 그보다 더 바깥에 둔다.
+   4.5% 에 두면 왼쪽 화살표를 덮는다. */
 .farch-band {
     position: absolute;
-    left: 4.5%;
+    left: 1%;
     padding: 3px 10px;
     border-radius: 999px;
     background: #ffffff;
@@ -549,7 +567,7 @@ pre.code code {
 /* 우->좌 로 흐르는 행은 라벨도 시작점인 오른쪽에 둔다. */
 .farch-band.right {
     left: auto;
-    right: 4.5%;
+    right: 1%;
 }
 
 .fnode-type {
@@ -627,15 +645,6 @@ pre.code code {
     color: #744370;
 }
 
-/* 네트워크 장비 */
-.fnode.net {
-    border-color: #cbb79b;
-    background: #f5efe5;
-}
-
-.fnode.net .fnode-type {
-    color: #8a5a28;
-}
 
 /* 화면에 결과가 나오는 지점만 테두리를 세게 준다 */
 .fnode.out {
@@ -684,11 +693,6 @@ pre.code code {
 .farch-legend .sw.kernel {
     border-color: #9fb3c8;
     background: #e3eaf2;
-}
-
-.farch-legend .sw.net {
-    border-color: #cbb79b;
-    background: #f5efe5;
 }
 
 .farch-legend .sw.dns {
@@ -745,6 +749,54 @@ pre.code code {
         border-right: 7px solid transparent;
         border-top: 10px solid var(--accent);
         transform: translateX(-50%);
+    }
+}
+
+/* ===== 용어 설명 ===== */
+.gloss {
+    margin: -8px 0 18px;
+    padding: 12px 15px;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    background: #fbfcfc;
+    font-size: 12.5px;
+}
+
+.gloss > b {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--accent);
+    font-size: 12px;
+}
+
+.gloss dl {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px 14px;
+    margin: 0;
+}
+
+@media (min-width: 760px) {
+    .gloss dl {
+        grid-template-columns: 150px minmax(0, 1fr);
+    }
+}
+
+.gloss dt {
+    font-family: Consolas, "Courier New", monospace;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.gloss dd {
+    margin: 0 0 4px;
+    color: var(--muted);
+    word-break: keep-all;
+}
+
+@media (min-width: 760px) {
+    .gloss dd {
+        margin-bottom: 0;
     }
 }
 
