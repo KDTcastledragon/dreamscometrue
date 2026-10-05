@@ -35,10 +35,11 @@
             </div>
             <!-- 전체 구조를 먼저 한 번 훑고 아래에서 단계별로 파고든다.
                  포트폴리오 캐슬챗 아키텍처와 같은 구조 - 그리드 캔버스 + SVG 흐름선 + 노드.
-                 흐름은 뱀 모양이다. 1,3행은 좌->우, 2,4행은 우->좌.
+                 흐름은 뱀 모양이다. 1,3,5행은 좌->우, 2,4행은 우->좌.
                  그래야 줄바꿈 화살표가 캔버스를 가로지르지 않고 짧게 내려가기만 한다.
                  DOM 순서는 흐름 순서 그대로 두고 left 값으로만 뒤집는다.
-                 5열 x 4행 = 20칸 중 19칸 사용. 마지막 행 왼쪽 끝이 빈다. -->
+                 4열 x 5행 = 20칸 중 19칸 사용. 마지막 행 오른쪽 끝이 빈다.
+                 정리한 원문을 그대로 담으려고 5열에서 4열로 줄여 칸을 넓혔다. -->
             <h3 class="h3-btn">전체 흐름 한눈에
                 <button type="button" class="note-btn"
                     onclick="document.getElementById('checkModal').showModal()">확인한 것</button>
@@ -47,7 +48,7 @@
             </h3>
             <div class="farch">
                 <div class="farch-canvas">
-                    <svg class="farch-lines" viewBox="0 0 1400 600" preserveAspectRatio="none"
+                    <svg class="farch-lines" viewBox="0 0 1400 1080" preserveAspectRatio="none"
                         aria-hidden="true">
                         <defs>
                             <marker id="fa" markerWidth="9" markerHeight="9" refX="7" refY="3"
@@ -57,175 +58,203 @@
                         </defs>
 
                         <!-- 1행 : 좌 -> 우 -->
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 255 78 L 305 78" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 535 78 L 585 78" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 815 78 L 865 78" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 1095 78 L 1145 78" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 1260 127 L 1260 175" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 320 125 L 380 125" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 670 125 L 730 125" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 1020 125 L 1080 125" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 1225 209 L 1225 245" />
 
                         <!-- 2행 : 우 -> 좌 -->
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 1145 226 L 1095 226" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 865 226 L 815 226" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 585 226 L 535 226" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 305 226 L 255 226" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 140 275 L 140 323" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 1080 333 L 1020 333" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 730 333 L 670 333" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 380 333 L 320 333" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 175 417 L 175 453" />
 
                         <!-- 3행 : 좌 -> 우 -->
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 255 374 L 305 374" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 535 374 L 585 374" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 815 374 L 865 374" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 1095 374 L 1145 374" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 1260 423 L 1260 471" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 320 541 L 380 541" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 670 541 L 730 541" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 1020 541 L 1080 541" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 1225 625 L 1225 661" />
 
                         <!-- 4행 : 우 -> 좌 -->
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 1145 522 L 1095 522" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 865 522 L 815 522" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 585 522 L 535 522" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 1080 749 L 1020 749" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 730 749 L 670 749" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 380 749 L 320 749" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 175 833 L 175 869" />
+
+                        <!-- 5행 : 좌 -> 우 -->
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 320 957 L 380 957" />
+                        <path class="farch-flow" marker-end="url(#fa)" d="M 670 957 L 730 957" />
                     </svg>
 
                     <!-- 1행 : 연결 수립. 좌 -> 우 -->
-                    <div class="farch-band" style="top:1.5%">연결 수립</div>
+                    <div class="farch-band" style="top:1.7%">연결 수립</div>
 
-                    <article class="fnode dns" style="left:10%;top:13%">
+                    <article class="fnode dns" style="left:12.5%;top:11.6%">
                         <span class="fnode-no">1</span>
                         <span class="fnode-type">DNS</span>
                         <strong>목적지 IP 탐색</strong>
-                        <small>DNS Resolver</small>
+                        <small>DNS Resolver 가 목적지 IP 주소 탐색.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:30%;top:13%">
+                    <article class="fnode kernel" style="left:37.5%;top:11.6%">
                         <span class="fnode-no">2</span>
                         <span class="fnode-type">Client Kernel</span>
                         <strong>SYN 전송</strong>
-                        <small>Default Gateway 로<br>CLOSED &rarr; SYN_SENT</small>
+                        <small>3-way Handshake 시작. 목적지 IP 와 TCP flag = SYN 포함한 패킷을
+                            Default Gateway 에 전송. 동시에 Client Kernel TCP State :
+                            CLOSED &rarr; SYN_SENT 변경.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:50%;top:13%">
+                    <article class="fnode kernel" style="left:62.5%;top:11.6%">
                         <span class="fnode-no">3</span>
                         <span class="fnode-type">N-Kernel</span>
                         <strong>SYN 확인</strong>
-                        <small>SYN Queue 에 연결 후보 생성<br>State = SYN_RCVD</small>
+                        <small>N-Kernel 의 TCP/IP 스택이 SYN 확인. SYN Queue 에 "연결 후보" 를
+                            TCP State = SYN_RCVD 상태로 새로 만들어 넣음.
+                            NGINX 의 listen socket 은 LISTEN 유지 (fd = 6).</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:70%;top:13%">
+                    <article class="fnode kernel" style="left:87.5%;top:11.6%">
                         <span class="fnode-no">4</span>
                         <span class="fnode-type">N-Kernel</span>
                         <strong>SYN+ACK 전송</strong>
-                        <small>연결 후보는 SYN Queue 에<br>보관되어 있다</small>
-                    </article>
-
-                    <article class="fnode kernel" style="left:90%;top:13%">
-                        <span class="fnode-no">5</span>
-                        <span class="fnode-type">Client Kernel</span>
-                        <strong>SYN+ACK 수신</strong>
-                        <small>TCP/IP 스택</small>
+                        <small>N-Kernel 의 TCP/IP 스택이 TCP flag = SYN+ACK 와 목적지(Client PC) IP
+                            포함한 패킷을 client 에게 전송. 연결은 SYN Queue 에 보관되어 있다.</small>
                     </article>
 
                     <!-- 2행 : 연결 완료. 우 -> 좌 -->
-                    <div class="farch-band right" style="top:26.2%">연결 완료</div>
+                    <div class="farch-band right" style="top:19.9%">연결 완료</div>
 
-                    <article class="fnode kernel" style="left:90%;top:37.7%">
+                    <article class="fnode kernel" style="left:87.5%;top:30.8%">
+                        <span class="fnode-no">5</span>
+                        <span class="fnode-type">Client Kernel</span>
+                        <strong>SYN+ACK 수신</strong>
+                        <small>Client Kernel 의 TCP/IP 스택이 TCP flag = SYN+ACK 패킷 수신.</small>
+                    </article>
+
+                    <article class="fnode kernel" style="left:62.5%;top:30.8%">
                         <span class="fnode-no">6</span>
                         <span class="fnode-type">Client Kernel</span>
                         <strong>ACK 전송</strong>
-                        <small>SYN_SENT &rarr; ESTABLISHED</small>
+                        <small>Client Kernel 의 TCP/IP 스택이 TCP flag = ACK 패킷을 NGINX 서버에 전송.
+                            동시에 TCP State : SYN_SENT &rarr; ESTABLISHED 변경.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:70%;top:37.7%">
+                    <article class="fnode kernel" style="left:37.5%;top:30.8%">
                         <span class="fnode-no">7</span>
                         <span class="fnode-type">N-Kernel</span>
-                        <strong>ACK 수신</strong>
-                        <small>SYN_RCVD &rarr; ESTABLISHED<br>SYN Queue &rarr; Accept Queue</small>
+                        <strong>ACK 수신 &middot; 연결 성공</strong>
+                        <small>N-Kernel 이 패킷을 받고 TCP State : SYN_RCVD &rarr; ESTABLISHED 변경.
+                            연결이 SYN Queue 에서 Accept Queue 로 이동.
+                            3-way Handshake 성공. 연결 성공.</small>
                     </article>
 
-                    <article class="fnode server" style="left:50%;top:37.7%">
+                    <article class="fnode server" style="left:12.5%;top:30.8%">
                         <span class="fnode-no">8</span>
                         <span class="fnode-type">NGINX</span>
                         <strong>accept()</strong>
-                        <small>conn_fd = 9 새 소켓 생성<br><em>이 연결에 처음 관여</em></small>
+                        <small>NGINX 가 accept() 로 꺼냄. conn_fd = 9 &rarr; 연결 socket 새로 생김.
+                            <em>&#9733; NGINX 가 이 연결에 처음 관여.</em></small>
                     </article>
 
-                    <article class="fnode client" style="left:30%;top:37.7%">
+                    <!-- 3행 : HTTP 요청. 좌 -> 우 -->
+                    <div class="farch-band" style="top:39.2%">HTTP 요청</div>
+
+                    <article class="fnode client" style="left:12.5%;top:50.1%">
                         <span class="fnode-no">9</span>
                         <span class="fnode-type">Browser</span>
                         <strong>write()</strong>
-                        <small>fd 에 GET 바이트를 쓰면<br>Kernel 이 Send Buffer 로 복사</small>
+                        <small>web browser 가 앞에서 만든 4-tuple Client Kernel socket 에
+                            GET / HTTP/1.1 바이트를 write(). socket 실체는 Client Kernel 안에 있고
+                            browser 가 가진 건 fd 번호뿐임. write() 는 시스템 콜이라
+                            Kernel 이 받아서 Send Buffer 로 복사.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:10%;top:37.7%">
+                    <article class="fnode kernel" style="left:37.5%;top:50.1%">
                         <span class="fnode-no">10</span>
                         <span class="fnode-type">Client Kernel</span>
                         <strong>세그먼트 전송</strong>
-                        <small>TCB 순서번호를 이어받음<br>Handshake 안 함</small>
+                        <small>Client Kernel 의 TCP/IP 스택이 해당 socket 의 TCB 에서 순서번호를
+                            이어받아 세그먼트를 만들어 전송. Handshake 를 다시 하지 않음.</small>
                     </article>
 
-                    <!-- 3행 : HTTP 요청과 응답. 좌 -> 우 -->
-                    <div class="farch-band" style="top:50.8%">HTTP 요청 &middot; 응답</div>
-
-                    <article class="fnode kernel" style="left:10%;top:62.3%">
+                    <article class="fnode kernel" style="left:62.5%;top:50.1%">
                         <span class="fnode-no">11</span>
                         <span class="fnode-type">N-Kernel</span>
                         <strong>역다중화</strong>
-                        <small>4-tuple 로 socket 찾아<br>Receive Buffer 에 쌓음</small>
+                        <small>N-Kernel 의 TCP/IP 스택이 도착한 세그먼트의 4-tuple 로 socket 을
+                            찾아내고(역다중화) GET 바이트를 그 socket 의 Receive Buffer 에 쌓음.</small>
                     </article>
 
-                    <article class="fnode server" style="left:30%;top:62.3%">
+                    <article class="fnode server" style="left:87.5%;top:50.1%">
                         <span class="fnode-no">12</span>
                         <span class="fnode-type">NGINX</span>
                         <strong>read()</strong>
-                        <small><em>HTTP 를 처음 봄</em></small>
+                        <small>NGINX 가 read() 로 꺼냄.
+                            <em>&#9733; HTTP 를 처음 봄.</em></small>
                     </article>
 
-                    <article class="fnode server" style="left:50%;top:62.3%">
+                    <!-- 4행 : 응답과 Rendering. 우 -> 좌 -->
+                    <div class="farch-band right" style="top:58.4%">응답 &middot; Rendering</div>
+
+                    <article class="fnode server" style="left:87.5%;top:69.4%">
                         <span class="fnode-no">13</span>
                         <span class="fnode-type">NGINX</span>
                         <strong>try_files &rarr; index.html</strong>
-                        <small>200 OK 송신</small>
+                        <small>NGINX 가 try_files &rarr; index.html, 200 OK 송신.</small>
                     </article>
 
-                    <article class="fnode out" style="left:70%;top:62.3%">
+                    <article class="fnode out" style="left:62.5%;top:69.4%">
                         <span class="fnode-no">14</span>
                         <span class="fnode-type">Browser</span>
                         <strong>Critical Rendering Path</strong>
-                        <small><em>화면 출력</em></small>
+                        <small>client 에서 Critical Rendering Path 과정을 거쳐
+                            <em>화면 뜸.</em></small>
                     </article>
 
-                    <article class="fnode client" style="left:90%;top:62.3%">
+                    <article class="fnode client" style="left:37.5%;top:69.4%">
                         <span class="fnode-no">15</span>
                         <span class="fnode-type">React</span>
                         <strong>GET /user/isMe</strong>
-                        <small>JS 실행 후 요청<br>기존 연결 재사용</small>
+                        <small>JS 실행 후, React 가 GET /user/isMe 요청을 목적지 IP 로 패킷 전송.</small>
                     </article>
 
-                    <!-- 4행 : API 와 SPA. 우 -> 좌 -->
-                    <div class="farch-band right" style="top:75.5%">API &middot; SPA</div>
-
-                    <article class="fnode server" style="left:90%;top:87%">
+                    <article class="fnode server" style="left:12.5%;top:69.4%">
                         <span class="fnode-no">16</span>
                         <span class="fnode-type">NGINX</span>
                         <strong>connect() &rarr; proxy</strong>
-                        <small>N-Kernel 이 SYN 전송<br>두 번째 Handshake</small>
+                        <small>NGINX 가 요청 받고 connect() 호출. N-Kernel 이 SYN 패킷 전송.
+                            NGINX &harr; Spring Boot Handshake 수행됨. Spring Boot 8080 으로 proxy.
+                            (proxy = NGINX 가 클라이언트 역할을 대신 해주는 것)
+                            &#42; 현재 nginx.conf 에 upstream keepalive 가 없어
+                            요청마다 새 연결이 생긴다.</small>
                     </article>
 
-                    <article class="fnode server" style="left:70%;top:87%">
+                    <!-- 5행 : API 응답과 SPA. 좌 -> 우 -->
+                    <div class="farch-band" style="top:77.7%">API 응답 &middot; SPA</div>
+
+                    <article class="fnode server" style="left:12.5%;top:88.6%">
                         <span class="fnode-no">17</span>
                         <span class="fnode-type">Spring Boot</span>
                         <strong>Redis 세션 조회</strong>
-                        <small>세션 없음 &rarr; 비로그인<br>결과를 NGINX 에게</small>
+                        <small>Spring Boot 에서 Redis session 조회 후, 결과(로그인 상태)를 담은
+                            패킷을 NGINX 에게 전송.</small>
                     </article>
 
-                    <article class="fnode server" style="left:50%;top:87%">
+                    <article class="fnode server" style="left:37.5%;top:88.6%">
                         <span class="fnode-no">18</span>
                         <span class="fnode-type">NGINX</span>
                         <strong>client 에게 전달</strong>
-                        <small>온 길 그대로 되돌아간다</small>
+                        <small>NGINX 가 client 에게 전달.</small>
                     </article>
 
-                    <article class="fnode out" style="left:30%;top:87%">
+                    <article class="fnode out" style="left:62.5%;top:88.6%">
                         <span class="fnode-no">19</span>
                         <span class="fnode-type">React</span>
                         <strong>navigate('/login')</strong>
-                        <small>서버 요청 없이 화면 교체<br><em>로그인 화면 출력</em></small>
+                        <small>React 가 "비로그인" 을 받고 navigate('/login').
+                            서버 요청 없이 이미 받은 JS 안에서 화면만 교체 &rarr;
+                            <em>로그인 화면 출력.</em></small>
                     </article>
                 </div>
 

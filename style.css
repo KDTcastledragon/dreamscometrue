@@ -474,7 +474,7 @@ pre.code code {
 
 .farch-canvas {
     position: relative;
-    height: 600px;
+    height: 1080px;
     isolation: isolate;
     background: #eef6f1;
 }
@@ -523,9 +523,9 @@ pre.code code {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: 15%;
-    min-height: 84px;
-    padding: 9px 11px;
+    width: 19%;
+    min-height: 156px;
+    padding: 11px 13px;
     border: 1px solid var(--line);
     border-radius: 11px;
     background: #f9fdfb;
@@ -589,10 +589,10 @@ pre.code code {
 
 .fnode small {
     display: block;
-    margin-top: 4px;
+    margin-top: 5px;
     color: var(--muted);
-    font-size: 9.5px;
-    line-height: 1.4;
+    font-size: 10.5px;
+    line-height: 1.5;
     word-break: keep-all;
 }
 
@@ -707,7 +707,7 @@ pre.code code {
 
 /* 좁은 화면에서는 절대배치를 풀어 세로로 쌓는다.
    캔버스를 그대로 두면 노드가 겹쳐서 읽을 수 없다. */
-@media (max-width: 899px) {
+@media (max-width: 1499px) {
     .farch-canvas {
         height: auto;
         padding: 10px 12px 4px;
@@ -730,7 +730,9 @@ pre.code code {
         left: auto !important;
         top: auto !important;
         width: auto;
-        margin: 9px 0 30px;
+        /* 가로를 다 쓰므로 고정 높이가 필요 없다. 두면 빈 공간만 늘어난다. */
+        min-height: auto;
+        margin: 9px 0 26px;
         transform: none;
     }
 
