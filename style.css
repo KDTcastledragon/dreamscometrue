@@ -602,9 +602,23 @@ pre.code code {
     font-weight: 700;
 }
 
-/* 역할별 색. 포트폴리오의 infrastructure / primary / event 노드와 같은 구분이다. */
+/* 역할별 색 3종. 프론트(브라우저·React) / Kernel / 서버 프로세스.
+   DNS 조회도 결과 출력도 결국 브라우저가 하는 일이라 프론트 색으로 묶었다. */
 .fnode.client {
-    background: #f9fdfb;
+    border-color: #4f9db8;
+    background: #8fd0e8;
+}
+
+.fnode.client .fnode-type {
+    color: #10455c;
+}
+
+.fnode.client small {
+    color: #1f4f64;
+}
+
+.fnode.client small em {
+    color: #08364a;
 }
 
 .fnode.server {
@@ -627,30 +641,19 @@ pre.code code {
 
 /* Kernel 이 일하는 구간 */
 .fnode.kernel {
-    border-color: #9fb3c8;
-    background: #e3eaf2;
+    border-color: #8d969e;
+    background: #ccd2d7;
+}
+
+.fnode.kernel small {
+    color: #3c444b;
 }
 
 .fnode.kernel .fnode-type {
-    color: #3d5173;
+    color: #2f373e;
 }
 
 /* DNS 조회 구간 */
-.fnode.dns {
-    border-color: #c6a9c4;
-    background: #f1e7f0;
-}
-
-.fnode.dns .fnode-type {
-    color: #744370;
-}
-
-
-/* 화면에 결과가 나오는 지점만 테두리를 세게 준다 */
-.fnode.out {
-    border: 2px solid var(--accent);
-    background: #ffffff;
-}
 
 .farch-legend {
     display: flex;
@@ -677,7 +680,8 @@ pre.code code {
 }
 
 .farch-legend .sw.client {
-    background: #f9fdfb;
+    border-color: #4f9db8;
+    background: #8fd0e8;
 }
 
 .farch-legend .sw.server {
@@ -691,18 +695,8 @@ pre.code code {
 }
 
 .farch-legend .sw.kernel {
-    border-color: #9fb3c8;
-    background: #e3eaf2;
-}
-
-.farch-legend .sw.dns {
-    border-color: #c6a9c4;
-    background: #f1e7f0;
-}
-
-.farch-legend .sw.out {
-    border: 2px solid var(--accent);
-    background: #fff;
+    border-color: #8d969e;
+    background: #ccd2d7;
 }
 
 /* 좁은 화면에서는 절대배치를 풀어 세로로 쌓는다.

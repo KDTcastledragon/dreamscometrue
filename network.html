@@ -89,7 +89,7 @@
                     <!-- 1행 : 연결 수립. 좌 -> 우 -->
                     <div class="farch-band" style="top:1.7%">연결 수립</div>
 
-                    <article class="fnode dns" style="left:12.5%;top:11.6%">
+                    <article class="fnode client" style="left:12.5%;top:11.6%">
                         <span class="fnode-no">1</span>
                         <span class="fnode-type">DNS</span>
                         <strong>목적지 IP 탐색</strong>
@@ -204,7 +204,7 @@
                         <small>NGINX 가 try_files &rarr; index.html, 200 OK 송신.</small>
                     </article>
 
-                    <article class="fnode out" style="left:62.5%;top:69.4%">
+                    <article class="fnode client" style="left:62.5%;top:69.4%">
                         <span class="fnode-no">14</span>
                         <span class="fnode-type">Browser</span>
                         <strong>Critical Rendering Path</strong>
@@ -248,7 +248,7 @@
                         <small>NGINX 가 client 에게 전달.</small>
                     </article>
 
-                    <article class="fnode out" style="left:62.5%;top:88.6%">
+                    <article class="fnode client" style="left:62.5%;top:88.6%">
                         <span class="fnode-no">19</span>
                         <span class="fnode-type">React</span>
                         <strong>navigate('/login')</strong>
@@ -259,11 +259,9 @@
                 </div>
 
                 <div class="farch-legend">
-                    <span><i class="sw dns"></i>DNS 조회</span>
+                    <span><i class="sw client"></i>브라우저 &middot; React (DNS 조회 &middot; 화면 출력 포함)</span>
                     <span><i class="sw kernel"></i>Kernel (TCP/IP 스택)</span>
-                    <span><i class="sw client"></i>브라우저 &middot; React</span>
                     <span><i class="sw server"></i>서버 프로세스 (NGINX &middot; Spring Boot)</span>
-                    <span><i class="sw out"></i>화면에 결과가 나오는 지점</span>
                 </div>
             </div>
 
