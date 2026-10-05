@@ -1373,6 +1373,90 @@ pre.code code {
     color: #fff;
 }
 
+/* ===== 구조 그림 (SVG) ===== */
+/* 좁은 화면에서 통째로 줄이면 글씨가 뭉개진다. min-width 를 주고 이 박스만 가로로 민다. */
+.cdiag {
+    margin: 12px 0 16px;
+    padding: 14px;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fbfcfc;
+}
+
+.cdiag svg {
+    display: block;
+    width: 100%;
+    min-width: 680px;
+    /* 폭을 안 막으면 1700px 까지 늘어나 한 화면을 다 먹는다. */
+    max-width: 920px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.cdiag .bd {
+    stroke: #8da89b;
+    stroke-width: 1.4;
+}
+
+.cdiag .fillw {
+    fill: #ffffff;
+}
+
+.cdiag .fillt {
+    fill: var(--accent-soft);
+}
+
+.cdiag .cell,
+.cdiag .ln {
+    fill: none;
+    stroke: #8da89b;
+    stroke-width: 1.2;
+}
+
+.cdiag .ln {
+    stroke: #5b806f;
+    stroke-width: 1.5;
+}
+
+.cdiag .bus {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+}
+
+.cdiag .ahead {
+    fill: #5b806f;
+    stroke: none;
+}
+
+.cdiag text {
+    fill: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.cdiag .sm {
+    fill: var(--muted);
+    font-size: 11.5px;
+}
+
+.cdiag .ttl {
+    fill: var(--accent);
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.cdiag .num {
+    fill: var(--accent);
+}
+
+.cdiag .numtxt {
+    fill: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+}
+
 /* ===== 명령어 구조 막대 ===== */
 /* 연산코드 + 오퍼랜드 N 개를 한 줄 막대로 그린다. */
 .ins {
