@@ -1387,16 +1387,52 @@ pre.code code {
 .cdiag svg {
     display: block;
     width: 100%;
-    min-width: 680px;
+    min-width: 560px;
     /* 폭을 안 막으면 1700px 까지 늘어나 한 화면을 다 먹는다. */
-    max-width: 920px;
+    max-width: 680px;
     height: auto;
     margin: 0 auto;
+}
+
+/* 메모리 그림은 더 작아도 읽힌다 */
+.cdiag.mem svg {
+    min-width: 380px;
+    max-width: 470px;
 }
 
 .cdiag .bd {
     stroke: #8da89b;
     stroke-width: 1.4;
+}
+
+.cdiag .cmd {
+    fill: var(--accent-soft);
+}
+
+.cdiag .dat {
+    fill: var(--warn-soft);
+}
+
+.cdiag .brace,
+.cdiag .addr {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.4;
+}
+
+.cdiag .addr {
+    stroke: #8da89b;
+}
+
+.cdiag .lbl {
+    fill: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.cdiag .xs {
+    fill: var(--muted);
+    font-size: 10.5px;
 }
 
 .cdiag .fillw {

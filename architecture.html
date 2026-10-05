@@ -22,129 +22,180 @@
 
             <!-- ===== 1 ===== -->
             <h3>1 &mdash; 컴퓨터 기본 구조</h3>
-            <p>컴퓨터가 이해하는 정보는 <em>데이터</em>와 <em>명령어</em> 둘뿐이다.
-                핵심 부품은 넷이고, 이들을 잇는 통로가 메인보드의 시스템 버스다.</p>
+            <div class="side-by-side">
+                <div>
+                    <p>컴퓨터가 이해하는 정보는 <em>데이터</em>와 <em>명령어</em> 둘뿐이다.
+                        핵심 부품은 넷이고, 이들을 잇는 통로가 메인보드의 시스템 버스다.</p>
+                    <ul>
+                        <li><em>CPU</em> &mdash; ALU(연산) &middot; Register(data·명령어 저장) &middot;
+                            제어장치(명령어 해석 &middot; 제어신호)</li>
+                        <li><em>메모리(RAM)</em> &mdash; 현재 실행되는 프로그램의 명령어와 data</li>
+                        <li><em>보조기억장치</em> &mdash; SD &middot; USB &middot; SSD &middot; HDD</li>
+                        <li><em>입출력장치</em> &mdash; 키보드 &middot; 마우스 &middot; 모니터</li>
+                        <li><em>메인보드 &middot; 시스템 버스</em> &mdash; 부품끼리 정보를 주고받는 통로.
+                            핵심 부품들을 연결하는 척추 같다</li>
+                    </ul>
+                    <p><em>캐시 메모리</em>는 Register 다음으로 CPU 에 가까운 메모리다.
+                        RAM 은 전원이 끊기면 날아간다.</p>
+                </div>
+                <!-- 메인보드 안의 CPU·메모리와 시스템 버스, 바깥의 보조기억·입출력장치.
+                     좁은 화면에서는 글씨가 뭉개지므로 min-width 를 주고 가로로 민다. -->
+                <div class="cdiag">
+                    <svg viewBox="0 0 840 470" role="img"
+                        aria-label="메인보드 안에 CPU 와 메모리가 있고 시스템 버스를 통해 보조기억장치, 입출력장치와 연결된다">
+                        <defs>
+                            <marker id="ca" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
+                                orient="auto" markerUnits="strokeWidth">
+                                <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
+                            </marker>
+                        </defs>
 
-            <!-- 메인보드 안의 CPU·메모리와 시스템 버스, 바깥의 보조기억·입출력장치.
-                 좁은 화면에서는 글씨가 뭉개지므로 min-width 를 주고 가로로 민다. -->
-            <div class="cdiag">
-                <svg viewBox="0 0 840 470" role="img"
-                    aria-label="메인보드 안에 CPU 와 메모리가 있고 시스템 버스를 통해 보조기억장치, 입출력장치와 연결된다">
-                    <defs>
-                        <marker id="ca" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
-                            orient="auto" markerUnits="strokeWidth">
-                            <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
-                        </marker>
-                    </defs>
+                        <!-- ① 메인보드 -->
+                        <rect x="14" y="36" width="624" height="408" rx="10" class="bd fillw" />
+                        <circle cx="26" cy="22" r="9" class="num" />
+                        <text x="26" y="25.5" class="numtxt" text-anchor="middle">1</text>
+                        <text x="40" y="26" class="ttl">메인보드</text>
 
-                    <!-- ① 메인보드 -->
-                    <rect x="14" y="36" width="624" height="408" rx="10" class="bd fillw" />
-                    <circle cx="26" cy="22" r="9" class="num" />
-                    <text x="26" y="25.5" class="numtxt" text-anchor="middle">1</text>
-                    <text x="40" y="26" class="ttl">메인보드</text>
+                        <!-- ③ CPU -->
+                        <rect x="44" y="64" width="252" height="176" rx="8" class="bd fillw" />
+                        <circle cx="56" cy="54" r="9" class="num" />
+                        <text x="56" y="57.5" class="numtxt" text-anchor="middle">3</text>
+                        <text x="70" y="58" class="ttl">CPU</text>
 
-                    <!-- ③ CPU -->
-                    <rect x="44" y="64" width="252" height="176" rx="8" class="bd fillw" />
-                    <circle cx="56" cy="54" r="9" class="num" />
-                    <text x="56" y="57.5" class="numtxt" text-anchor="middle">3</text>
-                    <text x="70" y="58" class="ttl">CPU</text>
+                        <path d="M 64 94 L 140 94 L 126 140 L 78 140 Z" class="bd fillt" />
+                        <text x="102" y="122" text-anchor="middle">ALU</text>
 
-                    <path d="M 64 94 L 140 94 L 126 140 L 78 140 Z" class="bd fillt" />
-                    <text x="102" y="122" text-anchor="middle">ALU</text>
+                        <rect x="164" y="88" width="116" height="26" rx="4" class="bd fillw" />
+                        <text x="222" y="105" text-anchor="middle" class="sm">레지스터</text>
+                        <rect x="164" y="120" width="116" height="26" rx="4" class="bd fillw" />
+                        <text x="222" y="137" text-anchor="middle" class="sm">레지스터</text>
+                        <rect x="164" y="152" width="116" height="26" rx="4" class="bd fillw" />
+                        <text x="222" y="169" text-anchor="middle" class="sm">레지스터</text>
+                        <text x="222" y="200" text-anchor="middle" class="sm">&#8942;</text>
 
-                    <rect x="164" y="88" width="116" height="26" rx="4" class="bd fillw" />
-                    <text x="222" y="105" text-anchor="middle" class="sm">레지스터</text>
-                    <rect x="164" y="120" width="116" height="26" rx="4" class="bd fillw" />
-                    <text x="222" y="137" text-anchor="middle" class="sm">레지스터</text>
-                    <rect x="164" y="152" width="116" height="26" rx="4" class="bd fillw" />
-                    <text x="222" y="169" text-anchor="middle" class="sm">레지스터</text>
-                    <text x="222" y="200" text-anchor="middle" class="sm">&#8942;</text>
+                        <rect x="64" y="160" width="86" height="40" rx="4" class="bd fillw" />
+                        <text x="107" y="184" text-anchor="middle" class="sm">제어장치</text>
 
-                    <rect x="64" y="160" width="86" height="40" rx="4" class="bd fillw" />
-                    <text x="107" y="184" text-anchor="middle" class="sm">제어장치</text>
+                        <!-- ④ 메모리 -->
+                        <rect x="44" y="288" width="252" height="140" rx="8" class="bd fillw" />
+                        <circle cx="56" cy="278" r="9" class="num" />
+                        <text x="56" y="281.5" class="numtxt" text-anchor="middle">4</text>
+                        <text x="70" y="282" class="ttl">메모리</text>
+                        <path d="M 44 308 H 296 M 44 328 H 296 M 44 348 H 296
+                                 M 44 368 H 296 M 44 388 H 296 M 44 408 H 296" class="cell" />
 
-                    <!-- ④ 메모리 -->
-                    <rect x="44" y="288" width="252" height="140" rx="8" class="bd fillw" />
-                    <circle cx="56" cy="278" r="9" class="num" />
-                    <text x="56" y="281.5" class="numtxt" text-anchor="middle">4</text>
-                    <text x="70" y="282" class="ttl">메모리</text>
-                    <path d="M 44 308 H 296 M 44 328 H 296 M 44 348 H 296
-                             M 44 368 H 296 M 44 388 H 296 M 44 408 H 296" class="cell" />
+                        <!-- ② 시스템 버스 -->
+                        <path d="M 372 80 V 400" class="bus" marker-start="url(#ca)" marker-end="url(#ca)" />
+                        <path d="M 402 80 V 400" class="bus" marker-start="url(#ca)" marker-end="url(#ca)" />
+                        <path d="M 432 80 V 400" class="bus" marker-start="url(#ca)" marker-end="url(#ca)" />
+                        <circle cx="368" cy="424" r="9" class="num" />
+                        <text x="368" y="427.5" class="numtxt" text-anchor="middle">2</text>
+                        <text x="382" y="428" class="ttl">시스템 버스</text>
 
-                    <!-- ② 시스템 버스 -->
-                    <path d="M 372 80 V 400" class="bus" marker-start="url(#ca)" marker-end="url(#ca)" />
-                    <path d="M 402 80 V 400" class="bus" marker-start="url(#ca)" marker-end="url(#ca)" />
-                    <path d="M 432 80 V 400" class="bus" marker-start="url(#ca)" marker-end="url(#ca)" />
-                    <circle cx="368" cy="424" r="9" class="num" />
-                    <text x="368" y="427.5" class="numtxt" text-anchor="middle">2</text>
-                    <text x="382" y="428" class="ttl">시스템 버스</text>
+                        <!-- CPU · 메모리 ↔ 버스 -->
+                        <path d="M 302 152 H 366" class="ln" marker-start="url(#ca)" marker-end="url(#ca)" />
+                        <path d="M 302 358 H 366" class="ln" marker-start="url(#ca)" marker-end="url(#ca)" />
 
-                    <!-- CPU · 메모리 ↔ 버스 -->
-                    <path d="M 302 152 H 366" class="ln" marker-start="url(#ca)" marker-end="url(#ca)" />
-                    <path d="M 302 358 H 366" class="ln" marker-start="url(#ca)" marker-end="url(#ca)" />
+                        <!-- 버스 ↔ 바깥 장치 -->
+                        <path d="M 438 110 H 702" class="ln" marker-start="url(#ca)" marker-end="url(#ca)" />
+                        <path d="M 438 320 H 686" class="ln" marker-start="url(#ca)" marker-end="url(#ca)" />
+                        <path d="M 690 258 V 382" class="ln" />
+                        <path d="M 690 272 H 706 M 690 330 H 700 M 690 368 H 726" class="ln" />
 
-                    <!-- 버스 ↔ 바깥 장치 -->
-                    <path d="M 438 110 H 702" class="ln" marker-start="url(#ca)" marker-end="url(#ca)" />
-                    <path d="M 438 320 H 686" class="ln" marker-start="url(#ca)" marker-end="url(#ca)" />
-                    <path d="M 690 258 V 382" class="ln" />
-                    <path d="M 690 272 H 706 M 690 330 H 700 M 690 368 H 726" class="ln" />
+                        <!-- ⑤ 보조기억장치 -->
+                        <path d="M 710 78 V 142 a 38 13 0 0 0 76 0 V 78" class="bd fillw" />
+                        <ellipse cx="748" cy="78" rx="38" ry="13" class="bd fillt" />
+                        <circle cx="706" cy="46" r="9" class="num" />
+                        <text x="706" y="49.5" class="numtxt" text-anchor="middle">5</text>
+                        <text x="720" y="50" class="ttl">보조기억장치</text>
 
-                    <!-- ⑤ 보조기억장치 -->
-                    <path d="M 710 78 V 142 a 38 13 0 0 0 76 0 V 78" class="bd fillw" />
-                    <ellipse cx="748" cy="78" rx="38" ry="13" class="bd fillt" />
-                    <circle cx="706" cy="46" r="9" class="num" />
-                    <text x="706" y="49.5" class="numtxt" text-anchor="middle">5</text>
-                    <text x="720" y="50" class="ttl">보조기억장치</text>
+                        <!-- ⑥ 입출력장치 -->
+                        <circle cx="700" cy="232" r="9" class="num" />
+                        <text x="700" y="235.5" class="numtxt" text-anchor="middle">6</text>
+                        <text x="714" y="236" class="ttl">입출력장치</text>
 
-                    <!-- ⑥ 입출력장치 -->
-                    <circle cx="700" cy="232" r="9" class="num" />
-                    <text x="700" y="235.5" class="numtxt" text-anchor="middle">6</text>
-                    <text x="714" y="236" class="ttl">입출력장치</text>
+                        <rect x="706" y="250" width="66" height="44" rx="3" class="bd fillw" />
+                        <rect x="712" y="256" width="54" height="32" rx="2" class="bd fillt" />
+                        <path d="M 739 294 V 302 M 724 302 H 754" class="ln" />
+                        <text x="786" y="276" class="sm">모니터</text>
 
-                    <rect x="706" y="250" width="66" height="44" rx="3" class="bd fillw" />
-                    <rect x="712" y="256" width="54" height="32" rx="2" class="bd fillt" />
-                    <path d="M 739 294 V 302 M 724 302 H 754" class="ln" />
-                    <text x="786" y="276" class="sm">모니터</text>
+                        <rect x="700" y="318" width="78" height="24" rx="3" class="bd fillw" />
+                        <path d="M 706 326 H 772 M 706 334 H 772" class="cell" />
+                        <text x="786" y="336" class="sm">키보드</text>
 
-                    <rect x="700" y="318" width="78" height="24" rx="3" class="bd fillw" />
-                    <path d="M 706 326 H 772 M 706 334 H 772" class="cell" />
-                    <text x="786" y="336" class="sm">키보드</text>
-
-                    <rect x="726" y="352" width="26" height="32" rx="13" class="bd fillw" />
-                    <path d="M 739 352 V 366" class="cell" />
-                    <text x="786" y="374" class="sm">마우스</text>
-                </svg>
+                        <rect x="726" y="352" width="26" height="32" rx="13" class="bd fillw" />
+                        <path d="M 739 352 V 366" class="cell" />
+                        <text x="786" y="374" class="sm">마우스</text>
+                    </svg>
+                </div>
             </div>
 
             <h4>메모리 &mdash; 번지마다 명령어 또는 data 가 들어 있다</h4>
-            <div class="scroll-x">
-                <table>
-                    <tr>
-                        <th>번지</th>
-                        <th>내용</th>
-                        <th>구분</th>
-                    </tr>
-                    <tr>
-                        <td>1번지</td>
-                        <td>더하라, 3번지와 4번지를</td>
-                        <td><em>명령어</em></td>
-                    </tr>
-                    <tr>
-                        <td>2번지</td>
-                        <td>저장하라, 연산 결과를</td>
-                        <td><em>명령어</em></td>
-                    </tr>
-                    <tr>
-                        <td>3번지</td>
-                        <td>120</td>
-                        <td>데이터</td>
-                    </tr>
-                    <tr>
-                        <td>4번지</td>
-                        <td>100</td>
-                        <td>데이터</td>
-                    </tr>
-                </table>
+            <div class="side-by-side">
+                <div class="cdiag mem">
+                    <svg viewBox="0 0 470 292" role="img"
+                        aria-label="메모리 1~6번지. 1·2번지에 명령어, 3·4번지에 데이터가 들어 있다">
+                        <text x="248" y="24" text-anchor="middle" class="ttl">메모리</text>
+
+                        <!-- 1 · 2 번지 : 명령어 -->
+                        <rect x="112" y="40" width="272" height="34" class="bd cmd" />
+                        <text x="124" y="62" class="sm">더하라, 3번지와 4번지를</text>
+                        <rect x="112" y="74" width="272" height="34" class="bd cmd" />
+                        <text x="124" y="96" class="sm">저장하라, 연산 결과를</text>
+
+                        <!-- 3 · 4 번지 : 데이터 -->
+                        <rect x="112" y="108" width="272" height="34" class="bd dat" />
+                        <text x="248" y="130" text-anchor="middle" class="sm">120</text>
+                        <rect x="112" y="142" width="272" height="34" class="bd dat" />
+                        <text x="248" y="164" text-anchor="middle" class="sm">100</text>
+
+                        <!-- 5 · 6 번지 : 빈 칸 -->
+                        <rect x="112" y="176" width="272" height="34" class="bd fillw" />
+                        <rect x="112" y="210" width="272" height="34" class="bd fillw" />
+                        <text x="248" y="232" text-anchor="middle" class="xs">(비어 있음)</text>
+
+                        <!-- 번지 -->
+                        <text x="394" y="62" class="xs">1번지</text>
+                        <text x="394" y="96" class="xs">2번지</text>
+                        <text x="394" y="130" class="xs">3번지</text>
+                        <text x="394" y="164" class="xs">4번지</text>
+                        <text x="394" y="198" class="xs">5번지</text>
+                        <text x="394" y="232" class="xs">6번지</text>
+
+                        <!-- 중괄호 -->
+                        <path d="M 104 42 q -8 0 -8 8 V 66 q 0 8 -8 8 q 8 0 8 8 V 98 q 0 8 8 8"
+                            class="brace" />
+                        <text x="80" y="78" text-anchor="end" class="lbl">명령어</text>
+                        <path d="M 104 110 q -8 0 -8 8 V 134 q 0 8 -8 8 q 8 0 8 8 V 166 q 0 8 8 8"
+                            class="brace" />
+                        <text x="80" y="146" text-anchor="end" class="lbl">데이터</text>
+
+                        <!-- 주소는 번지를 가리킨다 -->
+                        <path d="M 440 62 V 232" class="addr" />
+                        <path d="M 436 62 H 444 M 436 232 H 444" class="addr" />
+                        <text x="452" y="152" class="xs" transform="rotate(90 452 152)"
+                            text-anchor="middle">주소(번지)</text>
+                    </svg>
+                </div>
+
+                <div>
+                    <p>메모리는 <em>칸마다 번호(번지)가 붙은 사물함</em>이다.
+                        CPU 는 &ldquo;3번지를 가져와&rdquo; 처럼 <em>번지로만</em> 지목한다.</p>
+                    <div class="callout">
+                        <span class="tag">핵심 &mdash; 명령어와 data 가 같은 메모리에 섞여 있다</span>
+                        <p>1·2번지는 <em>명령어</em>, 3·4번지는 <em>data</em> 인데
+                            <em>생김새로는 구분이 안 된다.</em> 둘 다 그냥 0 과 1 이다.</p>
+                        <p>&ldquo;1번지부터 명령어로 읽어라&rdquo; 라고 <em>CPU 가 정해줘야</em> 비로소 갈린다.
+                            이렇게 명령어와 data 를 한 메모리에 같이 두는 구조를
+                            <em>폰 노이만 구조</em>라 한다.</p>
+                    </div>
+                    <ul>
+                        <li>번지는 <em>칸의 위치</em>일 뿐 내용이 아니다.
+                            그래서 오퍼랜드에 값 대신 번지를 적을 수 있다.</li>
+                        <li>5·6번지처럼 <em>빈 칸</em>도 있다. 프로그램이 올라오면 여기에 적재된다.</li>
+                        <li>전원이 끊기면 <em>전부 날아간다.</em> 그래서 보조기억장치가 따로 필요하다.</li>
+                    </ul>
+                </div>
             </div>
 
             <h4>x86 이 뜻하는 것</h4>
