@@ -1373,14 +1373,6 @@ pre.code code {
     color: #fff;
 }
 
-/* ===== 상단 버튼 묶음 ===== */
-.top-btns {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
 /* ===== 명령어 구조 막대 ===== */
 /* 연산코드 + 오퍼랜드 N 개를 한 줄 막대로 그린다. */
 .ins {
