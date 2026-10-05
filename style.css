@@ -1373,6 +1373,50 @@ pre.code code {
     color: #fff;
 }
 
+/* ===== 상단 버튼 묶음 ===== */
+.top-btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* ===== 명령어 구조 막대 ===== */
+/* 연산코드 + 오퍼랜드 N 개를 한 줄 막대로 그린다. */
+.ins {
+    display: flex;
+    margin: 8px 0 4px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    overflow: hidden;
+    font-size: 12px;
+    text-align: center;
+}
+
+.ins b {
+    flex: none;
+    padding: 8px 14px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ins span {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    border-left: 1px solid var(--line);
+    background: #fff;
+    word-break: keep-all;
+}
+
+.ins-cap {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
 /* ===== 상단 "헤더" 버튼과 모달 ===== */
 .hdr-btn {
     padding: 6px 16px;
