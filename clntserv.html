@@ -107,7 +107,7 @@
                         <small>DNS Resolver 가 목적지 IP 주소 탐색.</small>
                     </article>
 
-                    <article class="fnode kernel" data-step="2" data-extra="tcpip" data-chunks="ck-path ck-layer ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="2" data-extra="tcpip" data-chunks="ck-conn ck-path ck-layer ck-closed ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:11.6%">
                         <span class="fnode-no">2</span>
                         <span class="fnode-type">Client Kernel</span>
                         <small>3-way handshake 시작. 목적지 IP 와 TCP flag = SYN 포함한 패킷을 Default Gateway 에 전송. 동시에, client의 kernel TCP State : CLOSED → SYN_SENT 변경.</small>
@@ -292,7 +292,7 @@
             <div class="step-chunk" id="ck-dns">
             <p><em>아래 캐시에서 못 찾았을 때만</em> DNS 질의가 랜선을 타고 나간다.
                 이때 첫 패킷은 TCP SYN 이 아니라 DNS 질의고,
-                엄연한 네트워크 패킷이라 <em>홈 라우터를 똑같이 거친다.</em>
+                엄연한 네트워크 패킷이라 <em>Home Router 를 똑같이 거친다.</em>
                 캐시에서 찾으면 DNS 패킷은 아예 나가지 않고 첫 패킷이 TCP SYN 이 된다.</p>
 
             <div class="side-by-side">
@@ -341,7 +341,7 @@
                     </tr>
                     <tr>
                         <th>Recursive Resolver</th>
-                        <td>홈 라우터 / ISP DNS / <code>8.8.8.8</code></td>
+                        <td>Home Router / ISP DNS / <code>8.8.8.8</code></td>
                         <td>Root &rarr; TLD &rarr; 권한 네임서버를 <em>직접 돌아다닌다</em></td>
                     </tr>
                 </table>
@@ -354,7 +354,7 @@
                 <div class="callout">
                     <span class="tag">기본 DNS 서버는 8.8.8.8 이 아니다</span>
                     <p><code>8.8.8.8</code> 은 직접 지정했을 때 얘기다. 아무것도 안 건드렸으면 DHCP 가 알려준
-                        DNS 서버는 보통 <em>홈 라우터 자신(<code>192.168.0.1</code>)</em> 이다.</p>
+                        DNS 서버는 보통 <em>Home Router 자신(<code>192.168.0.1</code>)</em> 이다.</p>
                     <p>이 경우 질의는 라우터에서 끝나고 라우터가 ISP DNS 로 대신 물어본다.
                         <code>ipconfig /all</code> 의 <code>DNS Servers</code> 에서 확인할 수 있다.</p>
                 </div>
@@ -363,15 +363,15 @@
                     <p>첫 패킷은 SYN 이 아니다. 기본 게이트웨이 MAC 을 모르면 <em>ARP 가 가장 먼저</em> 나간다.</p>
                     <p>그래서 실제 순서는
                         <em>ARP &rarr; DNS 질의 &rarr; TCP SYN</em> 이고,
-                        <em>홈 라우터를 두 번 지난다.</em></p>
+                        <em>Home Router 를 두 번 지난다.</em></p>
                 </div>
             </div>
 
             <h4>랜선을 타고 나가는 순서 (DNS 캐시와 ARP 캐시가 둘 다 비어 있을 때)</h4>
             <pre class="code"><code>[1차]  ARP        기본 게이트웨이 MAC 확보     (같은 랜 안에서만)
-[2차]  DNS 질의   UDP 53  -> 홈 라우터 -> NAT -> Recursive Resolver
+[2차]  DNS 질의   UDP 53  -> Home Router -> NAT -> Recursive Resolver
                   &lt;- 응답 : 43.202.208.133
-[3차]  TCP SYN    목적지 43.202.208.133:80 -> 홈 라우터 -> NAT -> 서버</code></pre>
+[3차]  TCP SYN    목적지 43.202.208.133:80 -> Home Router -> NAT -> 서버</code></pre>
 
             <div class="side-by-side">
                 <div class="callout">
@@ -389,16 +389,75 @@
             </div>
             </div>
 
+            <div class="step-chunk" id="ck-conn">
+            <h4>connect() &mdash; 누구의 함수이고 누가 일하나</h4>
+            <p><code>connect(소켓, 43.202.208.133:80)</code> 은 브라우저가 만든 함수가 아니다.
+                <em>OS 가 프로그램에게 열어준 소켓 API</em> 이고 브라우저는 그걸 <em>부르기만</em> 한다.
+                SYN 을 실제로 만들어 보내는 건 <em>Kernel 의 TCP/IP 스택</em> 이다.</p>
+
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>Client PC (Windows 11)</th>
+                        <th>무엇</th>
+                        <th>모드</th>
+                    </tr>
+                    <tr>
+                        <td>브라우저</td>
+                        <td><code>connect()</code> 를 <em>부른다</em></td>
+                        <td>user mode</td>
+                    </tr>
+                    <tr>
+                        <td><code>ws2_32.dll</code> &middot; <code>mswsock.dll</code></td>
+                        <td><em>Winsock</em>. 소켓 API 의 Windows 구현.
+                            <code>connect()</code> 라는 함수가 실제로 정의된 곳</td>
+                        <td>user mode<br>(<code>System32</code> 의 일반 DLL)</td>
+                    </tr>
+                    <tr>
+                        <td><code>afd.sys</code></td>
+                        <td>Ancillary Function Driver for Winsock. Winsock 이 Kernel 로 넘어가는 문</td>
+                        <td><em>Kernel</em></td>
+                    </tr>
+                    <tr>
+                        <td><code>tcpip.sys</code></td>
+                        <td>TCP/IP Protocol Driver. <em>SYN 을 만들고 State 를 바꾼다</em></td>
+                        <td><em>Kernel</em></td>
+                    </tr>
+                </table>
+            </div>
+            <p><em>Winsock 은 Kernel 이 아니다.</em> Windows 프로그램이 네트워크를 쓰려고 부르는
+                user mode 라이브러리고, 그 안에서 <code>afd.sys</code> 로 요청을 넘겨야 Kernel 로 들어간다.
+                Linux 는 다르다. <code>connect()</code> 가 libc 를 거쳐 곧바로 <em>시스템 콜</em>이 된다.</p>
+
+            <h4>connect() 를 부르면 Kernel 이 하는 일</h4>
+            <ol class="seq">
+                <li>내 쪽 포트를 배정한다(예 <code>51234</code>). 이제 4-tuple(출발지 IP:Port + 목적지 IP:Port)이 완성된다.</li>
+                <li>이 연결의 <em>TCB</em> 를 만든다.</li>
+                <li>State 를 <em><code>CLOSED</code> &rarr; <code>SYN_SENT</code></em> 로 바꾸고,
+                    SYN 패킷을 만들어 Default Gateway 로 내보낸다.</li>
+                <li>SYN+ACK 가 오면 ACK 를 보내고 <code>ESTABLISHED</code> 가 된다.
+                    <em>connect() 가 리턴했다 = Handshake 가 끝났다.</em><br>
+                    <small>Chrome 은 non-blocking 으로 불러 연결이 완성되면 이벤트로 알림을 받는다. 기준은 같다.</small></li>
+            </ol>
+
+            <h4>서버 쪽 짝은 listen() &middot; accept()</h4>
+            <p>NGINX 는 시작할 때 <code>listen(80)</code> 으로 소켓을 <code>LISTEN</code> 상태로 만들고,
+                연결이 하나 완성될 때마다 <code>accept()</code> 로 꺼낸다(실제로는 <code>accept4()</code>).
+                <em>부르는 건 NGINX 프로세스고, 구현하는 건 N-Kernel(Linux)</em> 이다.</p>
+            <p><code>accept()</code> 는 Handshake 를 하지 않는다. Kernel 이 이미 끝낸 연결을 accept 큐에서 꺼내
+                <em>새 fd</em>(<code>conn_fd = 9</code>)로 돌려줄 뿐이다.</p>
+            </div>
+
             <div class="step-chunk" id="ck-path">
             <h3>패킷이 실제로 가는 길</h3>
             <p>여기가 "네트워크를 아느냐" 를 가르는 지점이다. <code>connect()</code> 한 번에 패킷이
-                Client Kernel &rarr; 공유기(NAT) &rarr; 라우터들 &rarr; 방화벽 &rarr; N-Kernel 순서로 지나간다.
+                Client Kernel &rarr; Home Router(NAT) &rarr; 라우터들 &rarr; 방화벽 &rarr; N-Kernel 순서로 지나간다.
                 단계별 설명은 #2 의 &lsquo;SYN 이 실제로 가는 경로&rsquo; 에 있다.</p>
 
             <div class="callout">
                 <span class="tag">같은 길을 두 번 간다</span>
                 <p>이 경로는 TCP SYN 기준이지만, <em>위의 DNS 질의도 똑같은 길을 지난다.</em>
-                    목적지만 Recursive Resolver 로 바뀔 뿐 Kernel &rarr; 공유기 NAT &rarr; 라우터 순서는 같다.</p>
+                    목적지만 Recursive Resolver 로 바뀔 뿐 Kernel &rarr; Home Router NAT &rarr; 라우터 순서는 같다.</p>
             </div>
             </div>
 
@@ -428,7 +487,7 @@
                     <tr>
                         <th>L2 Ethernet</th>
                         <td>출발지/목적지 <em>MAC</em></td>
-                        <td>스위치, 공유기</td>
+                        <td>Switch, Home Router</td>
                         <td><em>홉마다 새로 쓰인다</em></td>
                     </tr>
                     <tr>
@@ -463,14 +522,14 @@
                     <span class="tag">자주 틀리는 것</span>
                     <p>"라우터가 포트 80 을 보고 보낸다" &mdash; <em>틀렸다.</em>
                         라우터는 <em>L3 까지만</em> 본다. 포트는 L4 라 최종 목적지 Kernel 에서야 읽힌다.</p>
-                    <p>예외는 NAT 다. 공유기는 세션을 구분해야 해서 포트까지 들여다본다.</p>
+                    <p>예외는 NAT 다. Home Router 는 세션을 구분해야 해서 포트까지 들여다본다.</p>
                 </div>
             </div>
 
             <h4>돌아오는 길</h4>
-            <p>응답은 같은 경로를 되짚어 온다. 공유기가 나갈 때 기록해둔 <em>NAT 테이블</em>이 열쇠다.
+            <p>응답은 같은 경로를 되짚어 온다. Home Router 가 나갈 때 기록해둔 <em>NAT 테이블</em>이 열쇠다.
                 "공인 IP:51234 로 온 응답은 사설 <code>192.168.0.5:51234</code> 에게" 라는 기록이 없으면
-                공유기는 그 패킷을 누구에게 줘야 할지 몰라서 버린다.</p>
+                Home Router 는 그 패킷을 누구에게 줘야 할지 몰라서 버린다.</p>
             </div>
 
             <div class="step-chunk" id="ck-hs">
@@ -538,6 +597,45 @@
             </div>
             <p>2번에서 멈추면 <em>서버는 자기가 보낸 SYN+ACK 가 도착했는지 모른다.</em>
                 그 상태로 데이터를 보내면 허공에 쏘는 꼴이 된다.</p>
+            </div>
+
+            <div class="step-chunk" id="ck-closed">
+            <h4>Client Kernel 의 TCP State</h4>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>State</th>
+                        <th>뜻</th>
+                        <th>이 State 가 되는 순간</th>
+                    </tr>
+                    <tr>
+                        <td><code>CLOSED</code></td>
+                        <td>연결이 전혀 없다. 상대가 누군지 모른다</td>
+                        <td>소켓이 만들어진 직후(<code>socket()</code>)</td>
+                    </tr>
+                    <tr>
+                        <td><code>SYN_SENT</code></td>
+                        <td><em>SYN 을 보냈고 SYN+ACK 를 기다리는 중.</em> 답을 못 받은 SYN 이 하나 떠 있다</td>
+                        <td><code>connect()</code> 가 SYN 을 내보내는 순간</td>
+                    </tr>
+                    <tr>
+                        <td><code>ESTABLISHED</code></td>
+                        <td>Handshake 완료. 데이터를 주고받을 수 있다</td>
+                        <td>SYN+ACK 를 받고 ACK 를 보내는 순간</td>
+                    </tr>
+                </table>
+            </div>
+            <ul>
+                <li>State 는 Kernel 의 <em>TCB 에 적혀 있다.</em> 브라우저는 State 를 보지 못하고
+                    <code>connect()</code> 의 결과(성공 &middot; 실패)만 안다.</li>
+                <li><code>SYN_SENT</code> 에서 답이 없으면 Kernel 이 간격을 늘려가며 SYN 을 <em>다시 보낸다.</em>
+                    끝내 없으면 <code>connect()</code> 가 실패하고 <em>타임아웃</em>이 난다.
+                    방화벽이 조용히 버리는 경우가 바로 이 상태로 머문다.</li>
+                <li>서버가 그 포트를 안 열었으면 <code>RST</code> 가 바로 돌아와 즉시 <code>CLOSED</code> 로 간다
+                    (<em>connection refused</em>). 무응답(타임아웃)과 즉시 거절(refused)은 원인이 다르다.</li>
+                <li>직접 보려면 명령 프롬프트에서 <code>netstat -an | findstr SYN_SENT</code>.
+                    평소엔 거의 비어 있다. SYN_SENT 가 아주 짧게 지나가기 때문이다.</li>
+            </ul>
             </div>
 
             <div class="step-chunk" id="ck-state">
@@ -733,7 +831,7 @@ CSS  --파싱--> CSSOM 트리 -+
 [ARP]     기본 게이트웨이 MAC 확보
    |      랜선으로 나가는 진짜 첫 패킷
 [DNS]     캐시 -> Recursive Resolver -> 43.202.208.133
-   |      UDP 53. 이 질의도 홈 라우터를 거친다
+   |      UDP 53. 이 질의도 Home Router 를 거친다
 [Kernel]  SYN -> SYN+ACK -> ACK
    |      NGINX 가 아니라 Kernel 이 한다
 [HTTP]    GET / + 헤더 + 빈 줄
@@ -899,7 +997,7 @@ CSS  --파싱--> CSSOM 트리 -+
             <h3>SYN 이 실제로 가는 경로</h3>
             <p>패킷은 층으로 포개져 있고, <em>중간 라우터는 봉투 안을 뜯어보지 않는다.</em></p>
             <pre class="code"><code>+- Ethernet frame (L2) ---------------------------+
-|  dst MAC : 공유기 MAC      <-- ARP 로 알아냄      |
+|  dst MAC : Home Router MAC <-- ARP 로 알아냄      |
 |  +- IP packet (L3) --------------------------+  |
 |  |  src IP : 192.168.0.5    (내 PC 사설)      |  |
 |  |  dst IP : 43.202.208.133                  |  |  <-- 라우터가 보는 건 이것만
@@ -915,8 +1013,8 @@ CSS  --파싱--> CSSOM 트리 -+
                 <li><span class="who">브라우저</span> <code>socket()</code> + <code>connect()</code> 호출.
                     여기서 브라우저 역할은 끝이고 나머지는 Kernel이 한다.</li>
                 <li><span class="who k">Client Kernel</span> "목적지가 내 서브넷에 없네" 판단 &rarr;
-                    기본 게이트웨이(공유기)로 보내기로 결정. ARP 로 공유기 MAC 을 알아내 전송.</li>
-                <li><span class="who">공유기</span> NAT. 출발지 IP 를 사설 &rarr; 공인으로 바꿔치기하고,
+                    Default Gateway(= Home Router)로 보내기로 결정. ARP 로 Home Router 의 MAC 을 알아내 전송.</li>
+                <li><span class="who">Home Router</span> NAT(NAPT). 출발지 IP 를 사설 &rarr; 공인으로 바꿔치기하고,
                     돌아올 응답을 누구에게 줄지 포트로 기억해둔다.</li>
                 <li><span class="who">라우터들</span> ISP &rarr; 백본 &rarr; AWS. 수십 홉을 목적지 IP 만 보고 전달한다.</li>
                 <li><span class="who">방화벽</span> 보안그룹이 80 번 허용을 확인한다. 막혀 있으면 여기서 조용히
@@ -1774,7 +1872,7 @@ cheg     kafkaTemplate.send().get()     ⑥ ~ ⑦</code></pre>
                         <text x="270" y="310" text-anchor="middle" class="xs" style="font-size:11px">없음 (IHL = 5)</text>
                         <text x="18" y="362" class="xs" style="font-size:11px">Protocol 6 &rarr; 이 패킷 안에 TCP segment 가 들어 있다.</text>
                         <text x="18" y="384" class="xs" style="font-size:11px">Source IP 는 내 PC 의 사설 IP 다.</text>
-                        <text x="18" y="406" class="xs" style="font-size:11px">공유기 NAT 가 나중에 공인 IP 로 바꿔치기한다.</text>
+                        <text x="18" y="406" class="xs" style="font-size:11px">Home Router 의 NAT 가 나중에 공인 IP 로 바꿔치기한다.</text>
                     </svg>
                 </div>
             </div>
@@ -1798,14 +1896,14 @@ cheg     kafkaTemplate.send().get()     ⑥ ~ ⑦</code></pre>
                         윈도우를 적어두는 자료구조</dd>
                     <dt>4-tuple</dt>
                     <dd>출발지 IP:Port + 목적지 IP:Port. 연결의 신분증</dd>
-                    <dt>기본 게이트웨이</dt>
-                    <dd>랜 밖으로 나가는 패킷을 맡기는 장비. 집에서는 공유기.
-                        <em>캐슬챗의 <code>wsgate</code>(websocket-gateway) 와는 전혀 다른 것</em>이다</dd>
-                    <dt>connect() &middot; accept()</dt>
-                    <dd>소켓 API 의 함수. 브라우저나 NGINX 가 만든 함수가 아니라 <em>OS 가 프로그램에 제공하는 시스템 콜</em>이다
-                        (Windows 는 Winsock). <code>connect()</code> 는 &ldquo;이 IP:Port 로 연결해 달라&rdquo; 는 부탁이고,
-                        부르는 순간부터 3-way Handshake 는 Kernel 이 한다.
-                        <code>accept()</code> 는 서버 쪽에서 Handshake 가 끝난 연결을 꺼내는 함수다</dd>
+                    <dt>Default Gateway</dt>
+                    <dd>PC 에 설정된, 랜 밖으로 나가는 패킷이 제일 먼저 가는 곳의 <em>IP 주소</em>(next hop).
+                        내 PC 라면 <code>192.168.4.1</code>. 캐슬챗의 <code>wsgate</code>(websocket-gateway) 와는 전혀 다른 것이다</dd>
+                    <dt>Home Router</dt>
+                    <dd>공유기. <em>Default Gateway 주소를 LAN 쪽에 달고 있는 장비</em>다.
+                        라우팅 &middot; NAT(NAPT) &middot; DHCP &middot; 방화벽 &middot; Wi-Fi 를 한 박스에 겸한다.
+                        Default Gateway 는 &ldquo;주소(설정값)&rdquo;, Home Router 는 &ldquo;그 주소를 가진 장비&rdquo;다.
+                        NAPT 는 여러 사설 IP 를 공인 IP 하나로 합치고 <em>포트 번호로</em> 누구의 응답인지 구분하는 NAT 다</dd>
                     <dt>fd</dt>
                     <dd>File Descriptor. 프로세스가 커널 자원을 가리키는 번호.
                         소켓 실체는 커널 안에 있다</dd>
@@ -2025,7 +2123,7 @@ main.0bd4de65.css  ->  (CSS 한 줄 고침)  ->  main.a7f2c391.css</code></pre>
                     </tr>
                     <tr>
                         <th>집</th>
-                        <td>공유기 (Home Router)</td>
+                        <td>Home Router (공유기)</td>
                     </tr>
                     <tr>
                         <th>회사</th>
@@ -2039,7 +2137,7 @@ main.0bd4de65.css  ->  (CSS 한 줄 고침)  ->  main.a7f2c391.css</code></pre>
             </div>
             <div class="callout bad">
                 <span class="tag">회사에서는 보통 라우터가 아니다</span>
-                <p>집에서는 공유기 하나가 스위치 &middot; 게이트웨이 &middot; NAT &middot; 방화벽 역할을
+                <p>집에서는 Home Router(공유기) 하나가 스위치 &middot; 게이트웨이 &middot; NAT &middot; 방화벽 역할을
                     <em>다 겸한다.</em> 그래서 구분이 무의미했던 것이다.</p>
                 <p>회사 경로는 보통 이렇게 쪼개져 있다.</p>
                 <pre class="code"><code>내 PC -> 액세스 스위치(L2) -> 분배/코어 L3 스위치 -> 방화벽 -> 엣지 라우터 -> ISP
