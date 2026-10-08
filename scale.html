@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>대규모 지향 피드백 &middot; 백엔드 공부</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%232f6d55%27%2F%3E%3Cg%20fill%3D%27%23ffffff%27%3E%3Crect%20x%3D%277%27%20y%3D%276%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2713%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2720%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%232f6d55%27%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%279%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2716%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2723%27%20r%3D%271.3%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="note-page">
+    <main class="note-flow">
+
+        <!-- =====================================================
+             #1 판정 틀
+             ===================================================== -->
+        <section class="note">
+            <div class="head-row head-h2">
+                <h2>#1 판정 &mdash; 의도는 어디에 반영됐나</h2>
+                <p class="head-note">castleChat 은 <code>plan.md</code> 1순위 원칙이
+                    <strong class="danger">&ldquo;대용량 트래픽에 대응 가능한 설계&rdquo;</strong> 였다.
+                    그 의도가 실제 코드의 어디에 남았고 어디서 갈라졌는지 전수로 확인한 기록.</p>
+            </div>
+
+            <h3>1 &mdash; 되돌릴 수 있나로 나눠 본다</h3>
+            <p>&ldquo;대규모 지향 설계&rdquo; 의 핵심은 <em>지금 빠른가</em>가 아니라
+                <em>나중에 빠르게 만들 수 있는가</em>다.
+                그래서 결정을 <em>되돌릴 수 있는 것과 없는 것</em>으로 나눠 봐야 한다.</p>
+
+            <div class="side-by-side">
+                <div class="scroll-x">
+                    <table>
+                        <tr>
+                            <th colspan="2">되돌릴 수 없는 결정</th>
+                        </tr>
+                        <tr>
+                            <th>ID 채번 방식</th>
+                            <td><em>O</em> Snowflake 53bit</td>
+                        </tr>
+                        <tr>
+                            <th>데이터 흐름</th>
+                            <td><em>O</em> Kafka 이벤트</td>
+                        </tr>
+                        <tr>
+                            <th>파티셔닝 키</th>
+                            <td><em>O</em> <code>key = roomId</code></td>
+                        </tr>
+                        <tr>
+                            <th>연결 모델</th>
+                            <td><em>O</em> 유저당 1연결 멀티플렉싱</td>
+                        </tr>
+                        <tr>
+                            <th>소비 모델</th>
+                            <td><em>O</em> 멱등 소비 (at-least-once 전제)</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="scroll-x">
+                    <table>
+                        <tr>
+                            <th colspan="2">되돌릴 수 있는 결정</th>
+                        </tr>
+                        <tr>
+                            <th>Kafka <code>.get()</code> 제거</th>
+                            <td>X &mdash; 한 줄이면 바뀐다</td>
+                        </tr>
+                        <tr>
+                            <th>replicas 늘리기</th>
+                            <td>X &mdash; 상태만 밖으로 빼면 된다</td>
+                        </tr>
+                        <tr>
+                            <th>캐시 추가</th>
+                            <td>X &mdash; 기존 패턴 복사</td>
+                        </tr>
+                        <tr>
+                            <th>로그 레벨</th>
+                            <td>X &mdash; 설정값</td>
+                        </tr>
+                        <tr>
+                            <th>Kafka producer 튜닝</th>
+                            <td>X &mdash; properties 몇 줄</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="callout">
+                <span class="tag">한 줄 정리</span>
+                <p><em>되돌릴 수 없는 결정 다섯 개를 전부 맞췄고,
+                    못 한 것은 전부 되돌릴 수 있는 것들이다.</em></p>
+                <p><code>AUTO_INCREMENT</code> 로 시작했으면 지금 Snowflake 로 못 바꾼다.
+                    기존 ID 체계가 통째로 꼬인다.
+                    동기 <code>INSERT</code> 로 짰으면 Kafka 를 끼워 넣는 게 재작성 수준이다.</p>
+                <p>반대로 <code>.get()</code> 은 한 줄이고, replicas 는 설정이고,
+                    캐시는 반나절이다. <em>순서를 맞게 잡았다는 뜻이다.</em></p>
+            </div>
+
+            <div class="callout bad">
+                <span class="tag">그래도 선을 그을 것</span>
+                <p>이건 <em>&ldquo;대규모를 처리한다&rdquo; 가 아니라
+                    &ldquo;대규모로 가는 길을 막지 않았다&rdquo;</em> 는 뜻이다.</p>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #2 잘 설계한 부분
+             ===================================================== -->
+        <section class="note">
+            <h2>#2 잘 설계한 부분</h2>
+            <p>공통점이 하나 있다. <em>지금 규모에는 전혀 필요 없는데 일부러 한 것들</em>이다.
+                동시접속 열 명짜리 프로젝트에 이게 왜 있냐는 질문의 답이 &ldquo;의도&rdquo; 다.</p>
+
+            <h3>2 &mdash; Snowflake 분산 채번</h3>
+            <pre class="code"><code>messageId = timestamp(41) | workerId(5) | sequence(7)   = 53bit
+
+epoch  2024-01-01
+53bit 인 이유 : JS Number 안전 정수 한계가 2^53-1
+                프론트에서 정밀도 손실 없이 다룰 수 있는 최대</code></pre>
+
+            <div class="side-by-side">
+                <div>
+                    <h4>왜 대규모 지향인가</h4>
+                    <ul>
+                        <li><em>중앙 병목이 없다.</em> DB 가 ID 를 발급하면
+                            쓰기를 나눌 때 그게 병목이 된다</li>
+                        <li><em>DB 에 넣기 전에 PK 가 확정된다.</em>
+                            그래서 응답을 메모리에서 조립할 수 있고,
+                            <em>DB 쓰기를 비동기로 뺄 수 있다</em></li>
+                        <li><em>중복 소비가 자동으로 걸러진다.</em>
+                            같은 메시지가 두 번 와도 PK 충돌로 0행이 된다</li>
+                        <li>시간순 단조증가라 <em>기존 정렬 &middot; 페이징 로직을 그대로</em> 쓴다</li>
+                    </ul>
+                </div>
+                <div class="callout">
+                    <span class="tag">복붙이 아니라는 증거</span>
+                    <pre class="code"><code>if (currentTimestampMs &lt; lastTimestampMs) {
+    // 시계 역행(NTP 보정 등).
+    // 마지막 발급 시각까지 대기하여 단조증가 보장.
+    currentTimestampMs = waitUntil(lastTimestampMs);
+}</code></pre>
+                    <p><em>NTP 보정으로 시계가 뒤로 갈 수 있다</em>는 걸 알고 처리했다.
+                        그리고 같은 ms 안에서 sequence 를 다 쓰면
+                        다음 ms 까지 기다린다.
+                        <em>대부분의 복붙 구현이 이 두 가지를 빼먹는다.</em></p>
+                </div>
+            </div>
+
+            <h3>3 &mdash; Kafka 유실 방지 파이프라인</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>장치</th>
+                        <th>실제 설정</th>
+                        <th>막는 것</th>
+                    </tr>
+                    <tr>
+                        <th>acks=all</th>
+                        <td><code>spring.kafka.producer.acks=all</code></td>
+                        <td>ISR 전부가 받기 전엔 성공으로 안 본다</td>
+                    </tr>
+                    <tr>
+                        <th>idempotence</th>
+                        <td><code>enable.idempotence=true</code></td>
+                        <td>재시도로 인한 <em>브로커 측 중복 적재</em></td>
+                    </tr>
+                    <tr>
+                        <th>동기 확인</th>
+                        <td><code>send().get(timeout)</code></td>
+                        <td><em>저장 확인 전에 성공이라 말하는 것</em>.
+                            실패하면 사용자에게 실패를 돌려준다</td>
+                    </tr>
+                    <tr>
+                        <th>재시도 + DLT</th>
+                        <td><code>FixedBackOff(500ms, 10회)</code><br>
+                            &rarr; <code>&lt;topic&gt;.dlt</code></td>
+                        <td>소비 실패 건을 <em>버리지 않고 격리</em>.
+                            파티션 번호까지 유지한다</td>
+                    </tr>
+                    <tr>
+                        <th>멱등 소비</th>
+                        <td><code>inserted == 0</code> 이면 <em>정상 종료</em></td>
+                        <td>at-least-once 재전달로 인한 중복 저장</td>
+                    </tr>
+                    <tr>
+                        <th><code>key = roomId</code></th>
+                        <td>파티션 6개</td>
+                        <td><em>파티션을 늘려도 방 안의 순서가 유지된다</em></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="callout">
+                <span class="tag">멱등 소비가 왜 중요한가</span>
+                <pre class="code"><code>int inserted = chatMapper.insertChatMessage(msg);
+
+if (inserted == 0) {
+    log.info("이미 저장된 메시지. msgId={}", event.getMessageId());
+    return;              // 예외를 던지지 않는다
+}</code></pre>
+                <p>Kafka 는 <em>최소 한 번</em> 전달이라 같은 메시지가 두 번 올 수 있다.
+                    리밸런싱이 일어나거나 오프셋 커밋 전에 워커가 죽으면 그렇다.</p>
+                <p>여기서 <em>예외를 던졌다면</em> 재시도 10회 후 DLT 로 갔을 것이다.
+                    <em>정상으로 처리하고 넘기는 게 맞다.</em>
+                    Snowflake 로 ID 를 미리 확정했기 때문에 가능한 처리다.</p>
+            </div>
+
+            <h3>4 &mdash; Redis 캐시 두 가지</h3>
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">cache-aside &mdash; 방 멤버</span>
+                    <pre class="code"><code>roomMemberCache.getOrLoadRoomMembers(
+    roomId,
+    () -&gt; chatMapper.findAllActiveMemberIdsInRoom(roomId))</code></pre>
+                    <p>메시지마다 멤버 목록이 필요한데 <em>거의 안 바뀌는 값</em>이다.
+                        Redis Set 에 두고 미스일 때만 DB 를 친다.</p>
+                </div>
+                <div class="callout">
+                    <span class="tag">write-behind &mdash; 읽음 위치</span>
+                    <pre class="code"><code>roomReadPositionCache.updateIfGreater(
+    roomId, userId, messageId, ...)</code></pre>
+                    <p>읽음 위치는 <em>항상 커지기만 하는 값</em>이라
+                        중간값을 전부 DB 에 쓸 이유가 없다.</p>
+                    <p>안 그러면 쓰기가
+                        <em>사용자 수 &times; 스크롤 횟수</em>만큼 터진다.
+                        <em>쓰기 증폭은 규모가 커져야 생기는 문제</em>라,
+                        이걸 미리 막은 게 의도의 증거다.</p>
+                </div>
+            </div>
+
+            <h3>5 &mdash; 연결 비용과 전송량을 줄인 설계</h3>
+            <div class="trio">
+                <div class="kind">
+                    <span class="kind-no">1</span>
+                    <h4>WS 멀티플렉싱</h4>
+                    <p class="kind-desc">&ldquo;방 하나 = 연결 하나&rdquo; 로 만들면
+                        유저가 방 10개를 열 때 <em>서버 비용이 10배</em>가 된다.</p>
+                    <p class="kind-desc">연결은 유저당 하나만 두고
+                        봉투의 <code>wsType</code> 과 <code>roomId</code> 로 갈래를 나눈다.
+                        <em>방이 몇 개든 유저당 1연결로 고정된다.</em></p>
+                    <span class="kind-tag on">연결당 커널 버퍼 수십 KB 를 아낀다</span>
+                </div>
+                <div class="kind">
+                    <span class="kind-no">2</span>
+                    <h4>중복 전송 제거</h4>
+                    <pre class="code"><code>targetUserIds.removeAll(
+  getViewingUserIds(roomId));</code></pre>
+                    <p class="kind-desc">메시지 1건에 전송이 세 번 나간다
+                        (<code>MSG_CREATED</code> &middot; 방 목록 갱신 &middot; 알림).</p>
+                    <p class="kind-desc"><em>세 집합이 겹치지 않게</em>
+                        보고 있는 사람을 빼준다.
+                        안 그러면 fan-out 이 3배가 된다.</p>
+                    <span class="kind-tag on">fan-out 자체를 줄인 설계</span>
+                </div>
+                <div class="kind">
+                    <span class="kind-no">3</span>
+                    <h4>입구 필터</h4>
+                    <p class="kind-desc">핸들러에서 <code>roomId</code> 와
+                        내용 유무를 먼저 본다.</p>
+                    <p class="kind-desc">주석 그대로
+                        <em>&ldquo;깨진 패킷을 굳이 내부 서비스까지 보내지 않기 위한
+                        입구 필터&rdquo;</em> 다.
+                        gRPC 홉과 DB 조회를 아낀다.</p>
+                    <span class="kind-tag on">경계에서 막는다</span>
+                </div>
+            </div>
+
+            <h3>6 &mdash; 조회를 O(1) 로 만든 세션 레지스트리</h3>
+            <pre class="code"><code>Map&lt;WebSocketSession, SessionUserDTO&gt;        wsSessionsToConnectedUser
+Map&lt;Long, WebSocketSession&gt;                 userIdToWsSessions
+Map&lt;String, WebSocketSession&gt;               publicIdToWsSessions
+Map&lt;Long, Map&lt;Long, WebSocketSession&gt;&gt;      roomSessions      (방 -&gt; 유저 -&gt; 세션)</code></pre>
+            <p>같은 데이터를 <em>네 가지 방향으로 미리 색인</em>해 뒀다.
+                세션으로 유저를 찾는 것, 유저로 세션을 찾는 것,
+                방으로 세션 목록을 찾는 것이 <em>전부 O(1)</em> 이다.</p>
+            <p>전부 <code>ConcurrentHashMap</code> 이라 락 없이 동시 접근이 된다.
+                <em>브로드캐스트가 가장 뜨거운 경로라 여기가 느리면 전부 느려진다.</em></p>
+
+            <h3>7 &mdash; 서비스 분리와 그 한계를 같이 적어둔 것</h3>
+            <p>프로세스 5개로 나눈 것 자체는 <em>처리량을 올리지 않는다.</em>
+                오히려 메서드 호출(수십 ns)이 gRPC 호출(0.5~2ms)로 바뀌어 <em>건당 지연은 늘었다.</em></p>
+            <p>나눠서 얻은 건 <em>배포 독립성 &middot; 장애 격리 &middot; 스케일 단위 분리</em>다.
+                처리량은 <em>각각을 여러 개로 늘릴 때</em> 올라간다.</p>
+            <div class="callout">
+                <span class="tag">매니페스트 주석이 자산이다</span>
+                <pre class="code"><code># websocket-gateway
+# WsGateSessionRegistry가 JVM 메모리(ConcurrentHashMap)라
+# 브로드캐스트가 자기 파드에만 닿는다.
+replicas: 1
+
+# domain-service
+# 첨부가 이 파드 볼륨에만 있어 2개 이상 불가.
+# S3 이전이 선행되어야 함
+replicas: 1</code></pre>
+                <p><em>모르고 1인 게 아니라 알고 1이다.</em>
+                    &ldquo;왜 안 늘렸나&rdquo; 에 대한 답이 코드에 이미 적혀 있다.</p>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #3 그렇지 못한 부분
+             ===================================================== -->
+        <section class="note">
+            <h2>#3 그렇지 못한 부분</h2>
+            <p>셋으로 갈린다. <em>의식적 트레이드오프</em>, <em>그냥 놓친 것</em>,
+                <em>기본값으로 남겨둔 것</em>. 성격이 다르므로 말하는 방식도 달라야 한다.</p>
+
+            <h3>8 &mdash; 사용자 경로가 전 구간 동기다</h3>
+            <p><em>비동기로 뺀 것은 DB 쓰기 하나뿐</em>이다.
+                사용자가 기다리는 구간은 처음부터 끝까지 동기 블로킹이다.</p>
+
+            <div class="cdiag full">
+                <svg viewBox="0 0 980 300" role="img"
+                    aria-label="사용자 요청 경로는 gRPC 와 Kafka 를 동기로 기다리고 브로드캐스트까지 같은 스레드에서 수행한다. 비동기인 것은 워커의 DB INSERT 뿐이다">
+                    <defs>
+                        <marker id="sa" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <!-- 구간 라벨 -->
+                    <rect x="14" y="20" width="686" height="26" rx="5" class="bd dat" />
+                    <text x="357" y="38" text-anchor="middle" class="sm">
+                        사용자가 기다리는 구간 &mdash; 전부 동기</text>
+                    <rect x="712" y="20" width="254" height="26" rx="5" class="bd cmd" />
+                    <text x="839" y="38" text-anchor="middle" class="sm">비동기</text>
+
+                    <!-- 동기 박스들 -->
+                    <rect x="14" y="62" width="120" height="58" rx="6" class="bd fillw" />
+                    <text x="74" y="86" text-anchor="middle" class="sm">wsgate</text>
+                    <text x="74" y="104" text-anchor="middle" class="xs">Tomcat WS 스레드</text>
+                    <path d="M 136 91 H 160" class="ln" marker-end="url(#sa)" />
+
+                    <rect x="162" y="62" width="128" height="58" rx="6" class="bd fillt" />
+                    <text x="226" y="86" text-anchor="middle" class="sm">gRPC</text>
+                    <text x="226" y="104" text-anchor="middle" class="xs">BlockingStub &mdash; 대기</text>
+                    <path d="M 292 91 H 316" class="ln" marker-end="url(#sa)" />
+
+                    <rect x="318" y="62" width="128" height="58" rx="6" class="bd fillw" />
+                    <text x="382" y="86" text-anchor="middle" class="sm">channel-engine</text>
+                    <text x="382" y="104" text-anchor="middle" class="xs">Redis + DB 조회</text>
+                    <path d="M 448 91 H 472" class="ln" marker-end="url(#sa)" />
+
+                    <rect x="474" y="62" width="140" height="58" rx="6" class="bd fillt" />
+                    <text x="544" y="86" text-anchor="middle" class="sm">Kafka send().get()</text>
+                    <text x="544" y="104" text-anchor="middle" class="xs">acks=all 확인까지 대기</text>
+
+                    <!-- 되돌아와서 fan-out -->
+                    <path d="M 544 122 V 150 H 74 V 174" class="bus" marker-end="url(#sa)" />
+                    <text x="310" y="144" text-anchor="middle" class="xs">
+                        응답이 거꾸로 돌아온다 &mdash; 같은 스레드가 계속 묶여 있다</text>
+
+                    <rect x="14" y="176" width="600" height="58" rx="6" class="bd dat" />
+                    <text x="314" y="200" text-anchor="middle" class="sm">
+                        fan-out &mdash; 방 멤버 N 명에게 순차 전송 (역시 같은 스레드)</text>
+                    <text x="314" y="218" text-anchor="middle" class="xs">
+                        broadcastToRoom + pushChatRoomUpdate + pushChatMessageNotification</text>
+
+                    <text x="14" y="258" class="lbl">
+                        건당 체류시간 = gRPC 1ms + Kafka 10ms + fan-out (N &times; 0.15ms)</text>
+                    <text x="14" y="278" class="xs">
+                        Tomcat 스레드 200개 기준 &mdash; 10인 방 약 12,000/s &middot;
+                        50인 방 약 8,900/s &middot; 200인 방 약 4,400/s</text>
+
+                    <!-- 비동기 쪽 -->
+                    <path d="M 616 91 H 708" class="cell" stroke-dasharray="4 3"
+                        marker-end="url(#sa)" />
+                    <text x="662" y="83" text-anchor="middle" class="xs">Kafka</text>
+
+                    <rect x="712" y="62" width="254" height="58" rx="6" class="bd cmd" />
+                    <text x="839" y="86" text-anchor="middle" class="sm">event-persist-worker</text>
+                    <text x="839" y="104" text-anchor="middle" class="xs">DB INSERT &mdash; 여기만 비동기</text>
+
+                    <text x="712" y="150" class="xs">사용자는 이걸 기다리지 않는다</text>
+                    <text x="712" y="168" class="xs">&ldquo;성공&rdquo; 은 Kafka 가 받은 시점이지</text>
+                    <text x="712" y="186" class="xs">DB 에 들어간 시점이 아니다</text>
+                </svg>
+            </div>
+
+            <div class="side-by-side">
+                <div class="callout bad">
+                    <span class="tag">Kafka <code>.get()</code> 이 배치를 죽인다</span>
+                    <p>Kafka 가 빠른 이유는 <em>배치</em>다.
+                        <code>linger.ms</code> 동안 레코드를 모아
+                        <code>batch.size</code> 만큼 한 번에 보낸다.</p>
+                    <p><em>건건이 <code>.get()</code> 하면 배치 크기가 사실상 1</em> 이 된다.</p>
+                    <pre class="code"><code>배치 전송        수십만 건/s
+건당 동기 대기    수천 건/s     <- 10~100 배 차이</code></pre>
+                </div>
+                <div class="callout">
+                    <span class="tag">그래도 이건 트레이드오프다</span>
+                    <p><code>.get()</code> 을 빼면
+                        <em>&ldquo;성공했습니다&rdquo; 라고 말한 뒤 유실될 수 있다.</em></p>
+                    <p>주석에도 <code>durable save</code> 라고 적혀 있다.
+                        <em>처리량 대신 확실성을 산 것</em>이고,
+                        채팅에서는 맞는 선택이다.</p>
+                    <p>말할 때도 &ldquo;못 했다&rdquo; 가 아니라
+                        <em>&ldquo;무엇을 포기하고 무엇을 얻었다&rdquo;</em> 로 말한다.</p>
+                </div>
+            </div>
+
+            <h3>9 &mdash; fan-out &mdash; 진짜 벽</h3>
+            <p>채팅 서버의 부하는 <em>&ldquo;몇 명이 보내냐&rdquo; 가 아니라
+                &ldquo;한 건이 몇 명에게 퍼지냐&rdquo;</em> 로 정해진다.</p>
+
+            <div class="cdiag wide">
+                <svg viewBox="0 0 820 260" role="img"
+                    aria-label="수신 1건이 방 멤버 수만큼의 송신으로 늘어난다">
+                    <defs>
+                        <marker id="sb" markerWidth="7" markerHeight="7" refX="5.5" refY="2.5"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 5.5 2.5 L 0 5 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <rect x="14" y="88" width="128" height="52" rx="6" class="bd fillw" />
+                    <text x="78" y="110" text-anchor="middle" class="sm">수신 1건</text>
+                    <text x="78" y="127" text-anchor="middle" class="xs">SEND_MESSAGE</text>
+                    <path d="M 144 114 H 182" class="ln" marker-end="url(#sb)" />
+
+                    <rect x="184" y="78" width="142" height="72" rx="6" class="bd fillt" />
+                    <text x="255" y="104" text-anchor="middle" class="sm">wsgate</text>
+                    <text x="255" y="122" text-anchor="middle" class="xs">JSON 직렬화 1회</text>
+                    <text x="255" y="140" text-anchor="middle" class="xs">세션별 순차 write</text>
+
+                    <!-- N 갈래 -->
+                    <path d="M 328 114 L 392 36" class="ln" marker-end="url(#sb)" />
+                    <path d="M 328 114 L 392 78" class="ln" marker-end="url(#sb)" />
+                    <path d="M 328 114 L 392 114" class="ln" marker-end="url(#sb)" />
+                    <path d="M 328 114 L 392 150" class="ln" marker-end="url(#sb)" />
+                    <path d="M 328 114 L 392 192" class="ln" marker-end="url(#sb)" />
+
+                    <rect x="396" y="22" width="92" height="28" rx="4" class="bd cmd" />
+                    <text x="442" y="41" text-anchor="middle" class="xs">멤버 1</text>
+                    <rect x="396" y="64" width="92" height="28" rx="4" class="bd cmd" />
+                    <text x="442" y="83" text-anchor="middle" class="xs">멤버 2</text>
+                    <rect x="396" y="100" width="92" height="28" rx="4" class="bd cmd" />
+                    <text x="442" y="119" text-anchor="middle" class="xs">멤버 3</text>
+                    <rect x="396" y="136" width="92" height="28" rx="4" class="bd cmd" />
+                    <text x="442" y="155" text-anchor="middle" class="xs">&#8942;</text>
+                    <rect x="396" y="178" width="92" height="28" rx="4" class="bd cmd" />
+                    <text x="442" y="197" text-anchor="middle" class="xs">멤버 N</text>
+
+                    <text x="516" y="46" class="lbl">송신 N 건</text>
+                    <text x="516" y="68" class="xs">각각 socket write + 세션 락</text>
+
+                    <text x="516" y="104" class="xs">초당 1만 건 수신 &times; 10인 방</text>
+                    <text x="516" y="122" class="lbl">= 송신 10만 건/s</text>
+                    <text x="516" y="144" class="xs">송신 1건 ≈ 0.15ms CPU</text>
+                    <text x="516" y="162" class="lbl">= 16코어 서버 한 대를 꽉 채운다</text>
+
+                    <text x="14" y="190" class="xs">50인 방이면</text>
+                    <text x="14" y="208" class="xs">송신 50만 건/s</text>
+                    <text x="14" y="226" class="lbl">서버 5대</text>
+
+                    <text x="184" y="190" class="xs">
+                        그리고 이 fan-out 이 요청 스레드에서 동기로 돈다</text>
+                    <text x="184" y="208" class="xs">
+                        = CPU 만 먹는 게 아니라 스레드도 같이 묶인다</text>
+                    <text x="184" y="230" class="xs">
+                        해결하려면 전용 브로드캐스트 레이어나 방 단위 샤딩이 필요하다</text>
+                </svg>
+            </div>
+
+            <h3>10 &mdash; 수평 확장이 막혀 있다</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>대상</th>
+                        <th>막는 것</th>
+                        <th>풀려면</th>
+                    </tr>
+                    <tr>
+                        <th>websocket-gateway</th>
+                        <td>세션 레지스트리가 <em>JVM 메모리</em></td>
+                        <td>Redis pub/sub 팬아웃.
+                            <em>단, 파드가 많아지면 wsgate 간 트래픽이 또 폭발한다</em></td>
+                    </tr>
+                    <tr>
+                        <th>channel-engine</th>
+                        <td><code>CHAT_SNOWFLAKE_WORKER_ID: "0"</code>
+                            <em>하드코딩</em></td>
+                        <td>StatefulSet 전환 &rarr; 파드 번호를 workerId 로</td>
+                    </tr>
+                    <tr>
+                        <th>domain-service</th>
+                        <td>첨부가 <em>로컬 EBS</em>. RWO 라 1파드</td>
+                        <td>S3 이전</td>
+                    </tr>
+                    <tr>
+                        <th>event-persist-worker</th>
+                        <td>파티션 6개를 <em>혼자 소비</em></td>
+                        <td>replicas 를 올리면 바로 된다
+                            <em>(여기는 이미 준비돼 있다)</em></td>
+                    </tr>
+                    <tr>
+                        <th>Kafka</th>
+                        <td>브로커 1대, <em>RF 1</em></td>
+                        <td>브로커 3대 + RF 3 + <code>min.insync.replicas=2</code></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="callout bad">
+                <span class="tag">제일 날카로운 지적 &mdash; acks=all 인데 브로커가 1대다</span>
+                <p><em>ISR 이 1개라 사실상 <code>acks=1</code> 과 같다.</em>
+                    설정은 올바른 값이지만 <em>내구성 보장이 실질적으로 없다.</em>
+                    그 브로커의 디스크가 날아가면 유실이다.</p>
+                <p>먼저 인정하고 넘어가는 게 맞다.
+                    <code>chatKafka.md</code> 에 이미 &ldquo;운영에서는 브로커 3대 이상,
+                    RF 3, min.insync.replicas 2&rdquo; 라고 적어뒀다. <em>그대로 말하면 된다.</em></p>
+            </div>
+
+            <h3>11 &mdash; 그냥 놓친 것 두 개</h3>
+            <div class="side-by-side">
+                <div class="callout bad">
+                    <span class="tag">1 &mdash; 캐시 없이 매번 DB 를 친다</span>
+                    <pre class="code"><code>List&lt;Long&gt; notificationTargetUserIds =
+  chatMapper.findChatMessageNotificationTargetUserIds(
+      cmd.getRoomId(), cmd.getSenderUserId());</code></pre>
+                    <p><code>roomMemberCache</code> 는 캐시를 타는데
+                        <em>이건 안 탄다.</em> 매 메시지마다 DB 직행이다.</p>
+                    <p>초당 1만 건이면 <em>초당 1만 쿼리</em>다.
+                        <em>이것 하나만으로도 처리량이 막힌다.</em></p>
+                    <p><em>트레이드오프가 아니라 누락이다.</em>
+                        <code>roomMemberCache</code> 패턴을 그대로 복사하면 되고
+                        반나절이면 끝난다.</p>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">2 &mdash; 측정 수단이 없다</span>
+                    <pre class="code"><code>// WsGateOutboundWriter.java
+//	private final ChatMetrics chatMetrics;   &lt;- 주석 처리됨</code></pre>
+                    <p>메트릭을 넣으려다 <em>주석으로 남겨둔 흔적</em>이 있다.
+                        지금은 <em>처리량도 지연도 측정할 수단이 없다.</em></p>
+                    <p>그래서 &ldquo;몇 건 되나&rdquo; 에 답을 못 한다.
+                        <em>이게 숫자를 못 대는 근본 원인이다.</em></p>
+                    <p>Micrometer + Actuator 로 <em>건당 지연과 fan-out 크기</em>만
+                        찍어도 대화가 완전히 달라진다.</p>
+                </div>
+            </div>
+
+            <h3>12 &mdash; 기본값으로 남겨둔 것</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>항목</th>
+                        <th>현재</th>
+                        <th>영향</th>
+                    </tr>
+                    <tr>
+                        <th>Kafka producer 튜닝</th>
+                        <td><code>acks</code> 와 <code>idempotence</code> 만 설정.
+                            <em><code>linger.ms</code> &middot; <code>batch.size</code> &middot;
+                            <code>compression</code> 은 기본값</em></td>
+                        <td><code>linger.ms=0</code> 이라 모으지 않는다.
+                            <code>.get()</code> 과 겹쳐 <em>배치가 완전히 죽는다</em></td>
+                    </tr>
+                    <tr>
+                        <th>Tomcat 스레드</th>
+                        <td>설정 없음 &rarr; <em>기본 200</em></td>
+                        <td>동기 모델의 천장이 <code>200 / 건당지연</code> 으로 고정된다</td>
+                    </tr>
+                    <tr>
+                        <th>로그 레벨</th>
+                        <td>핫패스에 <code>log.info</code>
+                            <em>건당 4줄</em></td>
+                        <td>초당 1만 건이면 <em>초당 4만 줄</em>.
+                            동기 appender 면 디스크 I/O 가 요청 경로에 들어온다</td>
+                    </tr>
+                    <tr>
+                        <th>JVM</th>
+                        <td><code>MaxRAMPercentage=70</code> +
+                            <code>UseG1GC</code> 만</td>
+                        <td>힙 크기 &middot; 리전 크기 &middot; GC 목표는 전부 기본값</td>
+                    </tr>
+                </table>
+            </div>
+            <p><em>셋 다 설정만 바꾸면 되는 것들</em>이다. 구조 문제가 아니다.
+                <em>&ldquo;운영 전환할 때 할 일&rdquo; 로 분류하는 게 맞다.</em></p>
+
+            <h3>13 &mdash; 세부 비용 &mdash; 작지만 핫패스에 있는 것들</h3>
+            <div class="trio">
+                <div class="kind">
+                    <span class="kind-no">1</span>
+                    <h4><code>nextMessageId()</code> 가 <code>synchronized</code></h4>
+                    <pre class="code"><code>if (sequence == 0) {
+  waitUntil(lastTimestampMs + 1);
+}  // 락을 쥔 채 대기</code></pre>
+                    <p class="kind-desc">channel-engine 전체의 <em>단일 직렬화 지점</em>이다.
+                        평소엔 빠르지만 <em>ms 당 128건을 넘기면
+                        락을 쥔 채 스핀</em>해서 전체가 멈춘다.</p>
+                    <span class="kind-tag">Twitter 원본도 synchronized 다. 틀린 코드는 아니다</span>
+                </div>
+                <div class="kind">
+                    <span class="kind-no">2</span>
+                    <h4>송신마다 맵 조회 + 모니터</h4>
+                    <pre class="code"><code>synchronized (
+  getSessionSendLock(session)) {
+  session.sendMessage(...);
+}</code></pre>
+                    <p class="kind-desc">송신 10만 건/s 면
+                        <code>computeIfAbsent</code> 10만 회 +
+                        모니터 획득 10만 회다.</p>
+                    <span class="kind-tag">TEXT_PARTIAL_WRITING 을 막는 필요한 락이다</span>
+                </div>
+                <div class="kind">
+                    <span class="kind-no">3</span>
+                    <h4>느린 클라이언트가 스레드를 잡는다</h4>
+                    <p class="kind-desc"><code>session.sendMessage()</code> 는
+                        <em>TCP 송신 버퍼가 차면 블로킹</em>된다.
+                        그걸 <em>세션 락을 쥔 채</em> 한다.</p>
+                    <p class="kind-desc">네트워크가 느린 사용자 하나가
+                        <em>브로드캐스트 스레드를 붙잡을 수 있다.</em>
+                        백프레셔 장치가 없다.</p>
+                    <span class="kind-tag">ConcurrentWebSocketSessionDecorator 로 상한을 둘 수 있다</span>
+                </div>
+                <p class="kind-note">
+                    <em>셋 다 &ldquo;틀린 코드&rdquo; 가 아니라 &ldquo;규모가 커지면 드러나는 비용&rdquo; 이다.</em><br>
+                    특히 2번은 실제로 <code>TEXT_PARTIAL_WRITING</code> 을 겪고 고친 흔적이라
+                    <em>버그가 아니라 버그를 잡은 것</em>이다.
+                </p>
+            </div>
+
+            <div class="callout">
+                <span class="tag">확인해보니 문제가 아니었던 것</span>
+                <p>처음에 <code>targetUserIds.removeAll(getViewingUserIds(roomId))</code> 가
+                    <code>O(n&times;m)</code> 일 거라고 의심했다.</p>
+                <pre class="code"><code>public Set&lt;Long&gt; getViewingUserIds(Long roomId) {
+    ...
+    return new HashSet&lt;&gt;(sessions.keySet());   // Set 을 돌려준다
+}</code></pre>
+                <p><code>ArrayList.removeAll(c)</code> 는 <em><code>c</code> 가 <code>Set</code> 이면
+                    <code>O(n)</code></em> 이다. <em>문제가 아니었다.</em>
+                    다만 호출마다 <code>HashSet</code> 을 새로 복사하고
+                    건당 2회 호출되므로 <em>할당 압력은 있다.</em></p>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #4 용어와 메커니즘
+             ===================================================== -->
+        <section class="note">
+            <h2>#4 용어와 메커니즘 &mdash; 왜 못 늘리는지의 실제 이유</h2>
+            <p>앞에서 &ldquo;<em>fan-out</em>&rdquo;, &ldquo;<em>Redis pub/sub 팬아웃</em>&rdquo;,
+                &ldquo;<em>방 단위 샤딩</em>&rdquo; 이라고만 적고 넘어간 것들을 풀어 쓴다.
+                이 셋을 모르면 <code>replicas</code> 를 왜 못 올리는지 설명이 안 된다.</p>
+
+            <h3>14 &mdash; fan-out</h3>
+            <p><em>하나가 여러 개로 퍼지는 것.</em> 선풍기(fan) 날개처럼 펼쳐진다는 뜻이다.
+                채팅에서는 <em>메시지 1건을 받아 방 멤버 N 명에게 보내는 것</em>이다.</p>
+
+            <div class="side-by-side">
+                <div>
+                    <h4>코드에 그대로 있다</h4>
+                    <pre class="code"><code>// WsGateOutboundWriter.broadcastToRoom()
+for (WebSocketSession sess : sessions.values()) {
+    dispatchSerializedToSession(sess, payload);
+}
+//  ↑ 이 for 루프가 fan-out 이다</code></pre>
+                    <p>방 멤버가 10명이면 10번, 50명이면 50번 돈다.
+                        <em>루프 안에서 세션 락을 잡고 소켓에 쓴다.</em></p>
+                </div>
+                <div class="callout">
+                    <span class="tag">그래서 부하의 기준이 바뀐다</span>
+                    <pre class="code"><code>초당 1만 건 × 10인 방 = 송신 10만 건/s
+초당 1만 건 × 50인 방 = 송신 50만 건/s
+                        ↑ 같은 1만 건인데 5배</code></pre>
+                    <p><em>&ldquo;몇 명이 보내냐&rdquo; 가 아니라
+                        &ldquo;한 건이 몇 명에게 퍼지냐&rdquo;</em> 로 한계가 정해진다.
+                        이게 채팅 서버가 다른 웹 서비스와 다른 지점이다.</p>
+                </div>
+            </div>
+
+            <h3>15 &mdash; wsgate 를 늘리면 메시지가 사라진다</h3>
+            <p>세션 명부가 <em>그 파드의 JVM 메모리 안에만</em> 있기 때문이다.</p>
+
+            <pre class="code"><code>// WsGateSessionRegistry
+private final Map&lt;Long, Map&lt;Long, WebSocketSession&gt;&gt; roomSessions = new ConcurrentHashMap&lt;&gt;();
+//                                                    그냥 자바 객체다. 이 파드 안에만 존재한다</code></pre>
+
+            <div class="cdiag full">
+                <svg viewBox="0 0 940 444" role="img"
+                    aria-label="wsgate 가 두 개면 각자 자기 세션만 알아 다른 파드에 붙은 사람에게 메시지가 가지 않는다. Redis pub/sub 으로 방송하면 해결되지만 파드가 많아지면 Redis 가 병목이 된다">
+                    <defs>
+                        <marker id="ma" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <!-- ===== 1 문제 ===== -->
+                    <circle cx="24" cy="30" r="9" class="num" />
+                    <text x="24" y="33.5" class="numtxt" text-anchor="middle">1</text>
+                    <text x="40" y="34" class="ttl">문제 &mdash; wsgate 가 2개면</text>
+
+                    <rect x="20" y="52" width="84" height="40" rx="6" class="bd fillw" />
+                    <text x="62" y="77" text-anchor="middle" class="sm">철수</text>
+                    <path d="M 106 72 H 138" class="ln" marker-end="url(#ma)" />
+
+                    <rect x="140" y="44" width="212" height="56" rx="7" class="bd fillt" />
+                    <text x="246" y="68" text-anchor="middle" class="sm">wsgate A</text>
+                    <text x="246" y="88" text-anchor="middle" class="xs">
+                        명부 roomSessions[5] = { 철수 }</text>
+                    <path d="M 354 72 H 392" class="ln" marker-end="url(#ma)" />
+
+                    <rect x="394" y="52" width="150" height="40" rx="6" class="bd cmd" />
+                    <text x="469" y="77" text-anchor="middle" class="xs">철수만 받는다</text>
+                    <text x="560" y="70" class="xs">A 는 영희가 있는지조차 모른다</text>
+                    <text x="560" y="88" class="xs">명부에 없으니까</text>
+
+                    <rect x="20" y="124" width="84" height="40" rx="6" class="bd fillw" />
+                    <text x="62" y="149" text-anchor="middle" class="sm">영희</text>
+                    <path d="M 106 144 H 138" class="ln" marker-end="url(#ma)" />
+
+                    <rect x="140" y="116" width="212" height="56" rx="7" class="bd fillw" />
+                    <text x="246" y="140" text-anchor="middle" class="sm">wsgate B</text>
+                    <text x="246" y="160" text-anchor="middle" class="xs">
+                        명부 roomSessions[5] = { 영희 }</text>
+
+                    <path d="M 358 144 H 388" class="cell" />
+                    <path d="M 362 134 L 382 154 M 382 134 L 362 154" class="brace" />
+                    <text x="394" y="140" class="lbl">영희는 못 받는다</text>
+                    <text x="394" y="160" class="xs">★ 에러가 안 난다. 조용히 사라진다</text>
+                    <text x="394" y="178" class="xs">
+                        A 입장에선 &ldquo;방에 1명, 보냄, 성공&rdquo; 이다</text>
+
+                    <!-- ===== 2 해법 ===== -->
+                    <circle cx="24" cy="228" r="9" class="num" />
+                    <text x="24" y="231.5" class="numtxt" text-anchor="middle">2</text>
+                    <text x="40" y="232" class="ttl">해법 &mdash; Redis pub/sub 으로 서로에게 알린다</text>
+
+                    <rect x="14" y="258" width="76" height="40" rx="6" class="bd fillw" />
+                    <text x="52" y="283" text-anchor="middle" class="sm">철수</text>
+                    <path d="M 92 278 H 124" class="ln" marker-end="url(#ma)" />
+
+                    <rect x="126" y="250" width="166" height="58" rx="7" class="bd fillt" />
+                    <text x="209" y="272" text-anchor="middle" class="sm">wsgate A</text>
+                    <text x="209" y="291" text-anchor="middle" class="xs">
+                        자기 세션 전송 + 방송</text>
+
+                    <path d="M 209 310 V 332" class="ln" marker-end="url(#ma)" />
+                    <rect x="161" y="334" width="96" height="38" rx="5" class="bd cmd" />
+                    <text x="209" y="358" text-anchor="middle" class="xs">철수</text>
+
+                    <path d="M 294 278 H 328" class="ln" marker-end="url(#ma)" />
+                    <text x="311" y="268" text-anchor="middle" class="xs">PUBLISH</text>
+
+                    <rect x="330" y="250" width="124" height="58" rx="7" class="bd dat" />
+                    <text x="392" y="274" text-anchor="middle" class="sm">Redis</text>
+                    <text x="392" y="293" text-anchor="middle" class="xs">pub/sub</text>
+
+                    <path d="M 456 278 H 490" class="ln" marker-end="url(#ma)" />
+                    <text x="473" y="268" text-anchor="middle" class="xs">구독</text>
+
+                    <rect x="492" y="250" width="166" height="58" rx="7" class="bd fillw" />
+                    <text x="575" y="272" text-anchor="middle" class="sm">wsgate B</text>
+                    <text x="575" y="291" text-anchor="middle" class="xs">자기 세션에만 전송</text>
+
+                    <path d="M 575 310 V 332" class="ln" marker-end="url(#ma)" />
+                    <rect x="527" y="334" width="96" height="38" rx="5" class="bd cmd" />
+                    <text x="575" y="358" text-anchor="middle" class="xs">영희</text>
+
+                    <text x="676" y="266" class="xs">A 는 영희를 몰라도 된다</text>
+                    <text x="676" y="286" class="xs">&ldquo;방 5번에 메시지&rdquo; 라고</text>
+                    <text x="676" y="304" class="xs">방송만 하면</text>
+                    <text x="676" y="324" class="xs">영희를 가진 B 가 전달한다</text>
+
+                    <!-- ===== 3 그런데 ===== -->
+                    <path d="M 14 392 H 926" class="cell" stroke-dasharray="4 3" />
+                    <text x="14" y="410" class="lbl">
+                        그런데 파드가 45개면 &mdash; PUBLISH 1번이 45개 전부에게 전달된다.
+                        그 방 멤버가 없는 파드도 받아서 버린다</text>
+                    <text x="14" y="430" class="lbl">
+                        초당 1만 건 &times; 45 = Redis 가 초당 45만 전달 &rarr; Redis 가 먼저 터진다</text>
+                </svg>
+            </div>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">pub/sub 이 뭔가 &mdash; 라디오다</span>
+                    <pre class="code"><code>PUBLISH    방송을 쏜다
+SUBSCRIBE  주파수를 맞춰놓고 듣는다</code></pre>
+                    <p>보내는 쪽은 <em>누가 듣는지 모른다.</em>
+                        그게 장점이다 &mdash; A 가 영희의 존재를 알 필요가 없다.</p>
+                    <p>그리고 <em>저장하지 않는다.</em> 그 순간 듣고 있던 구독자에게만 간다.
+                        Kafka 와 다른 점이다.</p>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">왜 Redis 가 한계가 되나</span>
+                    <pre class="code"><code>초당 1만 건 × 45 파드 = 45만 전달/s
+Redis pub/sub 실용 한계 ≈ 10만/s</code></pre>
+                    <p>게다가 <em>Redis 는 단일 스레드</em>다.
+                        CPU 를 더 줘도 안 빨라진다.</p>
+                    <p><em>&ldquo;세션을 Redis 로 빼면 된다&rdquo; 는 해법 자체가
+                        그 규모에서는 병목이 된다.</em>
+                        그래서 다음 단계가 샤딩이다.</p>
+                </div>
+            </div>
+
+            <h3>16 &mdash; 샤딩 &mdash; 나눠 담기</h3>
+            <p><em>&ldquo;이건 네 담당, 저건 내 담당&rdquo; 으로 미리 정해두는 것</em>이다.
+                나눠두면 서로 물어볼 일이 없어진다.</p>
+
+            <div class="side-by-side">
+                <div>
+                    <h4>방 샤딩 &mdash; 위 문제를 없앤다</h4>
+                    <pre class="code"><code>roomId % wsgate_개수 = 담당 wsgate
+
+방 5번  ->  5 % 3 = 2  ->  wsgate 2 전담
+방 6번  ->  6 % 3 = 0  ->  wsgate 0 전담
+방 7번  ->  7 % 3 = 1  ->  wsgate 1 전담
+
+같은 방 사람은 무조건 같은 wsgate 로 붙인다
+
+  철수(방5) ->  wsgate 2
+  영희(방5) ->  wsgate 2
+
+  -> 명부에 둘 다 있다
+  -> ★ pub/sub 이 필요 없어진다</code></pre>
+                </div>
+                <div>
+                    <h4>DB 샤딩 &mdash; 쓰기를 나눈다</h4>
+                    <pre class="code"><code>roomId % 4
+
+방 1, 5,  9 ...  ->  DB-1
+방 2, 6, 10 ...  ->  DB-2
+방 3, 7, 11 ...  ->  DB-3
+방 4, 8, 12 ...  ->  DB-0
+
+초당 1만 INSERT
+  -> DB 하나당 2,500 INSERT
+  ★ 4배로 나눠진다</code></pre>
+                    <p>worker 를 늘려도 <em>DB 가 하나면 소용없다.</em>
+                        쓰기를 진짜로 나누려면 DB 를 나눠야 한다.</p>
+                </div>
+            </div>
+
+            <div class="callout bad">
+                <span class="tag">샤딩의 대가 &mdash; 공짜가 아니다</span>
+                <p><em>wsgate 개수가 바뀌면 <code>% N</code> 의 결과가 전부 달라진다.</em>
+                    파드를 3개에서 4개로 늘리는 순간 거의 모든 방의 담당이 바뀌고,
+                    <em>접속자 전원이 재배치</em>돼야 한다.
+                    그래서 실무에서는 <em>consistent hashing</em> 을 쓴다.</p>
+                <p>DB 샤딩은 <em>&ldquo;여러 방을 한 번에 조회&rdquo; 가 어려워진다.</em>
+                    4개 DB 를 전부 뒤져서 애플리케이션에서 합쳐야 한다.
+                    <em>JOIN 도 트랜잭션도 샤드를 넘지 못한다.</em></p>
+                <p>그래서 샤딩은 <em>마지막 수단</em>이다.
+                    캐시 &middot; 읽기 복제 &middot; 수직 확장을 먼저 해보고 그래도 안 되면 간다.</p>
+            </div>
+
+            <h3>17 &mdash; replicas 를 7~8 로 올리면 무슨 일이 생기나</h3>
+            <p>서비스마다 결과가 전혀 다르다. <em>그리고 제일 위험한 건 에러가 안 나는 쪽이다.</em></p>
+
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>서비스</th>
+                        <th>결과</th>
+                        <th>이유</th>
+                        <th>알아챌 수 있나</th>
+                    </tr>
+                    <tr>
+                        <th>event-persist-worker</th>
+                        <td><em>된다</em></td>
+                        <td>Kafka 파티션 6개를 나눠 먹는다.
+                            <em>단, 7개 이상은 의미 없다</em> &mdash;
+                            남는 컨슈머는 할당받을 파티션이 없어 논다</td>
+                        <td>&mdash;</td>
+                    </tr>
+                    <tr>
+                        <th>domain-service</th>
+                        <td>파드가 안 뜬다</td>
+                        <td>EBS 는 ReadWriteOnce 라 2번째 파드가 볼륨을 못 잡는다</td>
+                        <td><em>즉시.</em> <code>Pending</code> 에서 멈춘다</td>
+                    </tr>
+                    <tr>
+                        <th>channel-engine</th>
+                        <td>ID 가 겹친다</td>
+                        <td><code>CHAT_SNOWFLAKE_WORKER_ID: "0"</code> 이
+                            <em>모든 파드에 똑같이</em> 들어간다 &rarr; messageId 중복</td>
+                        <td><em>곧.</em> DB PK 충돌 에러</td>
+                    </tr>
+                    <tr>
+                        <th>websocket-gateway</th>
+                        <td><em>조용히 고장난다</em></td>
+                        <td>위 15번 그대로. 다른 파드에 붙은 사람에게 안 간다</td>
+                        <td><em>★ 못 알아챈다</em></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="callout bad">
+                <span class="tag">조용한 고장이 제일 나쁘다</span>
+                <pre class="code"><code>domain-service      Pending 에서 멈춤   -> 바로 안다
+channel-engine      PK 충돌 에러       -> 바로 안다
+websocket-gateway   아무 일도 안 일어남  -> ★ 모른다</code></pre>
+                <p>wsgate 는 <em>파드가 멀쩡히 뜨고, 로그도 깨끗하고,
+                    readinessProbe 도 통과</em>한다.
+                    그런데 메시지만 사라진다.</p>
+                <p>보낸 사람 화면에는 정상으로 보인다.
+                    <em>&ldquo;상대가 답이 없네&rdquo; 라고만 느낀다.</em>
+                    그래서 <code>replicas: 1</code> 로 묶고 주석을 달아둔 것이다.</p>
+            </div>
+
+            <div class="callout">
+                <span class="tag">한 줄씩</span>
+                <pre class="code"><code>fan-out     1건 받아서 N명에게 보내는 것. for 루프가 그거다
+
+pub/sub     wsgate 가 여러 개면 서로의 세션을 모른다
+            Redis 로 "방송" 해서 알려준다
+            -> 파드가 많아지면 Redis 가 먼저 터진다
+
+샤딩         "이 방은 네 담당" 으로 미리 나눠두는 것
+            나눠두면 방송이 필요 없어진다
+            대신 재배치와 조회가 어려워진다
+
+replicas    worker 만 된다 (파티션 수인 6까지)
+            나머지 셋은 안 되고, wsgate 는 조용히 고장난다</code></pre>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #5 숫자와 순서
+             ===================================================== -->
+        <section class="note">
+            <h2>#5 지금 어디까지 되고, 올리려면 무슨 순서인가</h2>
+
+            <h3>18 &mdash; 현재 상한 &mdash; 전부 추정이다</h3>
+            <div class="callout bad">
+                <span class="tag">먼저 말할 것</span>
+                <p><em>부하 측정을 한 적이 없다.</em> 아래는 리소스 설정에서 역산한 값이고
+                    <em>실측이 아니다.</em> 숫자를 단정해서 말하면 거짓이 된다.</p>
+            </div>
+
+            <pre class="code"><code>[ 동시 접속 ]  wsgate 1파드, memory limit 768Mi
+  heap = 768 x 0.7 = 약 537MB
+  Spring + Tomcat 상주 = 150~250MB
+  연결 1개당 (힙 기준) 20~40KB
+    Tomcat WsSession 입출력 버퍼 8KB + 8KB
+    + Spring 래퍼 + 레지스트리 엔트리 4개
+  -> 산술 상한 약 10,000.  현실적으로 3,000~5,000
+  (커널 소켓 버퍼는 힙 밖에서 추가로 든다)
+
+[ 처리량 ]  cpu limit 1코어, fan-out 이 지배적
+   2인 방   약 1,000 msg/s
+  10인 방   약   450 msg/s
+  50인 방   약   110 msg/s
+ 200인 방   약    30 msg/s
+
+[ 지연 ]  한가할 때
+  gRPC 1ms + Redis 0.5ms + DB 2~5ms + Kafka 5~15ms  =  10~25ms
+
+[ 숨은 함정 ]
+  t3.medium 은 burstable. 지속 가능한 건 baseline 20%
+  CPU 크레딧이 떨어지면 성능이 1/5 로 주저앉는다
+  -> 부하를 길게 주면 몇십 분 뒤 숫자가 급락한다</code></pre>
+
+            <div class="callout">
+                <span class="tag">규모를 환산하면</span>
+                <pre class="code"><code>가입자 30,000
+  -> DAU 10~20%        =  3,000 ~ 6,000
+     -> 피크 CCU 5~15%  =    300 ~   900 명</code></pre>
+                <p><em>가입자 3만 명의 실제 서버 부하는 동시 접속 수백 명</em>이다.
+                    그 정도면 <em>처리량은 지금 구성으로도 된다.</em></p>
+                <p>먼저 터지는 건 처리량이 아니라
+                    <em>첨부 저장소 20Gi &rarr; RDS db.t4g.micro &rarr; 가용성(replicas 1)</em> 순이다.</p>
+                <p><em>숫자를 말할 땐 반드시 단위를 붙인다.</em>
+                    &ldquo;가입자 기준으로&rdquo; 다섯 글자가 사실과 과장을 가른다.</p>
+            </div>
+
+            <h3>19 &mdash; 올리는 순서 &mdash; 싼 것부터</h3>
+            <div class="route">
+                <div class="rnode">
+                    <span class="rnode-type">반나절</span>
+                    <strong>알림 대상 캐싱</strong>
+                    <small>건당 DB 조회 1회 제거<br>roomMemberCache 패턴 복사</small>
+                </div>
+                <div class="rnode">
+                    <span class="rnode-type">1시간</span>
+                    <strong>로그 레벨 &middot; 비동기 appender</strong>
+                    <small>핫패스 info 를 debug 로<br>초당 4만 줄이 사라진다</small>
+                </div>
+                <div class="rnode k">
+                    <span class="rnode-type">1~2일</span>
+                    <strong>메트릭 추가</strong>
+                    <small>주석 처리된 ChatMetrics 복구<br>건당 지연 · fan-out 크기</small>
+                </div>
+                <div class="rnode k">
+                    <span class="rnode-type">설계 변경</span>
+                    <strong>.get() 제거</strong>
+                    <small>배치가 살아난다<br>&quot;언제 성공이라 할지&quot; 재설계 필요</small>
+                </div>
+                <div class="rnode fw">
+                    <span class="rnode-type">설계 변경</span>
+                    <strong>fan-out 분리</strong>
+                    <small>전용 브로드캐스트 레이어<br>또는 방 단위 샤딩</small>
+                </div>
+                <div class="rnode last">
+                    <span class="rnode-type">마지막</span>
+                    <strong>수평 확장</strong>
+                    <small>세션 Redis · workerId 파드번호<br>S3 · Kafka 3대 · 컨슈머 N개</small>
+                </div>
+            </div>
+
+            <div class="callout">
+                <span class="tag">순서가 중요하다</span>
+                <p><em>앞의 세 개는 지금 당장 할 수 있고 구조를 안 건드린다.</em>
+                    특히 <em>메트릭이 먼저다.</em> 측정 없이 뒤의 것들을 하면
+                    무엇이 좋아졌는지 알 수가 없다.</p>
+                <p>그리고 <em>수평 확장이 제일 마지막</em>이다.
+                    상태를 밖으로 빼지 않은 상태에서 replicas 를 올리면
+                    <em>장애를 자동화하는 것</em>이다.</p>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #6 정리
+             ===================================================== -->
+        <section class="note">
+            <h2>#6 정리</h2>
+
+            <h3>20 &mdash; 한 줄 정리</h3>
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">맞는 표현</span>
+                    <ul>
+                        <li>&ldquo;<em>나중에 바꾸기 어려운 것부터 맞췄다</em>&rdquo;</li>
+                        <li>&ldquo;비동기로 뺀 건 DB 쓰기뿐이고
+                            <em>사용자 경로는 전 구간 동기</em>다&rdquo;</li>
+                        <li>&ldquo;처리량 대신 <em>확실성</em>을 택했다&rdquo;</li>
+                        <li>&ldquo;병목은 처리량이 아니라 <em>fan-out</em> 이다&rdquo;</li>
+                        <li>&ldquo;<em>측정을 안 해서</em> 숫자는 말씀드릴 수 없다&rdquo;</li>
+                    </ul>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">쓰면 안 되는 표현</span>
+                    <ul>
+                        <li>&ldquo;대규모 트래픽을 <em>처리한다</em>&rdquo;</li>
+                        <li>&ldquo;초당 <em>N 건</em>이 나온다&rdquo; &mdash; 측정 안 했다</li>
+                        <li>&ldquo;동시접속 2~3만을 고려했다&rdquo;
+                            &mdash; <em>가입자</em>면 맞고 <em>동시접속</em>이면 틀리다</li>
+                        <li>&ldquo;노드당 초당 12.8만 건 처리&rdquo;
+                            &mdash; 그건 <em>ID 발급 상한</em>이지 처리량이 아니다</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>21 &mdash; 자주 나오는 질문</h3>
+            <pre class="code"><code>어디가 대규모 지향인가요?
+  -> 나중에 바꾸기 어려운 것부터 맞췄다
+     ID 채번(Snowflake) · 데이터 흐름(Kafka) · 파티셔닝 키(roomId)
+     · 연결 모델(멀티플렉싱) · 소비 모델(멱등)
+     전부 지금 규모엔 필요 없는데 일부러 넣은 것들이다
+
+그래서 초당 몇 건 되나요?
+  -> 측정 안 했다고 먼저 말한다
+     "병목은 처리량이 아니라 fan-out 이라고 봅니다.
+      수신 1건이 방 인원만큼 송신으로 늘어나서,
+      50명 방이면 1건이 50건이 됩니다"
+
+★ acks=all 쓰셨다는데 브로커가 몇 대죠?
+  -> 1대다. ISR 이 1개라 사실상 acks=1 이다
+     "설정은 올바른 값이지만 내구성 보장은 실질적으로 없습니다.
+      운영이면 브로커 3대 + RF 3 + min.insync.replicas 2 여야 합니다"
+
+비동기 처리했다면서 왜 느린가요?
+  -> 비동기로 뺀 건 DB 쓰기 하나뿐이다
+     gRPC 도 Kafka 도 동기로 기다린다. 사용자 경로는 전부 동기다
+
+프로세스를 5개로 나눴는데 왜 처리량이 안 늘었나요?
+  -> 나눈다고 병렬이 되는 게 아니다. 1건은 여전히 직렬로 지나간다
+     오히려 메서드 호출이 gRPC 호출로 바뀌어 건당 지연은 늘었다
+     나눠서 얻은 건 배포 독립성 · 장애 격리 · 스케일 단위 분리다
+
+왜 replicas 를 안 늘렸나요?
+  -> 늘릴 수 있는 게 frontend 밖에 없었다
+     wsgate 는 세션이 JVM 메모리, domain-service 는 파일이 로컬 EBS
+     "준비 안 된 상태에서 늘리는 건 장애를 자동화하는 것"
+
+부하 테스트는 왜 안 하셨나요?
+  -> 비용. t3.medium 이 burstable 이라 지속 부하를 주면
+     CPU 크레딧이 떨어져 숫자가 의미를 잃는다
+     그리고 메트릭 자체가 없다(ChatMetrics 주석 처리)
+     "안 한 게 맞고, 그래서 숫자를 말씀드리지 못합니다"</code></pre>
+
+            <div class="callout">
+                <span class="tag">마지막 &mdash; 이 문서의 결론</span>
+                <p><em>프로젝트가 나쁜 게 아니라, 프로젝트에 대한 이해가 올라간 것이다.</em>
+                    코드는 어제와 똑같다.</p>
+                <p>&ldquo;Kafka 써봤습니다&rdquo; 로 끝나는 것과
+                    <em>&ldquo;<code>.get()</code> 을 붙이면 배치가 죽는데,
+                    처리량 대신 확실성을 택한 겁니다&rdquo;</em> 는 다른 얘기다.</p>
+                <p>진짜 고칠 것은 <em>두 개</em>다 &mdash;
+                    <em>알림 대상 캐싱</em>과 <em>메트릭 복구.</em>
+                    나머지는 트레이드오프이거나, 정상이거나, 운영 전환 때 할 일이다.</p>
+            </div>
+        </section>
+
+    </main>
+</body>
+
+</html>

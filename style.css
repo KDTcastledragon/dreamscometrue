@@ -36,8 +36,11 @@ body {
     margin: 0 auto;
 }
 
+/* 홈 머리말. 지금은 우측 etc 버튼만 들어간다. */
 .page-head {
-    padding: 32px 0 24px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 26px 0 20px;
 }
 
 .page-head h1 {
@@ -83,7 +86,7 @@ body {
 
 /* ===== 본문 펼침 페이지 ===== */
 .note-page {
-    padding: 0 0 48px;
+    padding: 10px 0 48px;
 }
 
 .top-bar {
@@ -335,6 +338,29 @@ pre.code code {
     margin: 0;
 }
 
+/* 3열 배치. 공고 요약처럼 항목이 셋일 때. */
+.cols3 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+    margin: 4px 0 14px;
+}
+
+@media (min-width: 900px) {
+    .cols3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.cols3 > .callout {
+    margin: 0;
+}
+
+.cols3 > div > h4:first-child {
+    margin-top: 0;
+}
+
 /* ===== 제목 옆에 붙는 보충 문구 ===== */
 .head-row {
     display: flex;
@@ -346,6 +372,33 @@ pre.code code {
 
 .head-row h3 {
     flex: none;
+    margin: 0;
+}
+
+/* h2 옆에 한 줄 설명을 붙일 때. h2 가 갖고 있던 밑줄을 줄 전체가 대신 받는다. */
+/* 제목 옆에 바로 그림을 붙이는 행. 제목이 제 폭만 차지하고 남는 자리를 그림이 쓴다.
+   그림을 제목 "아래" 에 두면 제목 높이만큼 위쪽 여백이 생기므로 같은 행에 넣는다. */
+.head-row.head-h2 {
+    align-items: flex-start;
+    gap: 0 18px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.head-row.head-h2 > h2 {
+    flex: none;
+    margin: 0;
+    padding: 0 0 6px;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+}
+
+.head-row.head-h2 > .cdiag {
+    flex: 1 1 560px;
+    min-width: 0;
     margin: 0;
 }
 
@@ -591,7 +644,7 @@ pre.code code {
     display: block;
     margin-top: 5px;
     color: var(--muted);
-    font-size: 10.5px;
+    font-size: 12.5px;
     line-height: 1.5;
     word-break: keep-all;
 }
@@ -1256,8 +1309,9 @@ pre.code code {
     left: 0;
     width: 22px;
     height: 22px;
-    border-radius: 50%;
-    background: var(--accent);
+    /* 위 흐름도의 초록 원형 번호와 구분되도록 회색 사각 뱃지로 둔다. */
+    border-radius: 6px;
+    background: #6b7671;
     color: #fff;
     font-size: 12px;
     font-weight: 700;
@@ -1398,6 +1452,24 @@ pre.code code {
 .cdiag.mem svg {
     min-width: 380px;
     max-width: 470px;
+}
+
+/* 흐름도처럼 가로로 긴 그림은 더 넓게 둬야 글씨가 안 뭉갠다. */
+.cdiag.wide svg {
+    min-width: 680px;
+    max-width: 980px;
+}
+
+/* 중첩 구조처럼 글자가 많은 그림. 더 키워야 안쪽 설명이 읽힌다. */
+.cdiag.full svg {
+    min-width: 760px;
+    max-width: 1180px;
+}
+
+/* 이 그림이 그 절의 본문이라 제목 바로 밑에 붙인다. */
+.cdiag.full {
+    margin-top: 0;
+    padding-top: 4px;
 }
 
 .cdiag .bd {
@@ -1549,8 +1621,10 @@ pre.code code {
 
 /* 내용이 길어서 본문만큼 넓게 열고 세로로 스크롤시킨다.
    dialog 라 ESC 로 닫히는 건 브라우저가 해준다. */
+/* position 을 주지 않는다. relative 를 주면 브라우저 기본값(fixed, 화면 중앙)이 덮여서
+   모달이 문서 안 자기 자리에 뜬다. 스크롤을 내린 뒤 열면 화면 밖에 뜨는 원인이었다.
+   fixed 도 containing block 이라 닫기 버튼(absolute)은 그대로 모달 안에 붙는다. */
 .hdr-modal {
-    position: relative;
     width: min(1500px, 94vw);
     max-height: 90vh;
     padding: 26px 20px 28px;
@@ -1602,4 +1676,152 @@ pre.code code {
 .modal-note > h2 {
     margin-right: 40px;
     font-size: 19px;
+}
+
+/* ===== 페이지 안 탭 (첫 화면 Rendering / sendMsg 흐름) ===== */
+/* 패널이 note-flow 그리드의 자식 노릇을 그대로 하도록 contents 로 둔다. */
+.tab-panel {
+    display: contents;
+}
+
+.tab-panel[hidden] {
+    display: none;
+}
+
+.tab-group {
+    display: flex;
+    flex: 1;
+    gap: 12px;
+    min-width: 0;
+    margin: 0 18px;
+}
+
+.tab-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.tab-btn small {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 400;
+    word-break: keep-all;
+}
+
+.tab-btn:hover {
+    border-color: var(--accent);
+}
+
+.tab-btn.is-active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+@media (max-width: 760px) {
+    .top-bar {
+        flex-wrap: wrap;
+    }
+
+    .tab-group {
+        order: 3;
+        flex-basis: 100%;
+        margin: 10px 0 0;
+    }
+}
+
+/* 본문에서 직접 입력하는 주소를 눈에 띄게 */
+.url-hl {
+    color: #2b6cb0;
+    font-weight: 700;
+}
+
+/* 제목 옆 한 줄 참고 */
+.h2-note {
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+.callout.my-flow .seq {
+    margin: 0;
+}
+
+/* ===== 흐름도 박스 -> 상세 모달 ===== */
+.farch .fnode[data-step] {
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.farch .fnode[data-step]:hover,
+.farch .fnode[data-step]:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 10px 26px rgb(37 91 63 / 0.28);
+    outline: none;
+}
+
+.step-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding-right: 36px;
+}
+
+.step-head h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.step-who {
+    color: var(--accent);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+
+.step-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.step-orig p {
+    font-size: 15px;
+}
+
+/* 번호가 없는 참고 노트. 흐름(번호 있는 목록)과 섞이지 않도록 회색 면으로 둔다. */
+.ref-notes {
+    margin: 10px 0 16px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: #f1f3f2;
+    color: var(--muted);
+    font-size: 13.5px;
+}
+
+.ref-notes p {
+    margin: 5px 0;
+}
+
+/* 헤더 구조 그림은 세로로 길고 칸이 작아서 최소 폭을 조금 낮춰 둔다. */
+.cdiag.hdr svg {
+    min-width: 500px;
+    max-width: 700px;
 }

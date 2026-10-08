@@ -12,15 +12,32 @@
 <body class="note-page">
     <div class="top-bar">
         <a class="back-link" href="./index.html">&larr; 뒤로가기</a>
+        <div class="tab-group" role="tablist" aria-label="공부 범위">
+            <button type="button" class="tab-btn is-active" role="tab" id="tabbtn-render"
+                data-tab="render" aria-controls="tab-render" aria-selected="true">
+                첫 화면 Rendering<small>castlechat.com 입력 &rarr; 브라우저 화면 &middot; TCP 초기 연결</small>
+            </button>
+            <button type="button" class="tab-btn" role="tab" id="tabbtn-send"
+                data-tab="send" aria-controls="tab-send" aria-selected="false">
+                sendMsg 데이터 흐름<small>&ldquo;안녕&rdquo; 전송 &rarr; 화면 표시 &middot; Kafka &middot; DB</small>
+            </button>
+        </div>
         <button type="button" class="hdr-btn"
             onclick="document.getElementById('hdrModal').showModal()">헤더</button>
     </div>
 
     <main class="note-flow">
 
+        <!-- 왼쪽 탭 : 첫 화면 Rendering (#1 ~ #3) -->
+        <div class="tab-panel" id="tab-render" role="tabpanel" aria-labelledby="tabbtn-render">
+
         <!-- ===================================================== -->
         <section class="note">
-            <h2>#1 http://castlechat.com/ 입력 + Enter &rarr; 브라우저 화면 Rendering</h2>
+            <h2 class="h3-btn">#0 전체 흐름 한눈에
+                <button type="button" class="note-btn"
+                    onclick="document.getElementById('glossModal').showModal()">용어 설명</button>
+                <span class="h2-note">박스를 누르면 그 단계의 상세 설명이 열린다. 모달 안에서 &larr; &rarr; 로 넘긴다.</span>
+            </h2>
 
             <div class="side-by-side">
                 <div class="callout">
@@ -31,7 +48,7 @@
                 <div class="callout bad">
                     <span class="tag">빠뜨리기 쉬운 두 지점</span>
                     <p>① HTTP 보다 <em>TCP 3-way Handshake 가 먼저</em>다.</p>
-                    <p>② Handshake 는 <em>Kernel</em>이 하고 NginX 는 완성된 연결만 받는다.</p>
+                    <p>② Handshake 는 <em>Kernel</em>이 하고 NGINX 는 완성된 연결만 받는다.</p>
                 </div>
             </div>
             <!-- 전체 구조를 먼저 한 번 훑고 아래에서 단계별로 파고든다.
@@ -41,12 +58,6 @@
                  DOM 순서는 흐름 순서 그대로 두고 left 값으로만 뒤집는다.
                  4열 x 5행 = 20칸 중 19칸 사용. 마지막 행 오른쪽 끝이 빈다.
                  정리한 원문을 그대로 담으려고 5열에서 4열로 줄여 칸을 넓혔다. -->
-            <h3 class="h3-btn">전체 흐름 한눈에
-                <button type="button" class="note-btn"
-                    onclick="document.getElementById('checkModal').showModal()">확인한 것</button>
-                <button type="button" class="note-btn"
-                    onclick="document.getElementById('renderModal').showModal()">렌더링</button>
-            </h3>
             <div class="farch">
                 <div class="farch-canvas">
                     <svg class="farch-lines" viewBox="0 0 1400 1080" preserveAspectRatio="none"
@@ -90,172 +101,130 @@
                     <!-- 1행 : 연결 수립. 좌 -> 우 -->
                     <div class="farch-band" style="top:1.7%">연결 수립</div>
 
-                    <article class="fnode client" style="left:12.5%;top:11.6%">
+                    <article class="fnode client" data-step="1" data-chunks="ck-url ck-dns" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:11.6%">
                         <span class="fnode-no">1</span>
                         <span class="fnode-type">DNS</span>
-                        <strong>목적지 IP 탐색</strong>
                         <small>DNS Resolver 가 목적지 IP 주소 탐색.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:37.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="2" data-extra="tcpip" data-chunks="ck-path ck-layer ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:11.6%">
                         <span class="fnode-no">2</span>
                         <span class="fnode-type">Client Kernel</span>
-                        <strong>SYN 전송</strong>
-                        <small>3-way Handshake 시작. 목적지 IP 와 TCP flag = SYN 포함한 패킷을
-                            Default Gateway 에 전송. 동시에 Client Kernel TCP State :
-                            CLOSED &rarr; SYN_SENT 변경.</small>
+                        <small>3-way handshake 시작. 목적지 IP 와 TCP flag = SYN 포함한 패킷을 Default Gateway 에 전송. 동시에, client의 kernel TCP State : CLOSED → SYN_SENT 변경.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:62.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="3" data-chunks="ck-hs ck-state ck-kernel" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:11.6%">
                         <span class="fnode-no">3</span>
                         <span class="fnode-type">N-Kernel</span>
-                        <strong>SYN 확인</strong>
-                        <small>N-Kernel 의 TCP/IP 스택이 SYN 확인. SYN Queue 에 "연결 후보" 를
-                            TCP State = SYN_RCVD 상태로 새로 만들어 넣음.
-                            NGINX 의 listen socket 은 LISTEN 유지 (fd = 6).</small>
+                        <small>NGINX가 떠 있는 서버의 OS의 Kernel(===N-Kernel)의 TCP/IP 스택이 SYN 확인. SYN Queue 에 "연결 후보" 를 TCP State === SYN_RCVD 상태로 새로 만들어 넣음. NGINX 의 listen socket 은 LISTEN 유지 (fd = 6).</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:87.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="4" data-chunks="ck-hs ck-why3" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:11.6%">
                         <span class="fnode-no">4</span>
                         <span class="fnode-type">N-Kernel</span>
-                        <strong>SYN+ACK 전송</strong>
-                        <small>N-Kernel 의 TCP/IP 스택이 TCP flag = SYN+ACK 와 목적지(Client PC) IP
-                            포함한 패킷을 client 에게 전송. 연결은 SYN Queue 에 보관되어 있다.</small>
+                        <small>N-Kernel의 TCP/IP 스택이 TCP flag = syn+ack 와 목적지(client PC) IP 포함한 패킷을 client에게 전송. 연결은 SYN Queue에 "보관되어" 있다.</small>
                     </article>
 
                     <!-- 2행 : 연결 완료. 우 -> 좌 -->
                     <div class="farch-band right" style="top:19.9%">연결 완료</div>
 
-                    <article class="fnode kernel" style="left:87.5%;top:30.8%">
+                    <article class="fnode kernel" data-step="5" data-chunks="ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:30.8%">
                         <span class="fnode-no">5</span>
                         <span class="fnode-type">Client Kernel</span>
-                        <strong>SYN+ACK 수신</strong>
-                        <small>Client Kernel 의 TCP/IP 스택이 TCP flag = SYN+ACK 패킷 수신.</small>
+                        <small>Client Kernel의 TCP/IP 스택이 TCP flag = syn+ack 패킷 수신.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:62.5%;top:30.8%">
+                    <article class="fnode kernel" data-step="6" data-chunks="ck-why3 ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:30.8%">
                         <span class="fnode-no">6</span>
                         <span class="fnode-type">Client Kernel</span>
-                        <strong>ACK 전송</strong>
-                        <small>Client Kernel 의 TCP/IP 스택이 TCP flag = ACK 패킷을 NGINX 서버에 전송.
-                            동시에 TCP State : SYN_SENT &rarr; ESTABLISHED 변경.</small>
+                        <small>Client Kernel의 TCP/IP 스택이 TCP flag = ACK 패킷을 NGINX 서버에 전송. 동시에 TCP State : SYN_SENT → ESTABLISHED 변경.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:37.5%;top:30.8%">
+                    <article class="fnode kernel" data-step="7" data-chunks="ck-queue" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:30.8%">
                         <span class="fnode-no">7</span>
                         <span class="fnode-type">N-Kernel</span>
-                        <strong>ACK 수신 &middot; 연결 성공</strong>
-                        <small>N-Kernel 이 패킷을 받고 TCP State : SYN_RCVD &rarr; ESTABLISHED 변경.
-                            연결이 SYN Queue 에서 Accept Queue 로 이동.
-                            3-way Handshake 성공. 연결 성공.</small>
+                        <small>N-Kernel이 패킷을 받고, TCP State : SYN_RCVD → ESTABLISHED 변경. 연결이 SYN 큐에서 accept 큐로 이동. 3-way handshake 성공. 연결 성공.</small>
                     </article>
 
-                    <article class="fnode server" style="left:12.5%;top:30.8%">
+                    <article class="fnode server" data-step="8" data-chunks="ck-queue ck-kernel" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:30.8%">
                         <span class="fnode-no">8</span>
                         <span class="fnode-type">NGINX</span>
-                        <strong>accept()</strong>
-                        <small>NGINX 가 accept() 로 꺼냄. conn_fd = 9 &rarr; 연결 socket 새로 생김.
-                            <em>&#9733; NGINX 가 이 연결에 처음 관여.</em></small>
+                        <small>NGINX 가 accept() 로 꺼냄  conn_fd = 9 ─▶  연결 socket 새로 생김. ★ NGINX 가 이 연결에 처음 관여.</small>
                     </article>
 
                     <!-- 3행 : HTTP 요청. 좌 -> 우 -->
                     <div class="farch-band" style="top:39.2%">HTTP 요청</div>
 
-                    <article class="fnode client" style="left:12.5%;top:50.1%">
+                    <article class="fnode client" data-step="9" data-chunks="ck-get" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:50.1%">
                         <span class="fnode-no">9</span>
                         <span class="fnode-type">Browser</span>
-                        <strong>write()</strong>
-                        <small>web browser 가 앞에서 만든 4-tuple Client Kernel socket 에
-                            GET / HTTP/1.1 바이트를 write(). socket 실체는 Client Kernel 안에 있고
-                            browser 가 가진 건 fd 번호뿐임. write() 는 시스템 콜이라
-                            Kernel 이 받아서 Send Buffer 로 복사.</small>
+                        <small>web browser가, 앞에서 만든 4-tuple Client Kernel socket에 GET / HTTP/1.1 바이트를 write(). socket 실체는 Client Kernel 안에 있고 browser가 가진 건 fd 번호뿐임. write() 는 시스템 콜이라, kernel이 받아서  Send Buffer로 복사.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:37.5%;top:50.1%">
+                    <article class="fnode kernel" data-step="10" data-chunks="ck-get" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:50.1%">
                         <span class="fnode-no">10</span>
                         <span class="fnode-type">Client Kernel</span>
-                        <strong>세그먼트 전송</strong>
-                        <small>Client Kernel 의 TCP/IP 스택이 해당 socket 의 TCB 에서 순서번호를
-                            이어받아 세그먼트를 만들어 전송. Handshake 를 다시 하지 않음.</small>
+                        <small>Client Kernel 의 TCP/IP 스택이 해당 socket의 TCB에서 순서번호를 이어받아 세그먼트를 만들어 전송. handshake 를 다시 하지 않음.</small>
                     </article>
 
-                    <article class="fnode kernel" style="left:62.5%;top:50.1%">
+                    <article class="fnode kernel" data-step="11" data-chunks="ck-get" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:50.1%">
                         <span class="fnode-no">11</span>
                         <span class="fnode-type">N-Kernel</span>
-                        <strong>역다중화</strong>
-                        <small>N-Kernel 의 TCP/IP 스택이 도착한 세그먼트의 4-tuple 로 socket 을
-                            찾아내고(역다중화) GET 바이트를 그 socket 의 Receive Buffer 에 쌓음.</small>
+                        <small>N-Kernel 의 TCP/IP 스택이, 도착한 세그먼트의 4-tuple로 socket을 찾아내고(역다중화) GET 바이트를 그 socket의 Receive Buffer 에 쌓음.</small>
                     </article>
 
-                    <article class="fnode server" style="left:87.5%;top:50.1%">
+                    <article class="fnode server" data-step="12" data-chunks="ck-nginx" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:50.1%">
                         <span class="fnode-no">12</span>
                         <span class="fnode-type">NGINX</span>
-                        <strong>read()</strong>
-                        <small>NGINX 가 read() 로 꺼냄.
-                            <em>&#9733; HTTP 를 처음 봄.</em></small>
+                        <small>NGINX 가 read() 로 꺼냄  ★ HTTP 를 처음 봄.</small>
                     </article>
 
                     <!-- 4행 : 응답과 Rendering. 우 -> 좌 -->
                     <div class="farch-band right" style="top:58.4%">응답 &middot; Rendering</div>
 
-                    <article class="fnode server" style="left:87.5%;top:69.4%">
+                    <article class="fnode server" data-step="13" data-chunks="ck-nginx" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:69.4%">
                         <span class="fnode-no">13</span>
                         <span class="fnode-type">NGINX</span>
-                        <strong>try_files &rarr; index.html</strong>
-                        <small>NGINX 가 try_files &rarr; index.html, 200 OK 송신.</small>
+                        <small>NGINX가 try_files -&gt; index.html 200ok 송신.</small>
                     </article>
 
-                    <article class="fnode client" style="left:62.5%;top:69.4%">
+                    <article class="fnode client" data-step="14" data-chunks="ck-parse ck-sub ck-crp" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:69.4%">
                         <span class="fnode-no">14</span>
                         <span class="fnode-type">Browser</span>
-                        <strong>Critical Rendering Path</strong>
-                        <small>client 에서 Critical Rendering Path 과정을 거쳐
-                            <em>화면 뜸.</em></small>
+                        <small>client에서 critical rendering path 과정을 거쳐 화면 뜸.</small>
                     </article>
 
-                    <article class="fnode client" style="left:37.5%;top:69.4%">
+                    <article class="fnode client" data-step="15" data-chunks="ck-react" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:69.4%">
                         <span class="fnode-no">15</span>
                         <span class="fnode-type">React</span>
-                        <strong>GET /user/isMe</strong>
-                        <small>JS 실행 후, React 가 GET /user/isMe 요청을 목적지 IP 로 패킷 전송.</small>
+                        <small>JS 실행 후, React가 GET /user/isMe 요청을 목적지 IP로 패킷 전송.</small>
                     </article>
 
-                    <article class="fnode server" style="left:12.5%;top:69.4%">
+                    <article class="fnode server" data-step="16" data-chunks="ck-login ck-proxy" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:69.4%">
                         <span class="fnode-no">16</span>
                         <span class="fnode-type">NGINX</span>
-                        <strong>connect() &rarr; proxy</strong>
-                        <small>NGINX 가 요청 받고 connect() 호출. N-Kernel 이 SYN 패킷 전송.
-                            NGINX &harr; Spring Boot Handshake 수행됨. Spring Boot 8080 으로 proxy.
-                            (proxy = NGINX 가 클라이언트 역할을 대신 해주는 것)
-                            &#42; 현재 nginx.conf 에 upstream keepalive 가 없어
-                            요청마다 새 연결이 생긴다.</small>
+                        <small>NGINX가 요청 받고, connect() 호출. N-Kernel 이 SYN 패킷 전송. NGINX &lt;-&gt; Spring Boot Handshake 수행됨. springboot 8080으로 proxy. (proxy === NGINX가 클라이언트 역할을 대신 해주는 것.) *현재 NGINX.conf 에 upstream keepalive 가 없어 요청마다 새 연결이 생긴다.</small>
                     </article>
 
                     <!-- 5행 : API 응답과 SPA. 좌 -> 우 -->
                     <div class="farch-band" style="top:77.7%">API 응답 &middot; SPA</div>
 
-                    <article class="fnode server" style="left:12.5%;top:88.6%">
+                    <article class="fnode server" data-step="17" data-chunks="ck-login" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:88.6%">
                         <span class="fnode-no">17</span>
                         <span class="fnode-type">Spring Boot</span>
-                        <strong>Redis 세션 조회</strong>
-                        <small>Spring Boot 에서 Redis session 조회 후, 결과(로그인 상태)를 담은
-                            패킷을 NGINX 에게 전송.</small>
+                        <small>springboot에서 redis session 조회 후, 결과(로그인상태)를 담은 패킷을 NGINX에게 전송.</small>
                     </article>
 
-                    <article class="fnode server" style="left:37.5%;top:88.6%">
+                    <article class="fnode server" data-step="18" data-chunks="ck-login" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:88.6%">
                         <span class="fnode-no">18</span>
                         <span class="fnode-type">NGINX</span>
-                        <strong>client 에게 전달</strong>
-                        <small>NGINX 가 client 에게 전달.</small>
+                        <small>NGINX가 client에게 전달.</small>
                     </article>
 
-                    <article class="fnode client" style="left:62.5%;top:88.6%">
+                    <article class="fnode client" data-step="19" data-chunks="ck-route" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:88.6%">
                         <span class="fnode-no">19</span>
                         <span class="fnode-type">React</span>
-                        <strong>navigate('/login')</strong>
-                        <small>React 가 "비로그인" 을 받고 navigate('/login').
-                            서버 요청 없이 이미 받은 JS 안에서 화면만 교체 &rarr;
-                            <em>로그인 화면 출력.</em></small>
+                        <small>React 가 "비로그인" 을 받고 navigate('/login'). 서버 요청 없이 이미 받은 JS 안에서 화면만 교체 → 로그인 화면 출력.</small>
                     </article>
                 </div>
 
@@ -266,50 +235,65 @@
                 </div>
             </div>
 
-            <div class="gloss">
-                <b>&#42; 용어 설명</b>
-                <dl>
-                    <dt>N-Kernel</dt>
-                    <dd>NGINX 가 떠 있는 서버의 OS Kernel</dd>
-                    <dt>Client Kernel</dt>
-                    <dd>접속한 PC 의 OS Kernel</dd>
-                    <dt>TCB</dt>
-                    <dd>Transmission Control Block. 연결 하나의 state &middot; 순서번호 &middot;
-                        윈도우를 적어두는 자료구조</dd>
-                    <dt>4-tuple</dt>
-                    <dd>출발지 IP:Port + 목적지 IP:Port. 연결의 신분증</dd>
-                    <dt>fd</dt>
-                    <dd>File Descriptor. 프로세스가 커널 자원을 가리키는 번호.
-                        소켓 실체는 커널 안에 있다</dd>
-                    <dt>Send / Receive Buffer</dt>
-                    <dd>write() 한 데이터가 ACK 올 때까지 머무는 곳 /
-                        도착한 데이터가 read() 될 때까지 쌓이는 곳</dd>
-                </dl>
+
+
+        </section>
+
+        <!-- ===================================================== -->
+        <section class="note">
+            <h2 class="h3-btn">#1 http://castlechat.com/ 입력 + Enter &rarr; 브라우저 화면 Rendering
+                <button type="button" class="note-btn"
+                    onclick="document.getElementById('checkModal').showModal()">확인한 것</button>
+                <button type="button" class="note-btn"
+                    onclick="document.getElementById('renderModal').showModal()">렌더링</button>
+                <span class="h2-note">참고 &mdash; IP 를 직접 치면(<code>http://43.202.208.133/</code>)
+                    DNS 단계가 통째로 생략된다.</span>
+            </h2>
+
+            <div class="step-chunk" id="ck-url">
+            <div class="ref-notes">
+                <p><strong class="url-hl">http://castlechat.com/</strong>
+                    URL(Uniform Resource Locator) 을 쪼개서
+                    <em>scheme</em> <code>http</code> &middot; <em>host</em> <code>castlechat.com</code> &middot;
+                    <em>port</em> (생략) &middot; <em>path</em> <code>/</code> 로 나눈다.</p>
+                <p>포트를 생략했으므로 <code>http</code> 의 기본값인
+                    <em>80 번</em>으로 정한다. <code>https</code> 였다면 443 이다.</p>
+                <p><em><code>castlechat.com</code> 만으로는 아무것도 못 한다.</em>
+                    IP 를 알아야 패킷을 만들 수 있으므로 DNS 조회가 먼저다.</p>
+            </div>
+            </div>
+
+            <!-- 직접 정리하고 검증받은 흐름. 문장은 원문 그대로 둔다 (NGINX · N-Kernel 표기만 통일). -->
+            <div class="callout my-flow">
+                <ol class="seq">
+                    <li>DNS Resolver 가 목적지 IP 주소 탐색.</li>
+                    <li>3-way handshake 시작. 목적지 IP 와 TCP flag = SYN 포함한 패킷을 Default Gateway 에 전송. 동시에, client의 kernel TCP State : CLOSED → SYN_SENT 변경.</li>
+                    <li>NGINX가 떠 있는 서버의 OS의 Kernel(===N-Kernel)의 TCP/IP 스택이 SYN 확인. SYN Queue 에 "연결 후보" 를 TCP State === SYN_RCVD 상태로 새로 만들어 넣음. NGINX 의 listen socket 은 LISTEN 유지 (fd = 6).</li>
+                    <li>N-Kernel의 TCP/IP 스택이 TCP flag = syn+ack 와 목적지(client PC) IP 포함한 패킷을 client에게 전송. 연결은 SYN Queue에 "보관되어" 있다.</li>
+                    <li>Client Kernel의 TCP/IP 스택이 TCP flag = syn+ack 패킷 수신.</li>
+                    <li>Client Kernel의 TCP/IP 스택이 TCP flag = ACK 패킷을 NGINX 서버에 전송. 동시에 TCP State : SYN_SENT → ESTABLISHED 변경.</li>
+                    <li>N-Kernel이 패킷을 받고, TCP State : SYN_RCVD → ESTABLISHED 변경. 연결이 SYN 큐에서 accept 큐로 이동. 3-way handshake 성공. 연결 성공.</li>
+                    <li>NGINX 가 accept() 로 꺼냄  conn_fd = 9 ─▶  연결 socket 새로 생김. ★ NGINX 가 이 연결에 처음 관여.</li>
+                    <li>web browser가, 앞에서 만든 4-tuple Client Kernel socket에 GET / HTTP/1.1 바이트를 write(). socket 실체는 Client Kernel 안에 있고 browser가 가진 건 fd 번호뿐임. write() 는 시스템 콜이라, kernel이 받아서  Send Buffer로 복사.</li>
+                    <li>Client Kernel 의 TCP/IP 스택이 해당 socket의 TCB에서 순서번호를 이어받아 세그먼트를 만들어 전송. handshake 를 다시 하지 않음.</li>
+                    <li>N-Kernel 의 TCP/IP 스택이, 도착한 세그먼트의 4-tuple로 socket을 찾아내고(역다중화) GET 바이트를 그 socket의 Receive Buffer 에 쌓음.</li>
+                    <li>NGINX 가 read() 로 꺼냄  ★ HTTP 를 처음 봄.</li>
+                    <li>NGINX가 try_files -&gt; index.html 200ok 송신.</li>
+                    <li>client에서 critical rendering path 과정을 거쳐 화면 뜸.</li>
+                    <li>JS 실행 후, React가 GET /user/isMe 요청을 목적지 IP로 패킷 전송.</li>
+                    <li>NGINX가 요청 받고, connect() 호출. N-Kernel 이 SYN 패킷 전송. NGINX &lt;-&gt; Spring Boot Handshake 수행됨. springboot 8080으로 proxy. (proxy === NGINX가 클라이언트 역할을 대신 해주는 것.) *현재 NGINX.conf 에 upstream keepalive 가 없어 요청마다 새 연결이 생긴다.</li>
+                    <li>springboot에서 redis session 조회 후, 결과(로그인상태)를 담은 패킷을 NGINX에게 전송.</li>
+                    <li>NGINX가 client에게 전달.</li>
+                    <li>React 가 "비로그인" 을 받고 navigate('/login'). 서버 요청 없이 이미 받은 JS 안에서 화면만 교체 → 로그인 화면 출력.</li>
+                </ol>
             </div>
 
 
-            <h3>1 &mdash; 브라우저 (주소 해석)</h3>
-            <ol class="seq">
-                <li><span class="who">브라우저</span> <code>http://castlechat.com/</code> 입력 + Enter.
-                    URL 을 쪼개서 <em>스킴 <code>http</code> &middot; 호스트 <code>castlechat.com</code> &middot;
-                    경로 <code>/</code></em> 로 나눈다.</li>
-                <li><span class="who">브라우저</span> 포트를 생략했으므로 <code>http</code> 의 기본값인
-                    <em>80 번</em>으로 정한다. <code>https</code> 였다면 443 이다.</li>
-                <li><span class="who">브라우저</span> <em><code>castlechat.com</code> 만으로는 아무것도 못 한다.</em>
-                    IP 를 알아야 패킷을 만들 수 있으므로 DNS 조회가 먼저다.</li>
-            </ol>
-
-            <div class="callout">
-                <span class="tag">실제 배포 기준</span>
-                <p>캐슬챗은 도메인을 사지 않아서 <code>http://43.202.208.133/</code> 로 접속한다.
-                    <em>IP 를 직접 치면 1-1 의 DNS 단계가 통째로 생략된다.</em></p>
-                <p>아래에 나오는 응답 헤더와 바이트 수는 그 상태에서 실제로 받아온 값이다.
-                    설명은 도메인을 쓰는 일반적인 경우로 적는다.</p>
-            </div>
-
-            <h3>1-1 &mdash; castlechat.com 을 IP 로 바꾼다 (DNS 조회)</h3>
-            <p><em>여기서 랜선을 타고 나가는 첫 패킷이 생긴다.</em> TCP SYN 이 아니다.
-                DNS 질의도 엄연한 네트워크 패킷이라 <em>홈 라우터를 똑같이 거친다.</em></p>
+            <div class="step-chunk" id="ck-dns">
+            <p><em>아래 캐시에서 못 찾았을 때만</em> DNS 질의가 랜선을 타고 나간다.
+                이때 첫 패킷은 TCP SYN 이 아니라 DNS 질의고,
+                엄연한 네트워크 패킷이라 <em>홈 라우터를 똑같이 거친다.</em>
+                캐시에서 찾으면 DNS 패킷은 아예 나가지 않고 첫 패킷이 TCP SYN 이 된다.</p>
 
             <div class="side-by-side">
                 <div>
@@ -318,10 +302,15 @@
                         <li><span class="who">브라우저 캐시</span> 크롬은 자체 DNS 캐시를 들고 있다.
                             <code>chrome://net-internals/#dns</code> 에서 볼 수 있다.
                             <em><code>ipconfig /flushdns</code> 로는 안 지워진다.</em></li>
-                        <li><span class="who k">OS 캐시</span> Windows 는 <code>ipconfig /displaydns</code>.</li>
+                        <li><span class="who k">DNS Resolver Cache</span>
+                            Windows 11 의 <em>DNS Client 서비스</em>(<code>Dnscache</code>)가 메모리에 들고 있다.
+                            커널이 아니라 <code>svchost.exe</code> 안에서 도는 유저 모드 서비스다.
+                            명령 프롬프트에서 <code>ipconfig /displaydns</code> 를 치면
+                            이 캐시에 들어 있는 도메인과 IP 목록이 출력되고,
+                            <code>ipconfig /flushdns</code> 를 치면 이 캐시가 전부 비워진다.</li>
                         <li><span class="who k">hosts 파일</span>
                             <code>C:\Windows\System32\drivers\etc\hosts</code>.
-                            <em>여기 적으면 DNS 서버보다 먼저 먹는다.</em> 로컬 개발에서 자주 쓴다.</li>
+                            <em>여기 적으면 DNS 서버보다 우선적으로 적용된다.</em> 로컬 개발에서 자주 쓴다.</li>
                     </ol>
                 </div>
                 <div>
@@ -371,15 +360,15 @@
                 </div>
                 <div class="callout bad">
                     <span class="tag">순서를 틀리기 쉽다</span>
-                    <p>첫 패킷은 SYN 이 아니다. 게이트웨이 MAC 을 모르면 <em>ARP 가 가장 먼저</em> 나간다.</p>
+                    <p>첫 패킷은 SYN 이 아니다. 기본 게이트웨이 MAC 을 모르면 <em>ARP 가 가장 먼저</em> 나간다.</p>
                     <p>그래서 실제 순서는
                         <em>ARP &rarr; DNS 질의 &rarr; TCP SYN</em> 이고,
                         <em>홈 라우터를 두 번 지난다.</em></p>
                 </div>
             </div>
 
-            <h4>랜선을 타고 나가는 순서</h4>
-            <pre class="code"><code>[1차]  ARP        게이트웨이 MAC 확보          (같은 랜 안에서만)
+            <h4>랜선을 타고 나가는 순서 (DNS 캐시와 ARP 캐시가 둘 다 비어 있을 때)</h4>
+            <pre class="code"><code>[1차]  ARP        기본 게이트웨이 MAC 확보     (같은 랜 안에서만)
 [2차]  DNS 질의   UDP 53  -> 홈 라우터 -> NAT -> Recursive Resolver
                   &lt;- 응답 : 43.202.208.133
 [3차]  TCP SYN    목적지 43.202.208.133:80 -> 홈 라우터 -> NAT -> 서버</code></pre>
@@ -398,60 +387,28 @@
                     <p>즉 DNS 조회 자체가 또 하나의 TCP 연결과 TLS Handshake 를 끌고 온다.</p>
                 </div>
             </div>
-
-            <h3>1-2 &mdash; 패킷이 실제로 가는 길</h3>
-            <p>여기가 "네트워크를 아느냐" 를 가르는 지점이다. <code>connect()</code> 한 번에 아래가 전부 일어난다.</p>
-
-            <div class="route">
-                <div class="rnode">
-                    <span class="rnode-type">App</span>
-                    <strong>브라우저</strong>
-                    <small>connect() 호출.<br>여기서 역할 끝</small>
-                </div>
-                <div class="rnode k">
-                    <span class="rnode-type">L3 / L2</span>
-                    <strong>Client PC Kernel</strong>
-                    <small>서브넷 판단 &middot; ARP<br>패킷 조립</small>
-                </div>
-                <div class="rnode">
-                    <span class="rnode-type">NAT</span>
-                    <strong>공유기</strong>
-                    <small>사설 &rarr; 공인 IP<br>포트로 세션 기억</small>
-                </div>
-                <div class="rnode">
-                    <span class="rnode-type">Router</span>
-                    <strong>ISP &rarr; 백본</strong>
-                    <small>목적지 IP 만 보고 전달<br>홉마다 TTL &minus;1</small>
-                </div>
-                <div class="rnode fw">
-                    <span class="rnode-type">Firewall</span>
-                    <strong>AWS 보안그룹</strong>
-                    <small>80 번 허용 확인<br>막히면 조용히 폐기</small>
-                </div>
-                <div class="rnode k">
-                    <span class="rnode-type">L4</span>
-                    <strong>Lightsail Kernel</strong>
-                    <small>iptables DNAT<br>컨테이너로 전달</small>
-                </div>
-                <div class="rnode last">
-                    <span class="rnode-type">Process</span>
-                    <strong>NginX</strong>
-                    <small>accept() 로<br>완성된 연결 수령</small>
-                </div>
             </div>
+
+            <div class="step-chunk" id="ck-path">
+            <h3>패킷이 실제로 가는 길</h3>
+            <p>여기가 "네트워크를 아느냐" 를 가르는 지점이다. <code>connect()</code> 한 번에 패킷이
+                Client Kernel &rarr; 공유기(NAT) &rarr; 라우터들 &rarr; 방화벽 &rarr; N-Kernel 순서로 지나간다.
+                단계별 설명은 #2 의 &lsquo;SYN 이 실제로 가는 경로&rsquo; 에 있다.</p>
 
             <div class="callout">
                 <span class="tag">같은 길을 두 번 간다</span>
-                <p>위 경로는 TCP SYN 기준이지만, <em>1-1 의 DNS 질의도 똑같은 길을 지난다.</em>
+                <p>이 경로는 TCP SYN 기준이지만, <em>위의 DNS 질의도 똑같은 길을 지난다.</em>
                     목적지만 Recursive Resolver 로 바뀔 뿐 Kernel &rarr; 공유기 NAT &rarr; 라우터 순서는 같다.</p>
             </div>
+            </div>
 
+            <div class="step-chunk" id="ck-layer">
             <h4>Kernel 이 패킷을 조립하는 순서</h4>
             <ol class="seq">
                 <li><span class="who k">서브넷 판단</span> 내 IP <code>192.168.0.5</code> 와 서브넷 마스크
                     <code>255.255.255.0</code> 을 AND 해서 내 망은 <code>192.168.0.0/24</code> 임을 안다.
                     목적지 <code>43.202.208.133</code> 은 <em>여기 없다</em> &rarr; 기본 게이트웨이로 보낸다.</li>
-                <li><span class="who k">ARP</span> 게이트웨이의 <em>IP 는 아는데 MAC 을 모른다.</em>
+                <li><span class="who k">ARP</span> 기본 게이트웨이의 <em>IP 는 아는데 MAC 을 모른다.</em>
                     "<code>192.168.0.1</code> 쓰는 사람 MAC 알려줘" 를 브로드캐스트로 뿌려 알아낸다.
                     <em>ARP 는 같은 랜 안에서만 동작한다.</em></li>
                 <li><span class="who k">포트 배정</span> 출발지 포트를 <em>임시 포트(49152~65535)</em> 중에서 하나 고른다.
@@ -489,7 +446,7 @@
                     <tr>
                         <th>L7 HTTP</th>
                         <td>메서드, 헤더, 바디</td>
-                        <td>NginX, Spring Boot</td>
+                        <td>NGINX, Spring Boot</td>
                         <td>끝까지 유지</td>
                     </tr>
                 </table>
@@ -514,7 +471,9 @@
             <p>응답은 같은 경로를 되짚어 온다. 공유기가 나갈 때 기록해둔 <em>NAT 테이블</em>이 열쇠다.
                 "공인 IP:51234 로 온 응답은 사설 <code>192.168.0.5:51234</code> 에게" 라는 기록이 없으면
                 공유기는 그 패킷을 누구에게 줘야 할지 몰라서 버린다.</p>
+            </div>
 
+            <div class="step-chunk" id="ck-hs">
             <h4>TCP 3-way Handshake &mdash; HTTP 는 아직 한 글자도 안 보냈다</h4>
             <div class="side-by-side">
                 <div class="hsq">
@@ -548,11 +507,13 @@
 
                 <div class="callout">
                     <span class="tag">주체</span>
-                    <p>SYN+ACK 를 보내는 건 <em>서버의 Linux Kernel</em>이다. NginX 도 Spring Boot 도 아니다.</p>
-                    <p>NginX 는 <code>accept()</code> 로 <em>완성된 연결</em>만 건네받는다. 자세한 건 #2 참고.</p>
+                    <p>SYN+ACK 를 보내는 건 <em>서버의 Linux Kernel</em>이다. NGINX 도 Spring Boot 도 아니다.</p>
+                    <p>NGINX 는 <code>accept()</code> 로 <em>완성된 연결</em>만 건네받는다. 자세한 건 #2 참고.</p>
                 </div>
             </div>
+            </div>
 
+            <div class="step-chunk" id="ck-why3">
             <h4>왜 2번이 아니라 3번인가</h4>
             <p>답은 <em>양쪽 모두 "내 말이 상대에게 닿는다" 를 확인해야 하기 때문</em>이다.</p>
             <div class="scroll-x">
@@ -577,7 +538,9 @@
             </div>
             <p>2번에서 멈추면 <em>서버는 자기가 보낸 SYN+ACK 가 도착했는지 모른다.</em>
                 그 상태로 데이터를 보내면 허공에 쏘는 꼴이 된다.</p>
+            </div>
 
+            <div class="step-chunk" id="ck-state">
             <div class="side-by-side">
                 <div>
                     <h4>SYN 에 실제로 실리는 것</h4>
@@ -592,7 +555,7 @@
                 <div>
                     <h4>Kernel 의 연결 상태 전이</h4>
                     <pre class="code"><code>Client                    Server
-CLOSED                    LISTEN      &lt;- NginX 가 listen(80)
+CLOSED                    LISTEN      &lt;- NGINX 가 listen(80)
   |  --- SYN ------------>  |
 SYN_SENT                  SYN_RCVD
   |  &lt;-- SYN+ACK ---------  |
@@ -600,14 +563,16 @@ SYN_SENT                  SYN_RCVD
 ESTABLISHED               ESTABLISHED
                             |
                             +-> accept() 큐에 적립
-                                NginX 가 꺼내감</code></pre>
+                                NGINX 가 꺼내감</code></pre>
                 </div>
             </div>
+            </div>
 
+            <div class="step-chunk" id="ck-queue">
             <div class="side-by-side">
                 <div class="callout">
                     <span class="tag">backlog 큐</span>
-                    <p>Handshake 가 끝난 연결은 <em>accept 큐</em>에 쌓인다. NginX 가 바쁘면 큐가 차고,
+                    <p>Handshake 가 끝난 연결은 <em>accept 큐</em>에 쌓인다. NGINX 가 바쁘면 큐가 차고,
                         가득 차면 새 연결이 거절되거나 지연된다.</p>
                     <p>트래픽이 몰릴 때 "연결은 되는데 느리다" 가 여기서 나온다.
                         <code>somaxconn</code>, <code>backlog</code> 튜닝 대상이다.</p>
@@ -620,6 +585,7 @@ ESTABLISHED               ESTABLISHED
                         ACK 가 돌아올 때 복원한다.</p>
                 </div>
             </div>
+            </div>
 
             <div class="callout">
                 <span class="tag">연결을 끊을 때는 4번</span>
@@ -630,7 +596,8 @@ ESTABLISHED               ESTABLISHED
                     "Address already in use" 가 뜨는 이유가 이것이다.</p>
             </div>
 
-            <h3>2 &mdash; GET 요청 전송</h3>
+            <div class="step-chunk" id="ck-get">
+            <h3>GET 요청 전송</h3>
             <p>한 줄이 아니라 요청 라인 + 헤더 묶음이다. 쿠키도 여기 실린다. 자세한 건 상단 <em>헤더</em> 버튼.</p>
             <pre class="code"><code>GET / HTTP/1.1
 Host: 43.202.208.133
@@ -640,8 +607,10 @@ Accept-Encoding: gzip, deflate
 Connection: keep-alive
 Cookie: JSESSIONID=...          &lt;-- 있으면 브라우저가 자동으로 붙인다
                                 &lt;-- 빈 줄 하나가 "헤더 끝" 신호</code></pre>
+            </div>
 
-            <h3>3 &mdash; NginX (정적 파일 반환)</h3>
+            <div class="step-chunk" id="ck-nginx">
+            <h3>NGINX (정적 파일 반환)</h3>
             <pre class="code"><code>location / {
     try_files $uri $uri/ /index.html;
 }
@@ -650,7 +619,7 @@ Cookie: JSESSIONID=...          &lt;-- 있으면 브라우저가 자동으로 �
 #   1차 $uri   -> /usr/share/nginx/html/   디렉토리라서 실패
 #   2차 $uri/  -> 디렉토리 맞음 -> index 지시자 -> index.html 발견. 성공</code></pre>
             <p><code>location /</code> 에는 <code>proxy_pass</code> 가 없다. 즉 <em>Spring Boot 에게 물어볼
-                필요가 없다.</em> NginX 가 자기 디스크에서 읽어 바로 돌려준다.</p>
+                필요가 없다.</em> NGINX 가 자기 디스크에서 읽어 바로 돌려준다.</p>
             <pre class="code"><code>HTTP/1.1 200 OK
 Server: nginx/1.27.5
 Content-Type: text/html          &lt;-- 브라우저의 다음 행동을 결정한다
@@ -659,8 +628,10 @@ Connection: keep-alive
 ETag: "6aa4110f-224"
 
 &lt;!doctype html&gt;...  (548 바이트)</code></pre>
+            </div>
 
-            <h3>4 &mdash; 브라우저 파싱 (아직 흰 화면)</h3>
+            <div class="step-chunk" id="ck-parse">
+            <h3>브라우저 파싱 (아직 흰 화면)</h3>
             <p><code>Content-Type: text/html</code> 을 보고 HTML 파서를 가동한다.
                 <em>확장자가 아니라 이 헤더가 기준이다.</em> 받은 548 바이트의 알맹이는 이게 전부다.</p>
             <pre class="code"><code>&lt;script defer src="/static/js/main.e83d3066.js"&gt;&lt;/script&gt;
@@ -691,15 +662,19 @@ ETag: "6aa4110f-224"
                 </table>
             </div>
             <p><code>root</code> 가 비어 있으니 <em>그릴 내용이 없다. 흰 화면이다.</em></p>
+            </div>
 
-            <h3>5 &mdash; JS / CSS 추가 요청</h3>
+            <div class="step-chunk" id="ck-sub">
+            <h3>JS / CSS 추가 요청</h3>
             <pre class="code"><code>GET /static/css/main.0bd4de65.css
 GET /static/js/main.e83d3066.js
 GET /favicon.ico  등</code></pre>
             <p><code>Connection: keep-alive</code> 덕분에 <em>1 단계의 TCP 연결을 재사용</em>한다.
-                Handshake를 다시 하지 않는다. NginX 는 이것도 같은 <code>location /</code> 에서 정적 파일로 내준다.</p>
+                Handshake를 다시 하지 않는다. NGINX 는 이것도 같은 <code>location /</code> 에서 정적 파일로 내준다.</p>
+            </div>
 
-            <h3>6 &mdash; Rendering 파이프라인</h3>
+            <div class="step-chunk" id="ck-crp">
+            <h3>Rendering 파이프라인</h3>
             <pre class="code"><code>HTML --파싱--> DOM 트리  -+
                           +--> Render Tree --> Layout --> Paint --> Composite
 CSS  --파싱--> CSSOM 트리 -+
@@ -711,8 +686,10 @@ CSS  --파싱--> CSSOM 트리 -+
                 <li><em>Composite</em> &mdash; 레이어를 합쳐 화면에 출력한다.</li>
             </ul>
             <p>여기까지 돌면 <em>흰 화면이 실제로 모니터에 나타난다.</em> 아직 비어 있다.</p>
+            </div>
 
-            <h3>7 &mdash; JS 실행, React 등장</h3>
+            <div class="step-chunk" id="ck-react">
+            <h3>JS 실행, React 등장</h3>
             <p>DOM 파싱이 끝났으니 미뤄둔 <code>defer</code> 스크립트가 실행된다.</p>
             <ol class="seq">
                 <li><span class="who">브라우저</span> <code>crypto.randomUUID</code> polyfill 적용.
@@ -723,19 +700,23 @@ CSS  --파싱--> CSSOM 트리 -+
                     네트워크가 아니라 순수 DOM 조작이다.</li>
                 <li><span class="who">브라우저</span> DOM 이 바뀌었으니 Layout &rarr; Paint 를 다시 돈다.</li>
             </ol>
+            </div>
 
-            <h3>8 &mdash; 로그인 여부 확인 (여기서 처음 Spring Boot 가 깨어난다)</h3>
+            <div class="step-chunk" id="ck-login">
+            <h3>로그인 여부 확인 (여기서 처음 Spring Boot 가 깨어난다)</h3>
             <ol class="seq">
                 <li><span class="who">React</span> AppShell 의 <code>useMe()</code> 가
                     <code>GET /user/isMe</code> 호출.</li>
-                <li><span class="who">NginX</span> <code>location ~ ^/(user|friend|chat|room|uploads)/</code>
+                <li><span class="who">NGINX</span> <code>location ~ ^/(user|friend|chat|room|uploads)/</code>
                     에 걸려 <code>domain-service:8080</code> 으로 프록시. <em>이때 A&harr;B Handshake가 한 번 더
                     일어난다.</em></li>
                 <li><span class="who">Spring Boot</span> 쿠키의 세션 ID 로 Redis 세션 조회.</li>
                 <li><span class="who">Spring Boot</span> 세션 없음 &rarr; 비로그인 응답.</li>
             </ol>
+            </div>
 
-            <h3>9 &mdash; 라우팅 분기와 최종 화면</h3>
+            <div class="step-chunk" id="ck-route">
+            <h3>라우팅 분기와 최종 화면</h3>
             <ol class="seq">
                 <li><span class="who">React</span> me 없음 + 현재 경로가 <code>/</code> 라 공개 경로가 아니다.</li>
                 <li><span class="who">React</span> <code>navigate('/login', { replace: true })</code> &rarr;
@@ -744,19 +725,20 @@ CSS  --파싱--> CSSOM 트리 -+
                     이미 받은 JS 안에서 화면만 교체한다. 이것이 SPA 다.</li>
                 <li><span class="who">브라우저</span> 로그인 폼 Rendering. <em>완료.</em></li>
             </ol>
+            </div>
 
             <h3>한 장 요약</h3>
             <pre class="code"><code>[Input]   castlechat.com + Enter
    |
-[ARP]     게이트웨이 MAC 확보
+[ARP]     기본 게이트웨이 MAC 확보
    |      랜선으로 나가는 진짜 첫 패킷
 [DNS]     캐시 -> Recursive Resolver -> 43.202.208.133
    |      UDP 53. 이 질의도 홈 라우터를 거친다
 [Kernel]  SYN -> SYN+ACK -> ACK
-   |      NginX 가 아니라 Kernel 이 한다
+   |      NGINX 가 아니라 Kernel 이 한다
 [HTTP]    GET / + 헤더 + 빈 줄
    |
-[NginX]   try_files -> index.html  548 바이트
+[NGINX]   try_files -> index.html  548 바이트
    |
 [Parse]   DOM 트리 생성. root 는 비어 있음 -> CSS/JS 추가 GET
    |
@@ -775,8 +757,8 @@ CSS  --파싱--> CSSOM 트리 -+
                 <span class="tag">핵심 두 가지</span>
                 <p>① <em>흰 화면이 먼저 뜨고 JS 가 나중에 채운다.</em> CSR 의 특징이고,
                     그래서 초기 로딩이 느리면 빈 화면이 보인다. SSR 을 쓰는 이유가 여기서 나온다.</p>
-                <p>② <em>Handshake는 Kernel이 하고 NginX 는 완성된 연결만 받는다.</em>
-                    "NginX 가 SYN 을 받는다" 고 답하면 틀린다.</p>
+                <p>② <em>Handshake는 Kernel이 하고 NGINX 는 완성된 연결만 받는다.</em>
+                    "NGINX 가 SYN 을 받는다" 고 답하면 틀린다.</p>
             </div>
         </section>
 
@@ -820,8 +802,8 @@ CSS  --파싱--> CSSOM 트리 -+
 
             <div class="head-row">
                 <h3>온프레미스 &mdash; 물리적으로 분리한 구조</h3>
-                <p class="head-note"><strong class="danger">B 에 공인 IP 가 없는 것</strong>이 분리하는 가장 큰 이유다.
-                    공격자가 Spring Boot 를 직접 때릴 경로가 물리적으로 존재하지 않고, 반드시 A 를 거쳐야 한다.</p>
+                <p class="head-note"><strong class="danger">WAS 서버에 공인 IP 가 없는 것</strong>이 분리하는 가장 큰 이유다.
+                    공격자가 Spring Boot 를 직접 때릴 경로가 물리적으로 존재하지 않고, 반드시 Web 서버를 거쳐야 한다.</p>
             </div>
             <div class="topo">
                 <div class="machine">
@@ -833,32 +815,33 @@ CSS  --파싱--> CSSOM 트리 -+
                 </div>
                 <div class="topo-arrow" aria-hidden="true"></div>
                 <div class="machine edge">
-                    <div class="machine-title">Web 서버 (A)</div>
-                    <div class="layer"><strong>NginX</strong><small>listen :80</small></div>
-                    <div class="layer kernel">Linux Kernel A</div>
+                    <div class="machine-title">Web 서버</div>
+                    <div class="layer"><strong>NGINX</strong><small>listen :80</small></div>
+                    <div class="layer kernel">N-Kernel</div>
                     <div class="layer"><strong>NIC</strong></div>
                     <div class="machine-foot">공인 203.0.113.10<br>사설 10.0.1.10<br>외부에 노출된 유일한 지점</div>
                 </div>
                 <div class="topo-arrow" aria-hidden="true"></div>
                 <div class="machine">
-                    <div class="machine-title">WAS 서버 (B)</div>
+                    <div class="machine-title">WAS 서버</div>
                     <div class="layer"><strong>Spring Boot</strong><small>listen :8080</small></div>
-                    <div class="layer kernel">Linux Kernel B</div>
+                    <div class="layer kernel">S-Kernel</div>
                     <div class="layer"><strong>NIC</strong></div>
                     <div class="machine-foot">공인 IP 없음<br>사설 10.0.1.20<br>인터넷에서 닿을 수 없다</div>
                 </div>
             </div>
-            <h3>Handshake는 Kernel이 한다 &mdash; NginX 가 아니다</h3>
+            <div class="step-chunk" id="ck-kernel">
+            <h3>Handshake는 Kernel이 한다 &mdash; NGINX 가 아니다</h3>
             <div class="callout bad">
                 <span class="tag">흔한 오해</span>
-                <p>"NginX 가 SYN 을 받아서 SYN+ACK 를 보낸다" &mdash; <em>틀렸다.</em>
-                    NginX 는 SYN 을 보지도 못한다. Kernel이 Handshake를 혼자 다 끝낸 뒤에 NginX 에게 넘긴다.</p>
+                <p>"NGINX 가 SYN 을 받아서 SYN+ACK 를 보낸다" &mdash; <em>틀렸다.</em>
+                    NGINX 는 SYN 을 보지도 못한다. Kernel이 Handshake를 혼자 다 끝낸 뒤에 NGINX 에게 넘긴다.</p>
             </div>
 
             <h4>전화 비유</h4>
             <ul>
                 <li><em>Kernel = 교환원.</em> 벨이 울리면 받아서 통화를 성립시킨다.</li>
-                <li><em>NginX = 담당 직원.</em> 교환원이 연결해준 통화를 건네받아 실제 대화를 한다.</li>
+                <li><em>NGINX = 담당 직원.</em> 교환원이 연결해준 통화를 건네받아 실제 대화를 한다.</li>
                 <li>직원은 벨소리와 "연결 중" 신호에 참여하지 않는다. 수화기를 받았을 때 통화는 이미 성립돼 있다.</li>
             </ul>
 
@@ -875,42 +858,43 @@ CSS  --파싱--> CSSOM 트리 -+
                         <td>1</td>
                         <td><code>SYN</code></td>
                         <td><em>Client PC Kernel</em><br>(브라우저가 <code>connect()</code> 로 부탁)</td>
-                        <td><em>서버 A 의 Linux Kernel</em></td>
+                        <td><em>N-Kernel</em></td>
                     </tr>
                     <tr>
                         <td>2</td>
                         <td><code>SYN+ACK</code></td>
-                        <td><em>서버 A 의 Linux Kernel</em></td>
+                        <td><em>N-Kernel</em></td>
                         <td>Client PC Kernel</td>
                     </tr>
                     <tr>
                         <td>3</td>
                         <td><code>ACK</code></td>
                         <td>Client PC Kernel</td>
-                        <td>서버 A 의 Linux Kernel</td>
+                        <td>N-Kernel</td>
                     </tr>
                     <tr>
                         <td>4</td>
                         <td>연결 성립</td>
-                        <td>Kernel A 가 accept 큐에 적립</td>
-                        <td><em>NginX 가 <code>accept()</code> 로 꺼냄</em><br>&larr; NginX 첫 등장</td>
+                        <td>N-Kernel 이 accept 큐에 적립</td>
+                        <td><em>NGINX 가 <code>accept()</code> 로 꺼냄</em><br>&larr; NGINX 첫 등장</td>
                     </tr>
                     <tr>
                         <td>5</td>
                         <td><code>GET / HTTP/1.1</code></td>
                         <td>브라우저</td>
-                        <td>NginX</td>
+                        <td>NGINX</td>
                     </tr>
                     <tr>
                         <td>6</td>
                         <td><code>200 OK</code> + html</td>
-                        <td>NginX</td>
+                        <td>NGINX</td>
                         <td>브라우저</td>
                     </tr>
                 </table>
             </div>
-            <p><em>1~3 번에 NginX 가 없다.</em> TCP Handshake는 TCP 프로토콜의 일이고 TCP 구현체가 Kernel 안에 있기
+            <p><em>1~3 번에 NGINX 가 없다.</em> TCP Handshake는 TCP 프로토콜의 일이고 TCP 구현체가 Kernel 안에 있기
                 때문이다. 유저랜드 프로그램이 매번 직접 악수하게 만들면 모든 서버 프로그램이 TCP 를 새로 구현해야 한다.</p>
+            </div>
 
             <h3>SYN 이 실제로 가는 경로</h3>
             <p>패킷은 층으로 포개져 있고, <em>중간 라우터는 봉투 안을 뜯어보지 않는다.</em></p>
@@ -930,18 +914,20 @@ CSS  --파싱--> CSSOM 트리 -+
             <ol class="seq">
                 <li><span class="who">브라우저</span> <code>socket()</code> + <code>connect()</code> 호출.
                     여기서 브라우저 역할은 끝이고 나머지는 Kernel이 한다.</li>
-                <li><span class="who k">Client PC Kernel</span> "목적지가 내 서브넷에 없네" 판단 &rarr;
+                <li><span class="who k">Client Kernel</span> "목적지가 내 서브넷에 없네" 판단 &rarr;
                     기본 게이트웨이(공유기)로 보내기로 결정. ARP 로 공유기 MAC 을 알아내 전송.</li>
                 <li><span class="who">공유기</span> NAT. 출발지 IP 를 사설 &rarr; 공인으로 바꿔치기하고,
                     돌아올 응답을 누구에게 줄지 포트로 기억해둔다.</li>
                 <li><span class="who">라우터들</span> ISP &rarr; 백본 &rarr; AWS. 수십 홉을 목적지 IP 만 보고 전달한다.</li>
                 <li><span class="who">방화벽</span> 보안그룹이 80 번 허용을 확인한다. 막혀 있으면 여기서 조용히
                     버려지고 브라우저는 타임아웃이 난다.</li>
-                <li><span class="who k">Server Kernel</span> "80 번 듣는 소켓 있음(NginX)" &rarr;
-                    <em>SYN+ACK 발사.</em> 여기가 답이다.</li>
+                <li><span class="who k">N-Kernel</span> "80 번 듣는 소켓 있음(NGINX)" &rarr;
+                    <em>SYN+ACK 발사.</em> 여기가 답이다.
+                    (캐슬챗처럼 Docker 컨테이너라면 이 앞에서 호스트 Kernel 의 <code>iptables</code> DNAT 가
+                    컨테이너로 돌려준다.)</li>
             </ol>
 
-            <h3>입력 &rarr; Rendering 동안 B 서버는 깨어나지 않는다</h3>
+            <h3>입력 &rarr; Rendering 동안 WAS 서버는 깨어나지 않는다</h3>
             <div class="topo">
                 <div class="machine">
                     <div class="machine-title">클라이언트 PC</div>
@@ -951,16 +937,16 @@ CSS  --파싱--> CSSOM 트리 -+
                 </div>
                 <div class="topo-arrow" aria-hidden="true"></div>
                 <div class="machine edge">
-                    <div class="machine-title">Web 서버 (A)</div>
-                    <div class="layer"><strong>NginX</strong></div>
-                    <div class="layer kernel">Linux Kernel A</div>
+                    <div class="machine-title">Web 서버</div>
+                    <div class="layer"><strong>NGINX</strong></div>
+                    <div class="layer kernel">N-Kernel</div>
                     <div class="machine-foot">정적 파일을 혼자 다 내준다</div>
                 </div>
                 <div class="topo-arrow cut" aria-hidden="true"></div>
                 <div class="machine idle">
-                    <div class="machine-title">WAS 서버 (B)</div>
+                    <div class="machine-title">WAS 서버</div>
                     <div class="layer"><strong>Spring Boot</strong></div>
-                    <div class="layer kernel">Linux Kernel B</div>
+                    <div class="layer kernel">S-Kernel</div>
                     <div class="machine-foot">참여 없음</div>
                 </div>
             </div>
@@ -969,9 +955,9 @@ CSS  --파싱--> CSSOM 트리 -+
                 <table>
                     <tr>
                         <th>단계</th>
-                        <th>Kernel A</th>
-                        <th>NginX</th>
-                        <th>Kernel B</th>
+                        <th>N-Kernel</th>
+                        <th>NGINX</th>
+                        <th>S-Kernel</th>
                         <th>Spring Boot</th>
                     </tr>
                     <tr>
@@ -1014,12 +1000,12 @@ CSS  --파싱--> CSSOM 트리 -+
             <div class="callout">
                 <span class="tag">짚을 점</span>
                 <p>로그인 화면이 뜨기까지 Spring Boot 는 전원만 켜져 있을 뿐이다.
-                    <em>B 서버를 꺼놔도 로그인 화면은 똑같이 뜬다.</em>
+                    <em>WAS 서버를 꺼놔도 로그인 화면은 똑같이 뜬다.</em>
                     React 빌드 산출물은 그냥 정적 파일이라 WAS 가 필요 없다. 이게 CSR 구조의 특징이다.</p>
             </div>
 
             <h3>GET 이후 Rendering까지</h3>
-            <p><code>location /</code> 에는 <code>proxy_pass</code> 가 없다. 즉 "B 에게 물어볼 필요 없음" 이다.</p>
+            <p><code>location /</code> 에는 <code>proxy_pass</code> 가 없다. 즉 "WAS 서버에게 물어볼 필요 없음" 이다.</p>
             <pre class="code"><code>location / {
     try_files $uri $uri/ /index.html;
 }
@@ -1030,7 +1016,7 @@ CSS  --파싱--> CSSOM 트리 -+
 #   3차 /index.html  -> 갈 필요 없었음</code></pre>
 
             <ol class="seq">
-                <li><span class="who">NginX</span> 자기 디스크에서 <code>index.html</code> 을 읽어
+                <li><span class="who">NGINX</span> 자기 디스크에서 <code>index.html</code> 을 읽어
                     <code>200 OK</code> + 548 바이트 반환.</li>
                 <li><span class="who">브라우저</span> <code>Content-Type: text/html</code> 을 보고 HTML 파서 가동.
                     <em>확장자가 아니라 이 헤더가 기준이다.</em></li>
@@ -1054,23 +1040,26 @@ CSS  --파싱--> CSSOM 트리 -+
                     CSS 없이 그리면 스타일 없는 날것이 번쩍 보였다가 바뀌므로 브라우저가 일부러 기다린다.</li>
             </ul>
 
-            <h3>B 가 필요해지면 Handshake가 한 번 더</h3>
+            <div class="step-chunk" id="ck-proxy">
+            <h3>WAS 서버가 필요해지면 Handshake가 한 번 더</h3>
             <pre class="code"><code>location ~ ^/(user|friend|chat|room|uploads)/ {
     proxy_pass http://10.0.1.20:8080;      # 여기엔 proxy_pass 가 있다
 }</code></pre>
             <ul>
-                <li>① 브라우저 &rarr; Kernel A Handshake &nbsp;(클라이언트 &harr; A)</li>
-                <li>② NginX &rarr; Kernel B Handshake &nbsp;(A &harr; B) &mdash; <em>완전히 별개의 연결</em></li>
+                <li>① 브라우저 &rarr; N-Kernel Handshake &nbsp;(클라이언트 &harr; Web 서버)</li>
+                <li>② NGINX &rarr; S-Kernel Handshake &nbsp;(Web 서버 &harr; WAS 서버) &mdash; <em>완전히 별개의 연결</em></li>
             </ul>
             <div class="callout">
                 <span class="tag">역할이 뒤집힌다</span>
-                <p>NginX 는 브라우저에 대해서는 <em>서버</em>(SYN 을 받는 쪽), Spring Boot 에 대해서는
+                <p>NGINX 는 브라우저에 대해서는 <em>서버</em>(SYN 을 받는 쪽), Spring Boot 에 대해서는
                     <em>클라이언트</em>(SYN 을 보내는 쪽)가 된다.</p>
-                <p>②의 SYN+ACK 를 보내는 건 Kernel B 다. 이때도 톰캣은 악수에 참여하지 않고
-                    <code>accept()</code> 로 완성된 연결만 받는다. A 에서 일어난 일이 B 에서 똑같이 반복된다.</p>
-                <p>그리고 B 가 보는 접속 IP 는 브라우저가 아니라 <em>NginX</em> 가 된다. 그래서
+                <p>②의 SYN+ACK 를 보내는 건 S-Kernel 이다. 이때도 톰캣은 악수에 참여하지 않고
+                    <code>accept()</code> 로 완성된 연결만 받는다. Web 서버에서 일어난 일이 WAS 서버에서 똑같이 반복된다.</p>
+                <p>그리고 WAS 서버가 보는 접속 IP 는 브라우저가 아니라 <em>NGINX</em> 가 된다. 그래서
                     <code>X-Forwarded-For</code> 가 필요하다.</p>
             </div>
+            </div>
+
         </section>
 
         <!-- ===================================================== -->
@@ -1082,7 +1071,7 @@ CSS  --파싱--> CSSOM 트리 -+
             <div class="scroll-x">
                 <table>
                     <tr>
-                        <th>B 서버</th>
+                        <th>WAS 서버</th>
                         <th>상태</th>
                         <th>뜻</th>
                     </tr>
@@ -1101,8 +1090,8 @@ CSS  --파싱--> CSSOM 트리 -+
             <div class="callout">
                 <span class="tag">비유</span>
                 <p>사설 IP 는 집 안에서만 쓰는 호수, 공인 IP 는 전 세계에서 찾아올 수 있는 주소다.
-                    B 는 아파트 안의 1203 호인데 그 아파트 주소가 비공개인 상태다.
-                    같은 아파트 사람(A 서버)은 1203 호를 찾아갈 수 있지만 외부인은 아파트 자체를 못 찾는다.</p>
+                    WAS 서버는 아파트 안의 1203 호인데 그 아파트 주소가 비공개인 상태다.
+                    같은 아파트 사람(Web 서버)은 1203 호를 찾아갈 수 있지만 외부인은 아파트 자체를 못 찾는다.</p>
             </div>
 
             <h3>도메인은 프로세스에 붙는 게 아니다</h3>
@@ -1113,14 +1102,14 @@ CSS  --파싱--> CSSOM 트리 -+
             </div>
             <pre class="code"><code>도메인  --DNS A 레코드-->  공인 IP 하나
 
-castlechat.com  ->  203.0.113.10  ->  A 서버 (NginX)
-                                          |
-                                          +-> 10.0.1.20 (Spring Boot)
-                                              도메인 불필요. 공인 IP 불필요</code></pre>
-            <p>도메인을 산다는 건 <em>외부 노출 지점 하나에 이름을 붙이는 것</em>이고, 그 지점이 NginX 다.</p>
+castlechat.com  ->  203.0.113.10  ->  Web 서버 (NGINX)
+                                            |
+                                            +-> 10.0.1.20 (Spring Boot)
+                                                도메인 불필요. 공인 IP 불필요</code></pre>
+            <p>도메인을 산다는 건 <em>외부 노출 지점 하나에 이름을 붙이는 것</em>이고, 그 지점이 NGINX 다.</p>
 
             <h3>구성 1 &mdash; 단일 출처 (리버스 프록시). 캐슬챗 방식</h3>
-            <pre class="code"><code>castlechat.com  ->  NginX  (공인 203.0.113.10)
+            <pre class="code"><code>castlechat.com  ->  NGINX  (공인 203.0.113.10)
    (도메인 1개)        |
                       |  /          -> 자기 디스크의 정적 파일
                       |  /user/...  -> 10.0.1.20:8080  --> Spring Boot
@@ -1199,10 +1188,10 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
 
             <h3>캐슬챗의 현재 상태</h3>
             <p>구성 1 이고, <em>도메인을 사지도 않았다.</em> <code>43.202.208.133</code> 이라는 공인 IP 를
-                직접 쓰고 있다. NginX 설정에 증거가 있다.</p>
+                직접 쓰고 있다. NGINX 설정에 증거가 있다.</p>
             <pre class="code"><code>server_name _;    # "도메인 안 가림. 뭐든 다 받음"</code></pre>
             <p>도메인을 사면 이 자리에 <code>server_name castlechat.com;</code> 을 적게 된다.
-                <em>NginX 설정 한 줄 + DNS A 레코드 하나가 끝이고, Spring Boot 는 한 글자도 안 고친다.</em></p>
+                <em>NGINX 설정 한 줄 + DNS A 레코드 하나가 끝이고, Spring Boot 는 한 글자도 안 고친다.</em></p>
 
             <h3>추가로 알아둘 것</h3>
             <h4>서브도메인은 공짜다</h4>
@@ -1218,19 +1207,616 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
             <div class="callout">
                 <span class="tag">결론</span>
                 <p>어느 구성이든 <em>Spring Boot 자체는 사설 IP 만 갖는다.</em>
-                    공인 IP 를 받는 건 항상 그 앞단(NginX 또는 로드밸런서)이다.
+                    공인 IP 를 받는 건 항상 그 앞단(NGINX 또는 로드밸런서)이다.
                     그래야 서버를 여러 대로 늘릴 수 있고, 도메인이 특정 인스턴스에 묶이지 않는다.</p>
             </div>
             <div class="callout">
                 <span class="tag">한 줄 정리</span>
-                <p>"도메인은 외부 노출 지점에 붙는다. 캐슬챗은 NginX 를 단일 출처로 두는 리버스 프록시 구성이라
+                <p>"도메인은 외부 노출 지점에 붙는다. 캐슬챗은 NGINX 를 단일 출처로 두는 리버스 프록시 구성이라
                     도메인 하나로 충분하고, 그 덕에 CORS 설정이 아예 필요 없다."</p>
             </div>
         </section>
 
+        </div>
+
+        <!-- =====================================================
+             오른쪽 탭 : sendMsg "안녕" -> 화면에 뜨기까지
+             ===================================================== -->
+        <div class="tab-panel" id="tab-send" role="tabpanel" aria-labelledby="tabbtn-send" hidden>
+
+        <section class="note">
+            <h2>#1 &ldquo;안녕&rdquo; 한 건의 전체 흐름</h2>
+            <p>철수(<code>userId 12</code>)가 <em>5번 방</em>에서 <em>&ldquo;안녕&rdquo;</em> 을 보내고,
+                같은 방 사람들 화면에 뜨고, DB 에 저장되기까지.</p>
+
+            <div class="gloss">
+                <b>&#42; 전제와 용어</b>
+                <dl>
+                    <dt>전제</dt>
+                    <dd><em>WebSocket 은 이미 연결된 상태</em>에서 시작한다.
+                        TCP Handshake 와 WS Handshake 는 로그인 직후 한 번만 일어나므로
+                        <em>첫 화면 Rendering</em> 탭에서 다룬다</dd>
+                    <dt>wsgate</dt>
+                    <dd><code>websocket-gateway</code>. WAS 서버의 8090. 네트워크의 기본 게이트웨이와 무관</dd>
+                    <dt>cheg</dt>
+                    <dd><code>channel-engine</code>. gRPC 9091</dd>
+                    <dt>worker</dt>
+                    <dd><code>event-persist-worker</code>. Kafka 를 구독해 DB 에 넣는 쪽</dd>
+                    <dt>exec-N</dt>
+                    <dd>이 메시지를 맡은 Tomcat 스레드 하나. 처음부터 브로드캐스트까지 이 스레드가 끌고 간다</dd>
+                    <dt>Client / N / S-Kernel</dt>
+                    <dd>클라이언트 PC &middot; Web 서버(NGINX) &middot; WAS 서버(Spring) 의 OS Kernel</dd>
+                </dl>
+            </div>
+
+            <div class="cdiag full">
+                <svg viewBox="0 0 1230 720" role="img"
+                    aria-label="브라우저가 보낸 메시지가 NGINX 와 wsgate 를 거쳐 channel-engine 에서 Kafka 에 발행되고 응답이 돌아와 브로드캐스트되며, 별도로 worker 가 Kafka 에서 가져가 DB 에 저장한다">
+                    <defs>
+                        <marker id="sq" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <!-- 구간 배경 -->
+                    <rect x="8" y="84" width="1214" height="432" rx="8" class="dat" fill-opacity="0.55" />
+                    <text x="20" y="104" class="lbl">사용자가 기다리는 구간 &mdash; 전부 동기</text>
+                    <rect x="8" y="532" width="1214" height="150" rx="8" class="cmd" fill-opacity="0.7" />
+                    <text x="20" y="552" class="lbl">비동기 &mdash; 사용자는 기다리지 않는다</text>
+
+                    <!-- 생명선 : 위 넷은 동기 구간까지만, 아래 셋은 끝까지 -->
+                    <path d="M 90 70 V 514 M 265 70 V 514 M 450 70 V 514 M 650 70 V 514" class="cell" stroke-dasharray="4 4" />
+                    <path d="M 845 70 V 690 M 1010 70 V 690 M 1140 70 V 690" class="cell" stroke-dasharray="4 4" />
+
+                    <!-- 헤더 -->
+                    <rect x="15" y="18" width="150" height="50" rx="7" class="bd fillw" />
+                    <text x="90" y="39" text-anchor="middle" class="ttl">브라우저</text>
+                    <text x="90" y="57" text-anchor="middle" class="xs">React</text>
+
+                    <rect x="190" y="18" width="150" height="50" rx="7" class="bd fillw" />
+                    <text x="265" y="39" text-anchor="middle" class="ttl">NGINX</text>
+                    <text x="265" y="57" text-anchor="middle" class="xs">Web 서버 &middot; N-Kernel</text>
+
+                    <rect x="375" y="18" width="150" height="50" rx="7" class="bd fillt" />
+                    <text x="450" y="39" text-anchor="middle" class="ttl">wsgate</text>
+                    <text x="450" y="57" text-anchor="middle" class="xs">websocket-gateway</text>
+
+                    <rect x="575" y="18" width="150" height="50" rx="7" class="bd fillt" />
+                    <text x="650" y="39" text-anchor="middle" class="ttl">channel-engine</text>
+                    <text x="650" y="57" text-anchor="middle" class="xs">ChatCommandService</text>
+
+                    <rect x="770" y="18" width="150" height="50" rx="7" class="bd dat" />
+                    <text x="845" y="39" text-anchor="middle" class="ttl">Kafka</text>
+                    <text x="845" y="57" text-anchor="middle" class="xs">브로커</text>
+
+                    <rect x="935" y="18" width="150" height="50" rx="7" class="bd cmd" />
+                    <text x="1010" y="39" text-anchor="middle" class="ttl">worker</text>
+                    <text x="1010" y="57" text-anchor="middle" class="xs">event-persist-worker</text>
+
+                    <rect x="1075" y="18" width="140" height="50" rx="7" class="bd fillw" />
+                    <text x="1145" y="39" text-anchor="middle" class="ttl">MariaDB</text>
+                    <text x="1145" y="57" text-anchor="middle" class="xs">chat_messages</text>
+
+                    <!-- 대기 막대 -->
+                    <rect x="444" y="245" width="12" height="220" class="bd dat" />
+                    <text x="464" y="340" class="xs">exec-N</text>
+                    <text x="464" y="356" class="xs">잠듦</text>
+                    <rect x="644" y="325" width="12" height="40" class="bd dat" />
+                    <text x="636" y="350" text-anchor="end" class="xs">.get() 대기</text>
+
+                    <!-- ① ~ ⑩ 동기 -->
+                    <path d="M 90 130 H 261" class="ln" marker-end="url(#sq)" />
+                    <text x="177" y="123" text-anchor="middle" class="xs">① ws.send &mdash; WS Frame</text>
+
+                    <path d="M 265 165 H 446" class="ln" marker-end="url(#sq)" />
+                    <text x="357" y="158" text-anchor="middle" class="xs">② 바이트 중계 &middot; 별개 TCP</text>
+
+                    <rect x="360" y="188" width="180" height="26" rx="5" class="bd fillw" />
+                    <text x="450" y="205" text-anchor="middle" class="xs">③ Dispatcher &rarr; ChatHandler</text>
+
+                    <path d="M 456 245 H 646" class="ln" marker-end="url(#sq)" />
+                    <text x="550" y="238" text-anchor="middle" class="xs">④ gRPC &middot; BlockingStub</text>
+
+                    <rect x="545" y="268" width="210" height="26" rx="5" class="bd fillw" />
+                    <text x="650" y="285" text-anchor="middle" class="xs">⑤ 검증 &middot; 멤버 캐시(인가) &middot; Snowflake</text>
+
+                    <path d="M 656 325 H 841" class="ln" marker-end="url(#sq)" />
+                    <text x="748" y="318" text-anchor="middle" class="xs">⑥ send().get() &middot; acks=all</text>
+
+                    <path d="M 845 365 H 660" class="ln" stroke-dasharray="5 4" marker-end="url(#sq)" />
+                    <text x="752" y="358" text-anchor="middle" class="xs">⑦ partition &middot; offset</text>
+
+                    <rect x="530" y="388" width="240" height="26" rx="5" class="bd fillw" />
+                    <text x="650" y="405" text-anchor="middle" class="xs">⑧ 읽음 위치 Redis &middot; 응답 메모리 조립</text>
+
+                    <path d="M 650 440 H 460" class="ln" stroke-dasharray="5 4" marker-end="url(#sq)" />
+                    <text x="555" y="433" text-anchor="middle" class="xs">⑨ gRPC 응답</text>
+
+                    <path d="M 450 482 H 94" class="bus" marker-end="url(#sq)" />
+                    <text x="270" y="475" text-anchor="middle" class="xs">⑩ MSG_CREATED 브로드캐스트 (fan-out)</text>
+
+                    <text x="1210" y="508" text-anchor="end" class="lbl">★ 여기서 사용자 요청이 끝난다. DB 엔 아직 없다</text>
+
+                    <!-- ⑪ ~ ⑬ 비동기 -->
+                    <path d="M 1010 590 H 849" class="ln" marker-end="url(#sq)" />
+                    <text x="928" y="583" text-anchor="middle" class="xs">⑪ poll() &mdash; 가져간다</text>
+
+                    <path d="M 845 625 H 1006" class="ln" stroke-dasharray="5 4" marker-end="url(#sq)" />
+                    <text x="928" y="618" text-anchor="middle" class="xs">⑫ 레코드</text>
+
+                    <path d="M 1010 662 H 1136" class="ln" marker-end="url(#sq)" />
+                    <text x="1075" y="655" text-anchor="middle" class="xs">⑬ INSERT IGNORE</text>
+
+                    <text x="20" y="590" class="xs">cheg 는 worker 를 모른다. 브로커에 쓰고 끝이다</text>
+                    <text x="20" y="612" class="xs">worker 가 꺼져 있어도 메시지는 브로커 디스크에 남는다</text>
+                    <text x="20" y="634" class="xs">살아나면 커밋한 offset 부터 이어 읽는다 &mdash; 유실이 아니라 반영 지연</text>
+                    <text x="20" y="662" class="xs">읽음 위치는 이 길이 아니다. Redis &rarr; 5초 flush (#4 참고)</text>
+
+                    <text x="20" y="708" class="xs">
+                        실선 = 요청 &middot; 점선 = 응답 &middot; 굵은 선 = 브로드캐스트 &middot; 주황 막대 = 스레드가 잠들어 있는 구간</text>
+                </svg>
+            </div>
+
+            <div class="callout">
+                <span class="tag">한 줄 정리</span>
+                <p><em>사용자에게 &ldquo;성공&rdquo; 이라고 답한 시점은 DB 가 아니라
+                    Kafka 가 받았다고 한 시점(⑦)이다.</em>
+                    DB 저장(⑬)은 그 뒤에 완전히 별개로 일어난다.</p>
+            </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <section class="note">
+            <h2>#2 브라우저에서 wsgate 까지</h2>
+
+            <h3>브라우저 &middot; Client Kernel</h3>
+            <ol class="seq">
+                <li><span class="who">React</span> <code>JSON.stringify({wsType:"SEND_MESSAGE", payload:{roomId:5, messageText:"안녕"}})</code>
+                    &rarr; <code>ws.send(문자열)</code></li>
+                <li><span class="who">브라우저</span> 내장 WebSocket 구현이 <em>Frame</em> 을 만든다.
+                    <code>FIN=1</code> &middot; <code>opcode=0x1(text)</code> &middot;
+                    <em><code>MASK=1</code> &mdash; 클라이언트가 보내는 프레임은 반드시 마스킹</em>.
+                    그리고 <code>write()</code> 로 커널 송신 버퍼에 복사</li>
+                <li><span class="who k">Client Kernel</span> TCP/IP 스택이 세그먼트 &rarr; IP 패킷으로 감싼다.
+                    목적지 IP 는 끝까지 서버 IP, 바뀌는 건 MAC 뿐이다.
+                    <em>이미 연결된 상태라 DNS &middot; ARP &middot; Handshake 는 없다</em></li>
+            </ol>
+
+            <h3>N-Kernel &middot; NGINX &mdash; 패킷이 아니라 바이트를 중계한다</h3>
+            <p>NGINX 는 애플리케이션이라 <em>패킷을 못 본다.</em> 커널이 재조립한 <em>바이트</em>를 읽고 쓴다.
+                그래서 연결이 <em>둘로 끊어져</em> 있다.</p>
+
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>소켓</th>
+                        <th>어느 Kernel</th>
+                        <th>누가 fd 로 쥐나</th>
+                        <th>역할</th>
+                    </tr>
+                    <tr>
+                        <th>A</th>
+                        <td>Client Kernel</td>
+                        <td>브라우저</td>
+                        <td>연결 1 의 클라이언트 끝</td>
+                    </tr>
+                    <tr>
+                        <th>B</th>
+                        <td><em>N-Kernel</em></td>
+                        <td>NGINX <code>fd 7</code> &mdash; <em>downstream</em></td>
+                        <td>연결 1 의 서버 끝</td>
+                    </tr>
+                    <tr>
+                        <th>C</th>
+                        <td><em>N-Kernel</em></td>
+                        <td>NGINX <code>fd 9</code> &mdash; <em>upstream</em></td>
+                        <td>연결 2 의 클라이언트 끝</td>
+                    </tr>
+                    <tr>
+                        <th>D</th>
+                        <td>S-Kernel</td>
+                        <td>Tomcat</td>
+                        <td>연결 2 의 서버 끝</td>
+                    </tr>
+                </table>
+            </div>
+
+            <ol class="seq">
+                <li><span class="who k">N-Kernel</span> 패킷 수신 &rarr; TCP 재조립 &rarr;
+                    <em>downstream 소켓(fd 7) 수신 버퍼</em>에 바이트가 쌓인다</li>
+                <li><span class="who">NGINX</span> <code>read(fd 7)</code> 로 유저 공간에 꺼내고
+                    <code>write(fd 9)</code> 로 upstream 소켓에 넣는다.
+                    <em>프레임을 파싱하지 않는다. 그냥 바이트다</em></li>
+                <li><span class="who k">N-Kernel</span> upstream 소켓 송신 버퍼의 바이트를
+                    <em>8090 과의 별개 TCP 연결</em>에 새 패킷으로 만들어 보낸다.
+                    포트 &middot; 시퀀스 번호가 전부 다른 새 패킷이다</li>
+            </ol>
+
+            <div class="callout">
+                <span class="tag">연결이 둘이라서 생기는 설정</span>
+                <pre class="code"><code>location /ws {
+    proxy_pass http://10.0.1.20:8090;            # 온프레미스면 WAS 서버 사설 IP
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header X-Real-IP $remote_addr;     # wsgate 가 보는 출발지는 NGINX 다
+    proxy_read_timeout 3600s;                    # 연결 2 에만 걸리는 타임아웃
+}</code></pre>
+                <p>NGINX 는 브라우저에게는 <em>서버</em>, wsgate 에게는 <em>클라이언트</em>다.
+                    한 프로세스가 두 역할을 하므로 소켓이 2개 필요하다.</p>
+            </div>
+
+            <h3>S-Kernel &rarr; Tomcat &rarr; Spring &rarr; Dispatcher</h3>
+            <ol class="seq">
+                <li><span class="who k">S-Kernel</span> 재조립한 바이트를 Tomcat 소켓(D) 수신 버퍼에 쌓는다</li>
+                <li><span class="who">Tomcat</span> <code>WsFrameServer</code> 가
+                    프레임 수신 &middot; 언마스킹 &middot; 조각(continuation) 재조립 &rarr;
+                    <code>jakarta.websocket</code> 표준 API 로 올린다.
+                    <em>Tomcat 은 여기까지</em></li>
+                <li><span class="who">Spring</span> <code>StandardWebSocketHandlerAdapter</code> 가 받아
+                    <code>handleMessage()</code> &rarr; 타입 분기 &rarr;
+                    <code>WsGateDispatcher.handleTextMessage()</code>.
+                    <em>Spring 은 여기부터. DispatcherServlet 은 안 탄다</em></li>
+                <li><span class="who">Dispatcher</span> <code>objectMapper.readValue()</code> 로
+                    <code>WebSocketDTO</code> 변환 &rarr; <code>switch(wsType)</code> &rarr;
+                    <code>"SEND_MESSAGE"</code> 면 <code>WsGateChatHandler.handleSendMessage()</code></li>
+            </ol>
+
+            <div class="callout bad">
+                <span class="tag">헷갈리는 지점</span>
+                <p><em>DispatcherServlet 을 타는 건 WS Handshake 한 번뿐</em>이다.
+                    그때 <code>HttpSessionHandshakeInterceptor</code> 가 HTTP 세션의 로그인 정보를 WS 세션으로 복사해 둔다.
+                    그 뒤의 메시지 프레임은 전부 위 경로로 온다.</p>
+            </div>
+
+            <h3>wsgate ChatHandler &rarr; gRPC</h3>
+            <ol class="seq">
+                <li><span class="who">ChatHandler</span> <code>wsGateAuth.requireLoginUser(session)</code> &mdash;
+                    Handshake 때 복사해 둔 세션에서 <code>userId</code> &middot; <code>publicId</code> 를 꺼낸다</li>
+                <li><span class="who">ChatHandler</span> payload 변환 + <em>입구 필터</em>
+                    (<code>roomId</code> 없음 &middot; 내용도 첨부도 없음 &rarr; 여기서 실패 응답).
+                    깨진 요청을 내부 서비스까지 보내지 않는다</li>
+                <li><span class="who">ChatHandler</span> <code>new CreateChatMessageCommand(...)</code> &rarr;
+                    <code>wsGateChatClient.createChatMessage(cmd)</code>.
+                    <em>필드 타입이 인터페이스(<code>WsGateChatClient</code>)라 gRPC 를 모른다</em></li>
+                <li><span class="who">ClientGrpc</span> <code>WsGateChatClientGrpc</code> 가
+                    <code>chEngineStub.createChatMessage(req)</code> 호출.
+                    <em><code>BlockingStub</code> 이라 exec-N 이 여기서 잠든다</em></li>
+            </ol>
+        </section>
+
+        <!-- ===================================================== -->
+        <section class="note">
+            <h2>#3 channel-engine 안에서</h2>
+
+            <h3>검증 &middot; 인가 &middot; ID 확정</h3>
+            <ol class="seq">
+                <li><span class="who">Endpoint</span> <code>ChatGrpcEndpoint</code> 가 proto 를
+                    <code>CreateChatMessageCommand</code> 로 재조립 &rarr;
+                    <code>chatCommandUseCase.createChatMessage()</code></li>
+                <li><span class="who">Service</span> <code>roomId</code> null 검사 &middot;
+                    <code>validateSendBody(...)</code></li>
+                <li><span class="who">Service</span> <code>roomMemberCache.getOrLoadRoomMembers()</code> &mdash;
+                    Redis Set 조회, 없으면 DB 에서 채운다(cache-aside).
+                    <em>보낸 사람이 그 방 멤버인가</em> 를 여기서 본다. <em>캐시를 조회한 진짜 목적이 인가 검사</em></li>
+                <li><span class="who">Service</span> <code>ChatMessageIdGenerator.nextMessageId()</code> &mdash;
+                    Snowflake 53bit. <em>DB 에 넣기 전에 PK 가 확정된다.</em>
+                    <code>synchronized</code> 라 단일 직렬화 지점이다</li>
+                <li><span class="who">Service</span> 첨부가 있으면 <code>findChatAttachmentsByIds()</code> 로
+                    읽기만 한다(응답용). 쓰기는 여기서 안 한다</li>
+            </ol>
+
+            <h3>Kafka 발행 &mdash; 여기서 또 잠든다</h3>
+            <ol class="seq">
+                <li><span class="who">Publisher</span> <code>ChatMessageCreatedEventDTO</code> 생성 &rarr;
+                    <code>publishChatMessageCreated()</code> &rarr; <code>publishDurable()</code></li>
+                <li><span class="who">KafkaProducer</span> <code>send(토픽, roomId, event)</code> &mdash;
+                    Serializer 로 바이트 변환, Partitioner 가 <code>murmur2(roomId) % 6</code> 으로 파티션 결정,
+                    RecordAccumulator 에 넣고 <code>Future</code> 만 반환. <em>아직 브로커에 안 갔다</em></li>
+                <li><span class="who">Publisher</span> <code>.get(timeout)</code> &mdash;
+                    <em>스레드가 잠든다.</em> 별도의 Sender 스레드가 배치를 꺼내 브로커로 보낸다</li>
+                <li><span class="who k">브로커</span> 파티션 2 로그 끝에 append &rarr;
+                    <code>acks=all</code> 이라 ISR 복제 대기(브로커 1대라 ISR 도 1개) &rarr;
+                    <code>partition</code> &middot; <code>offset</code> 응답</li>
+                <li><span class="who">Publisher</span> Future 완료 &rarr; 깨어남.
+                    <em>실패했으면 예외 &rarr; 사용자에게 전송 실패 응답</em></li>
+            </ol>
+            <p>Partitioner &middot; Accumulator &middot; Sender 의 실체는
+                <a href="./kafka.html">Kafka</a> 카테고리 5~6번에 정리했다.</p>
+
+            <h3>응답을 메모리에서 조립한다</h3>
+            <ol class="seq">
+                <li><span class="who">Service</span> <code>roomReadPositionCache.updateIfGreater()</code> &mdash;
+                    보낸 사람의 읽음 위치를 자기 메시지까지 올린다. Redis Lua 로 원자 처리,
+                    DB 반영은 나중에(#4 참고)</li>
+                <li><span class="who">Service</span> <code>unreadCount = 멤버 수 - 1</code>,
+                    <code>findChatMessageNotificationTargetUserIds()</code> 로 알림 켠 멤버 조회
+                    <em>(캐시 없이 매번 DB &mdash; 아직 안 고친 지점)</em></li>
+                <li><span class="who">Service</span> <code>ChatMessageViewResponseDTO</code> 를
+                    <em>메모리에서</em> 조립해 return. <em>DB 를 다시 읽지 않는다</em> &mdash;
+                    messageId 는 이미 확정됐고 나머지는 전부 입력값이다</li>
+            </ol>
+        </section>
+
+        <!-- ===================================================== -->
+        <section class="note">
+            <h2>#4 돌아가는 길과 비동기 저장</h2>
+
+            <h3>응답 복귀와 브로드캐스트</h3>
+            <ol class="seq">
+                <li><span class="who">Endpoint</span> DTO &rarr; proto 로 바꿔
+                    <code>onNext()</code> &middot; <code>onCompleted()</code></li>
+                <li><span class="who">wsgate</span> 잠들어 있던 <em>exec-N 이 깨어난다.</em>
+                    <code>GrpcToDtoConverter</code> 로 다시 DTO</li>
+                <li><span class="who">Writer</span> <code>WsGateOutboundWriter</code> 가 세 번 보낸다 &mdash;
+                    <code>broadcastToRoom</code>(지금 방을 보는 사람) &middot;
+                    <code>pushChatRoomUpdate</code>(나머지 멤버의 방 목록) &middot;
+                    <code>pushChatMessageNotification</code>(알림 대상).
+                    <em>보고 있는 사람을 빼서 세 집합이 겹치지 않게</em> 했다</li>
+                <li><span class="who">Writer</span> 세션마다 <code>synchronized</code> 로 락을 잡고
+                    <code>session.sendMessage()</code>. <em>같은 exec-N 이 순차로 쓴다 = fan-out</em></li>
+                <li><span class="who">브라우저</span> 같은 경로를 거꾸로 타고 프레임 도착
+                    (서버 &rarr; 클라이언트 프레임은 마스킹 안 함) &rarr;
+                    React 가 상태를 바꿔 <em>&ldquo;안녕&rdquo; 이 화면에 뜬다</em></li>
+            </ol>
+
+            <h3>worker 가 가져가서 DB 에 넣는다</h3>
+            <ol class="seq">
+                <li><span class="who">worker</span> <code>@KafkaListener</code> 컨테이너 스레드가
+                    무한 루프로 <code>consumer.poll()</code>. <em>push 가 아니라 pull</em> 이다</li>
+                <li><span class="who">worker</span> 역직렬화 &rarr; <code>@KafkaHandler persistChatMessage()</code> &rarr;
+                    <code>insertChatMessage</code> (<code>INSERT IGNORE</code> + messageId 명시)</li>
+                <li><span class="who">worker</span> <em>0행이면 이미 저장된 것</em>으로 보고 정상 종료(멱등).
+                    첨부가 있으면 <code>updateChatMessageAttachments</code> 로 TEMP &rarr; ATTACHED</li>
+                <li><span class="who">worker</span> 실패하면 500ms &times; 10회 재시도 &rarr;
+                    <code>castlechat.chat.message.dlt</code> 로 격리. 버리지 않는다</li>
+            </ol>
+
+            <h3>읽음 위치는 다른 길이다 &mdash; Kafka 를 안 탄다</h3>
+            <pre class="code"><code>[ 메시지 본문 ]  channel-engine -> Kafka -> event-persist-worker -> DB     별도 프로세스
+[ 읽음 위치   ]  channel-engine -> Redis -> ReadPositionFlushWorker -> DB  같은 프로세스 @Scheduled
+
+chat:room:{roomId}:read-position   실제 읽음 위치 (Lua 로 더 클 때만 올림)
+chat:dirty:read-position           "아직 DB 에 안 쓴 것" 목록  <- dirty 표시
+-> 5초마다 dirty 목록만 긁어 updateLastReadMessageId -> 목록에서 지움</code></pre>
+            <p><em>메시지는 유실되면 안 되고 순서가 중요해서 Kafka,
+                읽음 위치는 최댓값만 맞으면 되고 중간값을 버려도 돼서 Redis.</em>
+                성질에 맞춰 길을 나눴다.</p>
+        </section>
+
+        <!-- ===================================================== -->
+        <section class="note">
+            <h2>#5 짚을 점</h2>
+
+            <div class="side-by-side">
+                <div class="callout bad">
+                    <span class="tag">스레드가 잠드는 곳 두 군데</span>
+                    <pre class="code"><code>wsgate   chEngineStub (BlockingStub)   ④ ~ ⑨
+cheg     kafkaTemplate.send().get()     ⑥ ~ ⑦</code></pre>
+                    <p>잠든 동안 <em>CPU 는 안 쓰지만 스레드 풀 자리를 묶는다.</em>
+                        처리량 = <code>maxThreads ÷ 건당 지연</code> 이 여기서 나온다.</p>
+                </div>
+                <div class="callout">
+                    <span class="tag">비동기로 뺀 건 DB 쓰기뿐이다</span>
+                    <p>gRPC 도 Kafka 도 동기로 기다린다. <em>사용자 경로는 전부 동기</em>고
+                        비동기인 건 worker 쪽 INSERT 와 읽음 위치 flush 뿐이다.</p>
+                    <p>정확한 표현은 <em>&ldquo;DB 쓰기를 응답 경로에서 뺐다&rdquo;</em> 다.</p>
+                </div>
+            </div>
+
+            <h4>&ldquo;안녕&rdquo; 의 껍데기가 바뀌는 순서</h4>
+            <pre class="code"><code>"안녕" 문자열
+  -> JSON                   ws 전송용
+  -> WS Frame 바이트         브라우저
+  -> TCP 세그먼트 · IP 패킷  Client Kernel
+  -> Command 객체            wsgate
+  -> protobuf 바이너리       gRPC
+  -> Command 객체            channel-engine
+  -> EventDTO               Kafka 발행용
+  -> JSON 바이트             Serializer
+  -> 로그 파일의 한 줄        브로커 파티션 2, offset 4
+  -> EventDTO               worker 역직렬화
+  -> DB 한 행               chat_messages</code></pre>
+            <p>글자는 끝까지 그대로고, <em>경계를 넘을 때마다 그 경계가 아는 형식으로 갈아입는다.</em></p>
+        </section>
+
+        </div>
+
     </main>
 
     <!-- "렌더링" 이라는 말이 층위마다 다른 뜻으로 쓰여서 따로 정리해 둔다. -->
+    <!-- 용어 설명. 본문 흐름을 끊지 않도록 모달로 뺐다. -->
+    <!-- 흐름도 박스를 누르면 여는 상세 모달. 내용은 본문 블록(.step-chunk)을 그대로 복제해 온다. -->
+    <dialog id="stepModal" class="hdr-modal step-modal" aria-labelledby="stepTitle">
+        <form method="dialog">
+            <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
+        </form>
+        <div class="note modal-note">
+            <div class="step-head">
+                <h2 id="stepTitle"><span class="step-no"></span><span class="step-who"></span><button type="button" class="note-btn step-extra" hidden>TCP/IP</button></h2>
+                <div class="step-nav">
+                    <button type="button" class="note-btn" data-dir="-1">&larr; 이전</button>
+                    <button type="button" class="note-btn" data-dir="1">다음 &rarr;</button>
+                </div>
+            </div>
+            <div class="callout my-flow step-orig"><p></p></div>
+            <div class="step-body"></div>
+        </div>
+    </dialog>
+
+    <!-- 박스 2번 모달의 [TCP/IP] 버튼이 여는 두 번째 모달. 닫아도 박스 모달은 그대로 남는다. -->
+    <dialog id="tcpipModal" class="hdr-modal" aria-labelledby="tcpipTitle">
+        <form method="dialog">
+            <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
+        </form>
+        <div class="note modal-note">
+            <h2 id="tcpipTitle">TCP / IP 헤더 &mdash; SYN 패킷</h2>
+            <div class="side-by-side">
+                <div class="cdiag hdr">
+                    <svg viewBox="0 0 540 434" role="img"
+                        aria-label="TCP Segment 헤더 구조와 SYN 패킷의 예시 값. Flags 8비트 중 SYN 만 1 이다">
+                        <text x="14" y="18" class="ttl">TCP Segment 헤더</text>
+                        <text x="526" y="18" text-anchor="end" class="xs">20 bytes + Options</text>
+                        <text x="14" y="38" text-anchor="middle" class="xs" style="font-size:9px">0</text>
+                        <text x="142" y="38" text-anchor="middle" class="xs" style="font-size:9px">8</text>
+                        <text x="270" y="38" text-anchor="middle" class="xs" style="font-size:9px">16</text>
+                        <text x="398" y="38" text-anchor="middle" class="xs" style="font-size:9px">24</text>
+                        <text x="518" y="38" text-anchor="middle" class="xs" style="font-size:9px">31</text>
+                        <rect x="14" y="44" width="256" height="46" class="bd cmd" />
+                        <text x="142" y="64" text-anchor="middle" style="font-size:11px;font-weight:700">Source Port</text>
+                        <text x="142" y="80" text-anchor="middle" class="xs" style="font-size:11px">51234 (0xC822)</text>
+                        <rect x="270" y="44" width="256" height="46" class="bd cmd" />
+                        <text x="398" y="64" text-anchor="middle" style="font-size:11px;font-weight:700">Destination Port</text>
+                        <text x="398" y="80" text-anchor="middle" class="xs" style="font-size:11px">80 (0x0050)</text>
+                        <rect x="14" y="90" width="512" height="46" class="bd fillw" />
+                        <text x="270" y="110" text-anchor="middle" style="font-size:11px;font-weight:700">Sequence Number</text>
+                        <text x="270" y="126" text-anchor="middle" class="xs" style="font-size:11px">3097674671 (0xB8A2C3AF) &mdash; 연결마다 랜덤으로 정하는 ISN</text>
+                        <rect x="14" y="136" width="512" height="46" class="bd fillw" />
+                        <text x="270" y="156" text-anchor="middle" style="font-size:11px;font-weight:700">Acknowledgment Number</text>
+                        <text x="270" y="172" text-anchor="middle" class="xs" style="font-size:11px">0 &mdash; ACK 플래그가 꺼져 있어 의미 없음</text>
+                        <rect x="14" y="182" width="64" height="46" class="bd fillw" />
+                        <text x="46" y="202" text-anchor="middle" style="font-size:9.5px;font-weight:700">Data Offset</text>
+                        <text x="46" y="218" text-anchor="middle" class="xs" style="font-size:9.5px">8 = 32B</text>
+                        <rect x="78" y="182" width="64" height="46" class="bd fillw" />
+                        <text x="110" y="202" text-anchor="middle" style="font-size:9.5px;font-weight:700">Rsvd &middot; NS</text>
+                        <text x="110" y="218" text-anchor="middle" class="xs" style="font-size:9.5px">0</text>
+                        <rect x="142" y="182" width="128" height="46" class="bd dat" />
+                        <text x="206" y="202" text-anchor="middle" style="font-size:11px;font-weight:700">Flags</text>
+                        <text x="206" y="218" text-anchor="middle" class="xs" style="font-size:11px">SYN = 1 (0x02)</text>
+                        <rect x="270" y="182" width="256" height="46" class="bd fillw" />
+                        <text x="398" y="202" text-anchor="middle" style="font-size:11px;font-weight:700">Window Size</text>
+                        <text x="398" y="218" text-anchor="middle" class="xs" style="font-size:11px">64240 (0xFAF0)</text>
+                        <rect x="14" y="228" width="256" height="46" class="bd fillw" />
+                        <text x="142" y="248" text-anchor="middle" style="font-size:11px;font-weight:700">Checksum</text>
+                        <text x="142" y="264" text-anchor="middle" class="xs" style="font-size:11px">0x725D</text>
+                        <rect x="270" y="228" width="256" height="46" class="bd fillw" />
+                        <text x="398" y="248" text-anchor="middle" style="font-size:11px;font-weight:700">Urgent Pointer</text>
+                        <text x="398" y="264" text-anchor="middle" class="xs" style="font-size:11px">0</text>
+                        <rect x="14" y="274" width="512" height="46" class="bd fillw" />
+                        <text x="270" y="294" text-anchor="middle" style="font-size:11px;font-weight:700">Options (12B)</text>
+                        <text x="270" y="310" text-anchor="middle" class="xs" style="font-size:11px">MSS 1460 &middot; NOP &middot; Window Scale 8 &middot; NOP &middot; NOP &middot; SACK 허용</text>
+                        <text x="14" y="346" class="xs" style="font-size:10px">&uarr; Flags 8bit 를 펼치면</text>
+                        <rect x="46" y="354" width="56" height="44" class="bd fillw" />
+                        <text x="74" y="372" text-anchor="middle" style="font-size:11px;font-weight:700">CWR</text>
+                        <text x="74" y="390" text-anchor="middle" style="font-size:13px;font-weight:700">0</text>
+                        <rect x="102" y="354" width="56" height="44" class="bd fillw" />
+                        <text x="130" y="372" text-anchor="middle" style="font-size:11px;font-weight:700">ECE</text>
+                        <text x="130" y="390" text-anchor="middle" style="font-size:13px;font-weight:700">0</text>
+                        <rect x="158" y="354" width="56" height="44" class="bd fillw" />
+                        <text x="186" y="372" text-anchor="middle" style="font-size:11px;font-weight:700">URG</text>
+                        <text x="186" y="390" text-anchor="middle" style="font-size:13px;font-weight:700">0</text>
+                        <rect x="214" y="354" width="56" height="44" class="bd fillw" />
+                        <text x="242" y="372" text-anchor="middle" style="font-size:11px;font-weight:700">ACK</text>
+                        <text x="242" y="390" text-anchor="middle" style="font-size:13px;font-weight:700">0</text>
+                        <rect x="270" y="354" width="56" height="44" class="bd fillw" />
+                        <text x="298" y="372" text-anchor="middle" style="font-size:11px;font-weight:700">PSH</text>
+                        <text x="298" y="390" text-anchor="middle" style="font-size:13px;font-weight:700">0</text>
+                        <rect x="326" y="354" width="56" height="44" class="bd fillw" />
+                        <text x="354" y="372" text-anchor="middle" style="font-size:11px;font-weight:700">RST</text>
+                        <text x="354" y="390" text-anchor="middle" style="font-size:13px;font-weight:700">0</text>
+                        <rect x="382" y="354" width="56" height="44" class="bd dat" />
+                        <text x="410" y="372" text-anchor="middle" style="font-size:11px;font-weight:700">SYN</text>
+                        <text x="410" y="390" text-anchor="middle" style="font-size:13px;font-weight:700">1</text>
+                        <rect x="438" y="354" width="56" height="44" class="bd fillw" />
+                        <text x="466" y="372" text-anchor="middle" style="font-size:11px;font-weight:700">FIN</text>
+                        <text x="466" y="390" text-anchor="middle" style="font-size:13px;font-weight:700">0</text>
+                    </svg>
+                </div>
+                <div class="cdiag hdr">
+                    <svg viewBox="0 0 540 434" role="img"
+                        aria-label="IP Packet 헤더 구조와 SYN 패킷의 예시 값. Protocol 이 6 이면 안에 TCP 가 들어 있다">
+                        <text x="14" y="18" class="ttl">IP Packet 헤더</text>
+                        <text x="526" y="18" text-anchor="end" class="xs">IPv4 &middot; 20 bytes + Options</text>
+                        <text x="14" y="38" text-anchor="middle" class="xs" style="font-size:9px">0</text>
+                        <text x="142" y="38" text-anchor="middle" class="xs" style="font-size:9px">8</text>
+                        <text x="270" y="38" text-anchor="middle" class="xs" style="font-size:9px">16</text>
+                        <text x="398" y="38" text-anchor="middle" class="xs" style="font-size:9px">24</text>
+                        <text x="518" y="38" text-anchor="middle" class="xs" style="font-size:9px">31</text>
+                        <rect x="14" y="44" width="64" height="46" class="bd fillw" />
+                        <text x="46" y="64" text-anchor="middle" style="font-size:9.5px;font-weight:700">Version</text>
+                        <text x="46" y="80" text-anchor="middle" class="xs" style="font-size:9.5px">4</text>
+                        <rect x="78" y="44" width="64" height="46" class="bd fillw" />
+                        <text x="110" y="64" text-anchor="middle" style="font-size:9.5px;font-weight:700">IHL</text>
+                        <text x="110" y="80" text-anchor="middle" class="xs" style="font-size:9.5px">5 = 20B</text>
+                        <rect x="142" y="44" width="128" height="46" class="bd fillw" />
+                        <text x="206" y="64" text-anchor="middle" style="font-size:11px;font-weight:700">DSCP / ECN</text>
+                        <text x="206" y="80" text-anchor="middle" class="xs" style="font-size:11px">0 / 0</text>
+                        <rect x="270" y="44" width="256" height="46" class="bd fillw" />
+                        <text x="398" y="64" text-anchor="middle" style="font-size:11px;font-weight:700">Total Length</text>
+                        <text x="398" y="80" text-anchor="middle" class="xs" style="font-size:11px">52 (0x0034)</text>
+                        <rect x="14" y="90" width="256" height="46" class="bd fillw" />
+                        <text x="142" y="110" text-anchor="middle" style="font-size:11px;font-weight:700">Identification</text>
+                        <text x="142" y="126" text-anchor="middle" class="xs" style="font-size:11px">0x2A7F (10879)</text>
+                        <rect x="270" y="90" width="48" height="46" class="bd fillw" />
+                        <text x="294" y="110" text-anchor="middle" style="font-size:9.5px;font-weight:700">Flags</text>
+                        <text x="294" y="126" text-anchor="middle" class="xs" style="font-size:9.5px">DF</text>
+                        <rect x="318" y="90" width="208" height="46" class="bd fillw" />
+                        <text x="422" y="110" text-anchor="middle" style="font-size:11px;font-weight:700">Fragment Offset</text>
+                        <text x="422" y="126" text-anchor="middle" class="xs" style="font-size:11px">0</text>
+                        <rect x="14" y="136" width="128" height="46" class="bd cmd" />
+                        <text x="78" y="156" text-anchor="middle" style="font-size:11px;font-weight:700">TTL</text>
+                        <text x="78" y="172" text-anchor="middle" class="xs" style="font-size:11px">128</text>
+                        <rect x="142" y="136" width="128" height="46" class="bd cmd" />
+                        <text x="206" y="156" text-anchor="middle" style="font-size:11px;font-weight:700">Protocol</text>
+                        <text x="206" y="172" text-anchor="middle" class="xs" style="font-size:11px">6 = TCP</text>
+                        <rect x="270" y="136" width="256" height="46" class="bd fillw" />
+                        <text x="398" y="156" text-anchor="middle" style="font-size:11px;font-weight:700">Header Checksum</text>
+                        <text x="398" y="172" text-anchor="middle" class="xs" style="font-size:11px">0x1348</text>
+                        <rect x="14" y="182" width="512" height="46" class="bd cmd" />
+                        <text x="270" y="202" text-anchor="middle" style="font-size:11px;font-weight:700">Source IP Address</text>
+                        <text x="270" y="218" text-anchor="middle" class="xs" style="font-size:11px">192.168.0.5</text>
+                        <rect x="14" y="228" width="512" height="46" class="bd dat" />
+                        <text x="270" y="248" text-anchor="middle" style="font-size:11px;font-weight:700">Destination IP Address</text>
+                        <text x="270" y="264" text-anchor="middle" class="xs" style="font-size:11px">43.202.208.133</text>
+                        <rect x="14" y="274" width="512" height="46" class="bd fillw" />
+                        <text x="270" y="294" text-anchor="middle" style="font-size:11px;font-weight:700">Options</text>
+                        <text x="270" y="310" text-anchor="middle" class="xs" style="font-size:11px">없음 (IHL = 5)</text>
+                        <text x="18" y="362" class="xs" style="font-size:11px">Protocol 6 &rarr; 이 패킷 안에 TCP segment 가 들어 있다.</text>
+                        <text x="18" y="384" class="xs" style="font-size:11px">Source IP 는 내 PC 의 사설 IP 다.</text>
+                        <text x="18" y="406" class="xs" style="font-size:11px">공유기 NAT 가 나중에 공인 IP 로 바꿔치기한다.</text>
+                    </svg>
+                </div>
+            </div>
+            <p class="ins-cap">헤더만 그렸다. TCP segment 가 IP packet 의 payload 로 들어가고, SYN 은 데이터가 없다.
+                분홍색은 2번 박스 문장의 &lsquo;목적지 IP&rsquo; 와 &lsquo;SYN 플래그&rsquo;, 초록색은 그 밖의 핵심 칸이다.<br>
+                값은 예시지만 체크섬 두 개는 이 헤더 바이트로 실제 계산했다(헤더를 다시 더하면 0 이 된다).
+                Sequence Number 와 Identification 은 연결 &middot; 패킷마다 달라지는 값이다.</p>
+        </div>
+    </dialog>
+
+    <dialog id="glossModal" class="hdr-modal">
+        <form method="dialog">
+            <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
+        </form>
+        <div class="note modal-note">
+            <h2>용어 설명</h2>
+            <div class="gloss">
+                <dl>
+                    <dt>TCB</dt>
+                    <dd>Transmission Control Block. 연결 하나의 state &middot; 순서번호 &middot;
+                        윈도우를 적어두는 자료구조</dd>
+                    <dt>4-tuple</dt>
+                    <dd>출발지 IP:Port + 목적지 IP:Port. 연결의 신분증</dd>
+                    <dt>기본 게이트웨이</dt>
+                    <dd>랜 밖으로 나가는 패킷을 맡기는 장비. 집에서는 공유기.
+                        <em>캐슬챗의 <code>wsgate</code>(websocket-gateway) 와는 전혀 다른 것</em>이다</dd>
+                    <dt>connect() &middot; accept()</dt>
+                    <dd>소켓 API 의 함수. 브라우저나 NGINX 가 만든 함수가 아니라 <em>OS 가 프로그램에 제공하는 시스템 콜</em>이다
+                        (Windows 는 Winsock). <code>connect()</code> 는 &ldquo;이 IP:Port 로 연결해 달라&rdquo; 는 부탁이고,
+                        부르는 순간부터 3-way Handshake 는 Kernel 이 한다.
+                        <code>accept()</code> 는 서버 쪽에서 Handshake 가 끝난 연결을 꺼내는 함수다</dd>
+                    <dt>fd</dt>
+                    <dd>File Descriptor. 프로세스가 커널 자원을 가리키는 번호.
+                        소켓 실체는 커널 안에 있다</dd>
+                    <dt>Send / Receive Buffer</dt>
+                    <dd>write() 한 데이터가 ACK 올 때까지 머무는 곳 /
+                        도착한 데이터가 read() 될 때까지 쌓이는 곳</dd>
+                </dl>
+            </div>
+        </div>
+    </dialog>
+
     <dialog id="renderModal" class="hdr-modal">
         <form method="dialog">
             <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
@@ -1378,6 +1964,89 @@ CSR = 브라우저가 HTML 을 만든다   &lt;-- 캐슬챗
             </div>
             <p>일상적으로는 넓은 의미로 써도 통하지만,
                 <em>"JS 실행도 렌더링이냐" 는 질문에는 아니라고 답하는 게 맞다.</em></p>
+
+            <h3>참고 1 &mdash; 파일명의 해시는 왜 붙나</h3>
+            <p><code>main.<em>0bd4de65</em>.css</code> 의 가운데 토막은
+                <em>파일 내용으로 만든 지문</em>이다.</p>
+            <pre class="code"><code>내용이 바뀌면  ->  해시도 바뀜  ->  파일명이 바뀜
+
+main.0bd4de65.css  ->  (CSS 한 줄 고침)  ->  main.a7f2c391.css</code></pre>
+
+            <h4>왜 이렇게 하나 &mdash; 캐시 때문이다</h4>
+            <p>브라우저는 CSS &middot; JS 를 한 번 받으면 캐시에 저장하고 다시 안 받는다. 빠르니까.
+                그런데 문제가 생긴다.</p>
+
+            <div class="side-by-side">
+                <div class="callout bad">
+                    <span class="tag">해시가 없다면</span>
+                    <pre class="code"><code>1일차  main.css 받음 -> 캐시 저장
+2일차  내가 CSS 수정 후 배포
+3일차  재방문 -> "main.css? 캐시에 있네"
+       -> 옛날 걸 씀. 수정이 반영 안 됨</code></pre>
+                    <p>파일명이 같으니 브라우저가 바뀐 줄 모른다.
+                        <em>&ldquo;Ctrl+Shift+R 하세요&rdquo; 라고 안내해야 하는 상황이 이것이다.</em></p>
+                </div>
+                <div class="callout">
+                    <span class="tag">해시가 있으면</span>
+                    <pre class="code"><code>1일차  main.0bd4de65.css 받음 -> 캐시 저장
+2일차  수정 -> 배포 -> main.a7f2c391.css 로 바뀜
+3일차  재방문 -> index.html 이 새 이름을 달라고 함
+       -> 캐시에 없는 이름 -> 무조건 새로 받음</code></pre>
+                    <p>이름을 바꿔서 캐시를 무력화하는 기법이고, <em>cache busting</em> 이라고 부른다.</p>
+                </div>
+            </div>
+
+            <h4>index.html 에는 왜 해시가 없나</h4>
+            <p>여기가 설계의 핵심이다.</p>
+            <pre class="code"><code>index.html                        해시 없음.  항상 새로 받아야 함
+  |
+  +-- 그 안에 적혀 있음 --> main.e83d3066.js    해시 있음. 영구 캐시 가능
+                       --> main.0bd4de65.css   해시 있음. 영구 캐시 가능</code></pre>
+            <p>548 바이트짜리 <code>index.html</code> 만 매번 새로 받으면,
+                <em>그 안에 적힌 새 파일명을 보고 나머지를 알아서 갱신한다.</em></p>
+            <pre class="code"><code>&lt;script defer src="/static/js/main.e83d3066.js"&gt;&lt;/script&gt;
+&lt;link href="/static/css/main.0bd4de65.css" rel="stylesheet"&gt;</code></pre>
+            <div class="callout">
+                <span class="tag">ETag 와 짝이 맞는다</span>
+                <p>실측 응답에 <code>ETag: "6aa4110f-224"</code> 가 있었다.
+                    <code>index.html</code> 은 ETag 로 <em>&ldquo;안 바뀌었으면 304 만 주세요&rdquo;</em> 를 하고,
+                    해시 붙은 파일들은 <em>애초에 다시 묻지 않는다.</em></p>
+                <p>작은 파일 하나만 매번 확인하고, 무거운 461 KB 는 바뀔 때만 받는 구조다.</p>
+            </div>
+
+            <h3>참고 2 &mdash; 기본 게이트웨이 자리에 실제로 뭐가 있나</h3>
+            <p><code>Default Gateway</code> 는 장비 이름이 아니라 <em>역할 &middot; 설정 이름</em>이라
+                어디서나 맞는 표현이다. 그 자리에 꽂혀 있는 물건만 환경마다 다르다.</p>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>환경</th>
+                        <th>기본 게이트웨이 자리의 실제 장비</th>
+                    </tr>
+                    <tr>
+                        <th>집</th>
+                        <td>공유기 (Home Router)</td>
+                    </tr>
+                    <tr>
+                        <th>회사</th>
+                        <td><em>L3 스위치</em> 또는 <em>방화벽.</em> 라우터인 경우도 있음</td>
+                    </tr>
+                    <tr>
+                        <th>AWS</th>
+                        <td>Internet Gateway / NAT Gateway (가상)</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="callout bad">
+                <span class="tag">회사에서는 보통 라우터가 아니다</span>
+                <p>집에서는 공유기 하나가 스위치 &middot; 게이트웨이 &middot; NAT &middot; 방화벽 역할을
+                    <em>다 겸한다.</em> 그래서 구분이 무의미했던 것이다.</p>
+                <p>회사 경로는 보통 이렇게 쪼개져 있다.</p>
+                <pre class="code"><code>내 PC -> 액세스 스위치(L2) -> 분배/코어 L3 스위치 -> 방화벽 -> 엣지 라우터 -> ISP
+                              ^ 여기가 Default Gateway 인 경우가 가장 흔하다</code></pre>
+                <p><code>Home Router</code> 는 소비자 장비 용어라 <em>회사 환경 설명에 쓰면 안 된다.</em>
+                    글로 적을 때는 <em>&ldquo;기본 게이트웨이로 보낸다&rdquo;</em> 가 가장 안전하다.</p>
+            </div>
         </div>
     </dialog>
 
@@ -1391,9 +2060,9 @@ CSR = 브라우저가 HTML 을 만든다   &lt;-- 캐슬챗
             <h2>확인한 것 &mdash; 내 정리가 맞는지 검증</h2>
 
             <!-- ① -->
-            <h3><span class="vd ok">맞음</span> ① NginX 가 CSS &middot; JS 를 전부 들고 있다</h3>
+            <h3><span class="vd ok">맞음</span> ① NGINX 가 CSS &middot; JS 를 전부 들고 있다</h3>
             <p>추가 요청이라는 게 <em>어디서 가져온다는 뜻이 아니다.</em> 전부 같은 디렉토리에 이미 있고,
-                브라우저가 HTML 을 읽다가 링크를 발견해 <em>같은 NginX 에 한 번 더 요청</em>할 뿐이다.</p>
+                브라우저가 HTML 을 읽다가 링크를 발견해 <em>같은 NGINX 에 한 번 더 요청</em>할 뿐이다.</p>
             <pre class="code"><code>Dockerfile.prebuilt
   COPY build /usr/share/nginx/html        &lt;-- build 폴더 통째로
 
@@ -1452,7 +2121,7 @@ createElement    88 회</code></pre>
 
             <h4>진짜 차이는 첫 HTML 을 누가 조립하느냐다</h4>
             <pre class="code"><code>[ 캐슬챗 - CSR ]
-NginX --> 빈 껍데기 HTML + JS 코드
+NGINX --> 빈 껍데기 HTML + JS 코드
            |
            v  브라우저가 JS 실행
         API 호출 --> 백엔드 --> 데이터(JSON)
@@ -1478,7 +2147,7 @@ NginX --> 빈 껍데기 HTML + JS 코드
                     </tr>
                     <tr>
                         <th>첫 HTML</th>
-                        <td>NginX 가 파일 그대로</td>
+                        <td>NGINX 가 파일 그대로</td>
                         <td><em>백엔드가 생성</em></td>
                     </tr>
                     <tr>
@@ -1575,7 +2244,7 @@ Last-Modified: Fri, 11 Sep...    (없음)
             <div class="hdr">
                 <div class="hdr-name">Host: 43.202.208.133</div>
                 <p><em>HTTP/1.1 에서 유일한 필수 헤더.</em> IP 하나에 여러 사이트를 올릴 수 있게 해주는 헤더다.</p>
-                <p>NginX 가 <code>server_name</code> 으로 어느 사이트인지 가르는 기준이 이것이다.</p>
+                <p>NGINX 가 <code>server_name</code> 으로 어느 사이트인지 가르는 기준이 이것이다.</p>
                 <pre class="code"><code>server_name _;    # 지금은 "뭐든 다 받음". 도메인 사면 여기에 적는다</code></pre>
             </div>
 
@@ -1631,7 +2300,7 @@ Last-Modified: Fri, 11 Sep...    (없음)
                 <div class="hdr-name">Origin: http://43.202.208.133</div>
                 <p><em>CORS 의 정체가 이 헤더다.</em> 브라우저가 강제로 붙이고 JS 로 위조가 불가능하다.
                     서버는 이걸 보고 "허용된 출처냐" 를 판단한다.</p>
-                <p>캐슬챗에 CORS 설정이 없는 이유 &mdash; 모든 요청이 NginX 한 곳으로 가서 출처가 하나뿐이고,
+                <p>캐슬챗에 CORS 설정이 없는 이유 &mdash; 모든 요청이 NGINX 한 곳으로 가서 출처가 하나뿐이고,
                     출처가 같으면 브라우저가 CORS 검사 자체를 하지 않는다.</p>
             </div>
 
@@ -1667,8 +2336,8 @@ Last-Modified: Fri, 11 Sep...    (없음)
 
             <div class="hdr">
                 <div class="hdr-name">X-Forwarded-For: 203.0.113.42</div>
-                <p>프록시를 거치면 뒷단 서버가 보는 접속 IP 는 <em>NginX 의 IP</em> 가 된다.
-                    진짜 사용자 IP 를 알려주려고 NginX 가 끼워넣는 헤더다.</p>
+                <p>프록시를 거치면 뒷단 서버가 보는 접속 IP 는 <em>NGINX 의 IP</em> 가 된다.
+                    진짜 사용자 IP 를 알려주려고 NGINX 가 끼워넣는 헤더다.</p>
                 <p>로그 분석, IP 차단에 필수. <code>X-</code> 접두사는 "표준이 아닌 관례" 라는 뜻이다.</p>
                 <pre class="code"><code>proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
 proxy_set_header X-Real-IP         $remote_addr;
@@ -1731,6 +2400,82 @@ Cookie: JSESSIONID=...\r\n
 \r\n                        <-- 이 빈 줄이 끝 신호</code></pre>
         </div>
     </dialog>
+    <script>
+        // 탭 전환. 주소 끝을 #send / #render 로 남겨 새로고침해도 같은 탭이 열린다.
+        (function () {
+            var btns = document.querySelectorAll('.tab-btn');
+            function show(id) {
+                document.querySelectorAll('.tab-panel').forEach(function (p) {
+                    p.hidden = p.id !== 'tab-' + id;
+                });
+                btns.forEach(function (b) {
+                    var on = b.dataset.tab === id;
+                    b.classList.toggle('is-active', on);
+                    b.setAttribute('aria-selected', on ? 'true' : 'false');
+                });
+                history.replaceState(null, '', '#' + id);
+            }
+            btns.forEach(function (b) {
+                b.addEventListener('click', function () { show(b.dataset.tab); window.scrollTo(0, 0); });
+            });
+            show(location.hash === '#send' ? 'send' : 'render');
+        })();
+    </script>
+    <script>
+        // 흐름도 박스 -> 상세 모달. 위아래로 스크롤하지 않고 박스 단위로 공부하려고 만들었다.
+        (function () {
+            var nodes = Array.prototype.slice.call(document.querySelectorAll('.farch .fnode[data-step]'));
+            var dlg = document.getElementById('stepModal');
+            var body = dlg.querySelector('.step-body');
+            var cur = 0;
+            function fill(i) {
+                cur = (i + nodes.length) % nodes.length;
+                var node = nodes[cur];
+                dlg.querySelector('.step-no').textContent = (cur + 1) + ' / ' + nodes.length;
+                var who = node.querySelector('.fnode-type');
+                dlg.querySelector('.step-who').textContent = who ? who.textContent : '';
+                dlg.querySelector('.step-orig p').textContent = node.querySelector('small').textContent;
+                dlg.querySelector('.step-extra').hidden = node.dataset.extra !== 'tcpip';
+                body.innerHTML = '';
+                node.dataset.chunks.split(' ').forEach(function (id) {
+                    var src = document.getElementById(id);
+                    if (!src) return;
+                    var c = src.cloneNode(true);
+                    c.removeAttribute('id');
+                    body.appendChild(c);
+                });
+                dlg.scrollTop = 0;
+            }
+            function open(i) { fill(i); if (!dlg.open) dlg.showModal(); }
+            nodes.forEach(function (n, i) {
+                n.addEventListener('click', function () { open(i); });
+                n.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(i); }
+                });
+            });
+            dlg.querySelectorAll('.step-nav button').forEach(function (b) {
+                b.addEventListener('click', function () { fill(cur + Number(b.dataset.dir)); });
+            });
+            // TCP/IP 모달. 닫기(x) · ESC 는 이 모달만 닫아야 한다. 박스 모달은 절대 같이 닫히면 안 된다.
+            var inner = document.getElementById('tcpipModal');
+            dlg.querySelector('.step-extra').addEventListener('click', function () { inner.showModal(); });
+            inner.addEventListener('cancel', function (e) {   // ESC
+                e.preventDefault();
+                inner.close();
+            });
+            dlg.addEventListener('cancel', function (e) {     // 안쪽 모달이 열려 있는 동안엔 바깥은 ESC 로 안 닫힌다
+                if (inner.open) e.preventDefault();
+            });
+            inner.addEventListener('close', function () {     // 안전장치. 혹시 같이 닫혔으면 되살린다
+                if (!dlg.open) dlg.showModal();
+            });
+            dlg.addEventListener('keydown', function (e) {
+                if (inner.open) return;
+                if (e.key === 'ArrowRight') { e.preventDefault(); fill(cur + 1); }
+                if (e.key === 'ArrowLeft') { e.preventDefault(); fill(cur - 1); }
+            });
+        })();
+    </script>
 </body>
 
 </html>

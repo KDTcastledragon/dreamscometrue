@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kafka &middot; 백엔드 공부</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%232f6d55%27%2F%3E%3Cg%20fill%3D%27%23ffffff%27%3E%3Crect%20x%3D%277%27%20y%3D%276%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2713%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2720%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%232f6d55%27%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%279%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2716%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2723%27%20r%3D%271.3%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="note-page">
+    <main class="note-flow">
+
+        <!-- =====================================================
+             #1 Kafka 구조
+             ===================================================== -->
+        <section class="note">
+            <div class="head-row head-h2">
+                <h2>#1 Kafka 구조</h2>
+                <p class="head-note">토픽 &middot; 파티션 &middot; 오프셋 &middot; 컨슈머 그룹.
+                    <strong class="danger">이 넷을 모르면 흐름이 안 붙는다.</strong></p>
+            </div>
+
+            <div class="gloss">
+                <b>&#42; 용어</b>
+                <dl>
+                    <dt>cheg</dt>
+                    <dd><code>channel-engine</code> 서비스. 메시지를 발행하는 쪽(Producer)</dd>
+                    <dt>evtpwk</dt>
+                    <dd><code>event-persist-worker</code> 서비스. 가져가서 DB 에 넣는 쪽(Consumer)</dd>
+                    <dt>Producer / Consumer</dt>
+                    <dd>브로커에 쓰는 쪽 / 브로커에서 읽는 쪽.
+                        <em>둘 다 Kafka 클라이언트 라이브러리를 쓰는 내 애플리케이션</em>이다</dd>
+                    <dt>브로커 Broker</dt>
+                    <dd>Kafka 서버 자체. 메시지를 디스크에 쌓아두는 곳.
+                        <em>내 구성은 1대</em></dd>
+                </dl>
+            </div>
+
+            <h3>1 &mdash; 3단 구조</h3>
+            <pre class="code"><code>토픽 Topic       castlechat.chat.message     이름일 뿐. 논리적 단위
+  파티션 Partition  0 1 2 3 4 5  (6개)        ★ 실제 저장 단위
+    오프셋 Offset    0 1 2 3 ...               파티션 안의 순번</code></pre>
+
+            <p>파티션 하나는 <em>끝에만 덧붙이는 로그 파일</em>이다.
+                중간 수정도 삭제도 없다. 그래서 디스크를 순차로만 쓰고, 그래서 빠르다.</p>
+
+            <div class="cdiag full">
+                <svg viewBox="0 0 880 344" role="img"
+                    aria-label="Partitioner 가 key 인 roomId 를 해시해 파티션을 고르고, 토픽 안의 각 파티션은 오프셋이 붙은 추가 전용 로그다">
+                    <defs>
+                        <marker id="fa" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <!-- Partitioner -->
+                    <rect x="14" y="26" width="176" height="42" rx="6" class="bd fillw" />
+                    <text x="102" y="43" text-anchor="middle" class="xs">send(토픽, key, value)</text>
+                    <text x="102" y="60" text-anchor="middle" class="sm">key = roomId 5</text>
+                    <path d="M 102 70 V 94" class="ln" marker-end="url(#fa)" />
+
+                    <rect x="14" y="96" width="176" height="56" rx="6" class="bd fillt" />
+                    <text x="102" y="118" text-anchor="middle" class="sm">Partitioner</text>
+                    <text x="102" y="137" text-anchor="middle" class="xs">
+                        murmur2(key) % 6 = 2</text>
+
+                    <text x="14" y="176" class="xs">프로듀서 쪽에서 정한다</text>
+                    <text x="14" y="194" class="xs">(클라이언트 라이브러리 안)</text>
+                    <text x="14" y="212" class="xs">브로커가 정하는 게 아니다</text>
+
+                    <path d="M 192 124 H 244" class="ln" marker-end="url(#fa)" />
+
+                    <!-- 토픽 -->
+                    <rect x="250" y="14" width="616" height="252" rx="10" class="bd fillw" />
+                    <text x="264" y="38" class="ttl">토픽 castlechat.chat.message</text>
+
+                    <!-- 파티션 0 -->
+                    <text x="264" y="72" class="xs">파티션 0</text>
+                    <rect x="342" y="54" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="380" y="54" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="418" y="54" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="456" y="54" width="34" height="26" rx="3" class="bd cmd" />
+                    <text x="359" y="72" text-anchor="middle" class="xs">0</text>
+                    <text x="397" y="72" text-anchor="middle" class="xs">1</text>
+                    <text x="435" y="72" text-anchor="middle" class="xs">2</text>
+                    <text x="473" y="72" text-anchor="middle" class="xs">3</text>
+                    <text x="502" y="72" class="xs">&rarr; 오프셋</text>
+
+                    <!-- 파티션 1 -->
+                    <text x="264" y="110" class="xs">파티션 1</text>
+                    <rect x="342" y="92" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="380" y="92" width="34" height="26" rx="3" class="bd cmd" />
+                    <text x="359" y="110" text-anchor="middle" class="xs">0</text>
+                    <text x="397" y="110" text-anchor="middle" class="xs">1</text>
+
+                    <!-- 파티션 2 : 강조 -->
+                    <text x="264" y="148" class="lbl">파티션 2</text>
+                    <rect x="342" y="130" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="380" y="130" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="418" y="130" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="456" y="130" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="494" y="130" width="46" height="26" rx="3" class="bd dat" />
+                    <text x="359" y="148" text-anchor="middle" class="xs">0</text>
+                    <text x="397" y="148" text-anchor="middle" class="xs">1</text>
+                    <text x="435" y="148" text-anchor="middle" class="xs">2</text>
+                    <text x="473" y="148" text-anchor="middle" class="xs">3</text>
+                    <text x="517" y="148" text-anchor="middle" class="xs">새것</text>
+                    <text x="552" y="148" class="xs">&larr; 방 5번은 전부 여기</text>
+
+                    <text x="264" y="178" class="xs">&#8942;</text>
+
+                    <!-- 파티션 5 -->
+                    <text x="264" y="208" class="xs">파티션 5</text>
+                    <rect x="342" y="190" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="380" y="190" width="34" height="26" rx="3" class="bd cmd" />
+                    <rect x="418" y="190" width="34" height="26" rx="3" class="bd cmd" />
+                    <text x="359" y="208" text-anchor="middle" class="xs">0</text>
+                    <text x="397" y="208" text-anchor="middle" class="xs">1</text>
+                    <text x="435" y="208" text-anchor="middle" class="xs">2</text>
+
+                    <text x="264" y="240" class="xs">
+                        오프셋은 파티션마다 따로 센다. 파티션 0의 3과 파티션 2의 3은 아무 관계가 없다</text>
+                    <text x="264" y="258" class="xs">
+                        추가만 된다. 중간 수정도 삭제도 없다 &mdash; 그래서 디스크를 순차로만 쓴다</text>
+
+                    <path d="M 14 292 H 866" class="cell" stroke-dasharray="4 3" />
+                    <text x="14" y="316" class="lbl">
+                        순서 보장은 파티션 안에서만 &mdash; 같은 roomId 는 항상 같은 파티션으로 가므로
+                        방 안의 순서가 지켜진다</text>
+                    <text x="14" y="336" class="xs">
+                        반대로 방 5번과 방 7번 사이의 순서는 보장되지 않는다. 그런데 보장할 필요도 없다</text>
+                </svg>
+            </div>
+
+            <h3>2 &mdash; Partitioner &mdash; 어디 있고 뭘 하나</h3>
+            <div class="side-by-side">
+                <div>
+                    <h4>어디 있나</h4>
+                    <pre class="code"><code>org.apache.kafka.clients.producer
+  .internals.BuiltInPartitioner
+
+-> Kafka 클라이언트 라이브러리 안
+-> channel-engine JVM 안에서 돈다
+-> ★ 브로커가 아니다</code></pre>
+                    <p><em>파티션은 보내기 전에 프로듀서가 정한다.</em>
+                        내 코드에 Partitioner 클래스가 없다 &mdash; 기본 구현을 그대로 쓴다.</p>
+                </div>
+                <div>
+                    <h4>key 유무로 갈린다</h4>
+                    <pre class="code"><code>key 가 있으면
+  murmur2(직렬화된 key) % 파티션수
+  roomId 5 -> 항상 같은 파티션
+  ★ 순서 보장의 전부가 이것이다
+
+key 가 null 이면
+  sticky partitioning
+  배치가 찰 때까지 한 파티션에 몰고
+  차면 다음으로 옮긴다
+  순서 보장 없음. 배치 효율은 좋다</code></pre>
+                </div>
+            </div>
+
+            <pre class="code"><code>kafkaTemplate.send(CHAT_MESSAGE_TOPIC, roomId, event);
+//                                     ^^^^^^ 이 자리가 key</code></pre>
+            <p><code>roomId</code> 를 <em>key 자리에 넣은 그 한 가지</em>가 방 안의 순서를 만든다.</p>
+
+            <div class="callout bad">
+                <span class="tag">파티션 수를 함부로 못 늘리는 이유</span>
+                <p>파티션을 6개에서 12개로 늘리면 <code>% 파티션수</code> 의 결과가 전부 바뀐다.
+                    <em>방 5번이 파티션 2에서 5로 옮겨간다.</em></p>
+                <p>그러면 <em>옛 메시지는 파티션 2에, 새 메시지는 파티션 5에</em> 남는다.
+                    두 파티션은 서로 순서를 모르므로 <em>그 방의 순서가 깨진다.</em></p>
+                <p>그래서 파티션 수는 <em>처음에 넉넉히 잡아두는 게</em> 원칙이다.
+                    내가 컨슈머 1개인데도 <em>파티션을 6개로 만들어 둔 이유</em>가 이것이다.</p>
+            </div>
+
+            <h3>3 &mdash; 컨슈머와 컨슈머 그룹</h3>
+            <p><em>Consumer</em> 는 브로커에서 읽어가는 쪽이다.
+                내 경우 <code>event-persist-worker</code> 가 그것이다.</p>
+            <p><em>Consumer Group</em> 은 <em>같은 일을 나눠 하는 컨슈머들의 묶음</em>이다.
+                <code>groupId</code> 가 같으면 한 그룹이다.</p>
+
+            <pre class="code"><code>@KafkaListener(topics = ChatKafkaTopics.CHAT_EVENT_TOPIC,
+               groupId = "${chat.kafka.persist-group-id:event-persist-worker}")
+//                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 이게 그룹 이름</code></pre>
+
+            <div class="cdiag full">
+                <svg viewBox="0 0 880 326" role="img"
+                    aria-label="컨슈머 그룹 안에서 파티션 하나는 컨슈머 하나에만 할당된다. 컨슈머가 파티션보다 많으면 남는 컨슈머는 논다">
+                    <defs>
+                        <marker id="fb" markerWidth="7" markerHeight="7" refX="5.5" refY="2.5"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 5.5 2.5 L 0 5 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <text x="14" y="30" class="ttl">토픽 파티션 6개</text>
+                    <rect x="14" y="42" width="112" height="28" rx="4" class="bd cmd" />
+                    <text x="70" y="61" text-anchor="middle" class="xs">파티션 0</text>
+                    <rect x="14" y="76" width="112" height="28" rx="4" class="bd cmd" />
+                    <text x="70" y="95" text-anchor="middle" class="xs">파티션 1</text>
+                    <rect x="14" y="110" width="112" height="28" rx="4" class="bd cmd" />
+                    <text x="70" y="129" text-anchor="middle" class="xs">파티션 2</text>
+                    <rect x="14" y="152" width="112" height="28" rx="4" class="bd cmd" />
+                    <text x="70" y="171" text-anchor="middle" class="xs">파티션 3</text>
+                    <rect x="14" y="186" width="112" height="28" rx="4" class="bd cmd" />
+                    <text x="70" y="205" text-anchor="middle" class="xs">파티션 4</text>
+                    <rect x="14" y="220" width="112" height="28" rx="4" class="bd cmd" />
+                    <text x="70" y="239" text-anchor="middle" class="xs">파티션 5</text>
+
+                    <path d="M 128 56 H 168 V 100 H 206" class="ln" marker-end="url(#fb)" />
+                    <path d="M 128 90 H 206" class="ln" marker-end="url(#fb)" />
+                    <path d="M 128 124 H 168 V 100" class="ln" />
+                    <path d="M 128 166 H 168 V 210 H 206" class="ln" marker-end="url(#fb)" />
+                    <path d="M 128 200 H 206" class="ln" marker-end="url(#fb)" />
+                    <path d="M 128 234 H 168 V 210" class="ln" />
+
+                    <rect x="198" y="40" width="268" height="238" rx="10" class="bd fillw"
+                        stroke-dasharray="5 4" />
+                    <text x="212" y="62" class="lbl">컨슈머 그룹</text>
+                    <text x="290" y="62" class="xs">groupId = event-persist-worker</text>
+
+                    <rect x="212" y="74" width="240" height="54" rx="6" class="bd fillt" />
+                    <text x="332" y="96" text-anchor="middle" class="sm">컨슈머 1</text>
+                    <text x="332" y="115" text-anchor="middle" class="xs">
+                        worker 파드 1 &mdash; 파티션 0 1 2 담당</text>
+
+                    <rect x="212" y="184" width="240" height="54" rx="6" class="bd fillt" />
+                    <text x="332" y="206" text-anchor="middle" class="sm">컨슈머 2</text>
+                    <text x="332" y="225" text-anchor="middle" class="xs">
+                        worker 파드 2 &mdash; 파티션 3 4 5 담당</text>
+
+                    <text x="212" y="262" class="xs">
+                        파드를 늘리면 다시 나눠준다 (리밸런싱)</text>
+
+                    <text x="486" y="62" class="lbl">규칙</text>
+                    <text x="486" y="84" class="xs">파티션 1개는 그룹 안에서</text>
+                    <text x="486" y="102" class="xs">컨슈머 1개에만 할당된다</text>
+                    <text x="486" y="124" class="xs">그래서 컨슈머가 7개면</text>
+                    <text x="486" y="142" class="xs">1개는 할당받을 게 없어 논다</text>
+
+                    <text x="486" y="176" class="lbl">지금 내 구성</text>
+                    <text x="486" y="198" class="xs">replicas: 1 &mdash; 컨슈머 1개가</text>
+                    <text x="486" y="216" class="xs">파티션 6개를 혼자 다 먹는다</text>
+                    <text x="486" y="238" class="xs">6까지 올리면 그만큼 병렬이 된다</text>
+                    <text x="486" y="262" class="xs">(여기는 이미 확장 준비가 돼 있다)</text>
+
+                    <path d="M 14 294 H 866" class="cell" stroke-dasharray="4 3" />
+                    <text x="14" y="318" class="xs">
+                        각 컨슈머는 자기가 어디까지 읽었는지(offset)를 브로커에 커밋한다.
+                        재시작하면 거기서 이어 읽는다 &mdash; 그래서 worker 가 꺼져 있어도 메시지가 유실되지 않는다</text>
+                </svg>
+            </div>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">그룹이 다르면 같은 메시지를 또 받는다</span>
+                    <p>같은 그룹 안에서는 <em>나눠 먹지만</em>,
+                        <em>그룹이 다르면 각자 전부 받는다.</em></p>
+                    <pre class="code"><code>groupId = "event-persist-worker"  -> DB 저장
+groupId = "search-indexer"        -> 검색 색인
+  두 그룹이 같은 메시지를 각각 다 받는다</code></pre>
+                    <p>나중에 <em>검색 색인이나 통계 집계를 붙일 때</em>
+                        기존 worker 를 건드리지 않아도 되는 이유다.</p>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">리밸런싱 &mdash; 중복 소비가 생기는 지점</span>
+                    <p>파드가 늘거나 줄면 브로커가 <em>파티션을 다시 나눠준다.</em>
+                        그 사이에 <em>오프셋 커밋 전에 파드가 죽으면</em>
+                        새 담당 컨슈머가 <em>같은 메시지를 다시 읽는다.</em></p>
+                    <p>그래서 Kafka 는 <em>최소 한 번(at-least-once)</em> 전달이고,
+                        <em>소비 쪽이 멱등해야 한다.</em>
+                        내 worker 의 <code>inserted == 0</code> 처리가 그것이다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #2 Publisher 에서 DB 까지
+             ===================================================== -->
+        <section class="note">
+            <h2>#2 ChatMessageEventPublisher 에서 DB INSERT 까지</h2>
+
+            <h3>4 &mdash; &ldquo;안녕&rdquo; 한 건을 따라가기</h3>
+            <p>철수(<code>userId 12</code>)가 <em>5번 방</em>에서 <em>&ldquo;안녕&rdquo;</em> 을 보냈다.
+                그 한 건이 어떤 모습으로 바뀌며 DB 까지 가는지만 본다.</p>
+            <p><em>&ldquo;안녕&rdquo; 이라는 글자는 끝까지 그대로다.</em>
+                바뀌는 건 <em>그걸 담는 껍데기</em>뿐이다.</p>
+
+            <div class="cdiag full">
+                <svg viewBox="0 0 1000 640" role="img"
+                    aria-label="안녕이라는 메시지 한 건이 React 에서 DTO, JSON 바이트, 파티션 로그, 다시 DTO, DB 행으로 모습을 바꾸며 이동한다">
+                    <defs>
+                        <marker id="mt" markerWidth="7" markerHeight="7" refX="5.5" refY="2.5"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 5.5 2.5 L 0 5 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <!-- 범례 -->
+                    <rect x="14" y="14" width="18" height="14" rx="3" class="bd fillw" />
+                    <text x="38" y="26" class="xs">내 코드</text>
+                    <rect x="106" y="14" width="18" height="14" rx="3" class="bd fillt" />
+                    <text x="130" y="26" class="xs">Kafka 클라이언트 라이브러리 (내 JVM 안)</text>
+                    <rect x="382" y="14" width="18" height="14" rx="3" class="bd dat" />
+                    <text x="406" y="26" class="xs">브로커 (네트워크 너머)</text>
+                    <rect x="570" y="14" width="18" height="14" rx="3" class="bd cmd" />
+                    <text x="594" y="26" class="xs">worker</text>
+
+                    <text x="132" y="54" text-anchor="middle" class="lbl">단계</text>
+                    <text x="272" y="54" class="lbl">그 순간 &ldquo;안녕&rdquo; 의 모습</text>
+
+                    <!-- 1 -->
+                    <rect x="14" y="62" width="236" height="34" rx="5" class="bd fillw" />
+                    <text x="132" y="84" text-anchor="middle" class="xs">철수 입력</text>
+                    <text x="272" y="84" class="sm">&ldquo;안녕&rdquo;</text>
+                    <path d="M 132 98 V 106" class="ln" marker-end="url(#mt)" />
+
+                    <!-- 2 -->
+                    <rect x="14" y="108" width="236" height="34" rx="5" class="bd fillw" />
+                    <text x="132" y="130" text-anchor="middle" class="xs">React ws.send()</text>
+                    <text x="272" y="124" class="xs">
+                        {"wsType":"SEND_MESSAGE",</text>
+                    <text x="272" y="138" class="xs">
+                        &nbsp;"payload":{"roomId":5,"messageText":"안녕"}}</text>
+                    <path d="M 132 144 V 152" class="ln" marker-end="url(#mt)" />
+
+                    <!-- 3 -->
+                    <rect x="14" y="154" width="236" height="34" rx="5" class="bd fillw" />
+                    <text x="132" y="176" text-anchor="middle" class="xs">wsgate ChatHandler</text>
+                    <text x="272" y="170" class="xs">CreateChatMessageCommand</text>
+                    <text x="272" y="184" class="xs">
+                        &nbsp;roomId=5, senderUserId=12, messageText="안녕"</text>
+                    <path d="M 132 190 V 198" class="ln" marker-end="url(#mt)" />
+
+                    <!-- 4 -->
+                    <rect x="14" y="200" width="236" height="34" rx="5" class="bd fillw" />
+                    <text x="132" y="222" text-anchor="middle" class="xs">gRPC 전송</text>
+                    <text x="272" y="222" class="xs">
+                        CreateChatMessageRequest &mdash; protobuf 바이너리</text>
+                    <path d="M 132 236 V 244" class="ln" marker-end="url(#mt)" />
+
+                    <!-- 5 -->
+                    <rect x="14" y="246" width="236" height="34" rx="5" class="bd fillw" />
+                    <text x="132" y="268" text-anchor="middle" class="xs">cheg nextMessageId()</text>
+                    <text x="272" y="268" class="sm">messageId = 7301234567890123</text>
+                    <text x="618" y="268" class="lbl">★ PK 확정</text>
+                    <path d="M 132 282 V 290" class="ln" marker-end="url(#mt)" />
+
+                    <!-- 6 -->
+                    <rect x="14" y="292" width="236" height="44" rx="5" class="bd fillw" />
+                    <text x="132" y="320" text-anchor="middle" class="xs">cheg Publisher</text>
+                    <text x="272" y="310" class="xs">ChatMessageCreatedEventDTO</text>
+                    <text x="272" y="326" class="xs">
+                        &nbsp;{ messageId, roomId=5, senderUserId=12, "안녕", createdAt }</text>
+                    <text x="272" y="342" class="lbl">★ 이게 Kafka 에 들어갈 모습이다</text>
+
+                    <path d="M 14 354 H 986" class="cell" stroke-dasharray="4 3" />
+                    <text x="18" y="370" class="lbl">
+                        여기부터 Kafka 클라이언트 라이브러리 &mdash; 아직 channel-engine JVM 안이다</text>
+
+                    <!-- 7 -->
+                    <rect x="14" y="378" width="236" height="44" rx="5" class="bd fillt" />
+                    <text x="132" y="406" text-anchor="middle" class="xs">Serializer</text>
+                    <text x="272" y="396" class="xs">key&nbsp;&nbsp;&nbsp;: 5 &rarr; 8바이트</text>
+                    <text x="272" y="414" class="xs">value : EventDTO &rarr; JSON 바이트</text>
+                    <path d="M 132 424 V 432" class="ln" marker-end="url(#mt)" />
+
+                    <!-- 8 -->
+                    <rect x="14" y="434" width="236" height="34" rx="5" class="bd fillt" />
+                    <text x="132" y="456" text-anchor="middle" class="xs">Partitioner</text>
+                    <text x="272" y="456" class="xs">
+                        murmur2(key 바이트) % 6 = 2 &nbsp;&rarr; 파티션 2 로 결정</text>
+                    <path d="M 132 470 V 478" class="ln" marker-end="url(#mt)" />
+
+                    <!-- 9 -->
+                    <rect x="14" y="480" width="236" height="44" rx="5" class="bd fillt" />
+                    <text x="132" y="508" text-anchor="middle" class="xs">RecordAccumulator</text>
+                    <text x="272" y="498" class="xs">ProducerRecord 로 파티션2 배치 버퍼에 쌓인다</text>
+                    <text x="272" y="516" class="lbl">
+                        ★ 아직 브로커에 안 갔다. 내 프로세스 메모리다</text>
+
+                    <path d="M 14 532 H 986" class="cell" stroke-dasharray="4 3" />
+                    <text x="18" y="548" class="lbl">
+                        여기부터 브로커 &mdash; 네트워크를 넘어간다</text>
+
+                    <!-- 10 -->
+                    <rect x="14" y="556" width="236" height="34" rx="5" class="bd dat" />
+                    <text x="132" y="578" text-anchor="middle" class="xs">Sender 스레드</text>
+                    <text x="272" y="578" class="xs">
+                        배치를 꺼내 ProduceRequest 로 묶어 전송</text>
+
+                    <!-- 11 브로커 로그 -->
+                    <rect x="14" y="598" width="236" height="34" rx="5" class="bd dat" />
+                    <text x="132" y="620" text-anchor="middle" class="xs">브로커 파티션 2</text>
+                    <text x="272" y="620" class="xs">로그 끝에 append &rarr; offset 4 배정</text>
+                    <rect x="560" y="604" width="30" height="22" rx="3" class="bd fillw" />
+                    <rect x="594" y="604" width="30" height="22" rx="3" class="bd fillw" />
+                    <rect x="628" y="604" width="30" height="22" rx="3" class="bd fillw" />
+                    <rect x="662" y="604" width="30" height="22" rx="3" class="bd fillw" />
+                    <rect x="696" y="604" width="62" height="22" rx="3" class="bd cmd" />
+                    <text x="575" y="620" text-anchor="middle" class="xs">0</text>
+                    <text x="609" y="620" text-anchor="middle" class="xs">1</text>
+                    <text x="643" y="620" text-anchor="middle" class="xs">2</text>
+                    <text x="677" y="620" text-anchor="middle" class="xs">3</text>
+                    <text x="727" y="620" text-anchor="middle" class="xs">4 안녕</text>
+                    <text x="770" y="620" class="xs">&larr; 여기 들어갔다</text>
+                </svg>
+            </div>
+
+            <div class="cdiag full">
+                <svg viewBox="0 0 1000 196" role="img"
+                    aria-label="브로커가 offset 을 응답해 요청 스레드가 깨어나고, 나중에 worker 가 그 레코드를 가져와 DB 에 넣는다">
+                    <defs>
+                        <marker id="mt2" markerWidth="7" markerHeight="7" refX="5.5" refY="2.5"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 5.5 2.5 L 0 5 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <rect x="14" y="16" width="236" height="34" rx="5" class="bd dat" />
+                    <text x="132" y="38" text-anchor="middle" class="xs">브로커 응답</text>
+                    <text x="272" y="38" class="xs">
+                        partition=2, offset=4 &nbsp;&rarr; Future 완료 &rarr; exec-N 이 깨어난다</text>
+
+                    <path d="M 14 60 H 986" class="cell" stroke-dasharray="4 3" />
+                    <text x="18" y="78" class="lbl">
+                        여기서 사용자 요청이 끝난다 &mdash; DB 에는 아직 아무것도 없다</text>
+                    <text x="18" y="96" class="xs">
+                        아래는 완전히 별개의 흐름이다. 몇 ms 뒤일 수도, worker 가 죽어 있었다면 한참 뒤일 수도 있다</text>
+
+                    <rect x="14" y="110" width="236" height="34" rx="5" class="bd cmd" />
+                    <text x="132" y="132" text-anchor="middle" class="xs">worker consumer.poll()</text>
+                    <text x="272" y="126" class="xs">
+                        파티션2 offset 4 레코드를 가져와 역직렬화</text>
+                    <text x="272" y="142" class="xs">
+                        JSON 바이트 &rarr; ChatMessageCreatedEventDTO 로 복원</text>
+                    <path d="M 132 146 V 154" class="ln" marker-end="url(#mt2)" />
+
+                    <rect x="14" y="156" width="236" height="34" rx="5" class="bd cmd" />
+                    <text x="132" y="178" text-anchor="middle" class="xs">worker INSERT</text>
+                    <text x="272" y="172" class="xs">
+                        ChatMessagesDTO 로 바꿔 chat_messages 테이블에 INSERT</text>
+                    <text x="272" y="188" class="xs">
+                        messageId 가 PK &mdash; 중복으로 또 와도 0행이 되어 그냥 넘어간다</text>
+                </svg>
+            </div>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">Kafka 가 &ldquo;개입하는 순간&rdquo; 은 두 번이다</span>
+                    <pre class="code"><code>publishDurable() 호출
+  -> Kafka 클라이언트 라이브러리
+     Serializer · Partitioner · Accumulator
+     ★ 전부 내 JVM 메모리 안에서 돈다
+
+Sender 스레드가 전송
+  -> 그제야 브로커가 개입
+     ★ 네트워크를 넘어간다</code></pre>
+                    <p><em><code>.get()</code> 이 깨어나기 전까지 내 메시지는 아직 아무 데도 안 갔다.</em>
+                        그때 JVM 이 죽으면 그냥 사라진다.</p>
+                </div>
+                <div class="callout">
+                    <span class="tag">모습이 바뀌는 지점만 추리면</span>
+                    <pre class="code"><code>"안녕"  (문자열)
+  -> JSON  (ws 전송용)
+  -> Command 객체  (wsgate)
+  -> protobuf 바이너리  (gRPC)
+  -> Command 객체  (cheg)
+  -> EventDTO  (★ Kafka 용)
+  -> JSON 바이트  (Serializer)
+  -> 로그 파일의 한 줄  (브로커)
+  -> EventDTO  (worker 역직렬화)
+  -> DB 한 행</code></pre>
+                    <p>글자는 그대로고 <em>껍데기만 9번 바뀐다.</em>
+                        경계를 넘을 때마다 <em>그 경계가 아는 형식</em>으로 갈아입는다.</p>
+                </div>
+            </div>
+
+            <h3>5 &mdash; 그래서 Serializer · Partitioner · Accumulator · Sender 가 뭔데</h3>
+            <p><em>전부 내가 만든 게 아니라 라이브러리에 들어 있는 자바 클래스</em>다.
+                그리고 <em>넷 다 <code>KafkaProducer</code> 객체 하나 안의 필드</em>다.
+                그림의 네모들이 사실은 <em>한 객체 안의 부품들</em>이다.</p>
+
+            <pre class="code"><code>build.gradle
+  implementation 'org.springframework.kafka:spring-kafka'
+        |  이게 kafka-clients.jar 를 끌어온다
+        v
+  org.apache.kafka.clients.producer.KafkaProducer      ★ 실체는 이 클래스 하나
+
+public class KafkaProducer&lt;K,V&gt; implements Producer&lt;K,V&gt; {
+    private final Serializer&lt;K&gt; keySerializer;        ①
+    private final Serializer&lt;V&gt; valueSerializer;      ①
+    private final Partitioner partitioner;            ②
+    private final RecordAccumulator accumulator;      ③
+    private final Sender sender;                      ④
+    private final Thread ioThread;                    ④ 를 돌리는 전용 스레드
+}</code></pre>
+
+            <div class="cdiag wide">
+                <svg viewBox="0 0 860 300" role="img"
+                    aria-label="KafkaTemplate 안에 KafkaProducer 가 있고 그 안에 Serializer, Partitioner, RecordAccumulator, Sender 가 필드로 들어 있다">
+                    <rect x="14" y="20" width="700" height="246" rx="10" class="bd fillw" />
+                    <text x="28" y="44" class="ttl">channel-engine JVM</text>
+
+                    <rect x="28" y="56" width="672" height="196" rx="9" class="bd fillw" />
+                    <text x="42" y="80" class="sm">KafkaTemplate</text>
+                    <text x="150" y="80" class="xs">Spring Kafka &mdash; 편하게 쓰라고 감싼 포장지</text>
+
+                    <rect x="42" y="92" width="644" height="146" rx="8" class="bd fillt" />
+                    <text x="56" y="116" class="sm">KafkaProducer</text>
+                    <text x="168" y="116" class="xs">kafka-clients.jar &mdash; 실체</text>
+
+                    <rect x="56" y="128" width="148" height="48" rx="6" class="bd fillw" />
+                    <text x="130" y="148" text-anchor="middle" class="xs">Serializer</text>
+                    <text x="130" y="166" text-anchor="middle" class="xs">변환기 &middot; 상태 없음</text>
+
+                    <rect x="214" y="128" width="148" height="48" rx="6" class="bd fillw" />
+                    <text x="288" y="148" text-anchor="middle" class="xs">Partitioner</text>
+                    <text x="288" y="166" text-anchor="middle" class="xs">계산기 &middot; 상태 없음</text>
+
+                    <rect x="372" y="128" width="148" height="48" rx="6" class="bd dat" />
+                    <text x="446" y="148" text-anchor="middle" class="xs">RecordAccumulator</text>
+                    <text x="446" y="166" text-anchor="middle" class="xs">저장소 &middot; 메모리 버퍼</text>
+
+                    <rect x="530" y="128" width="148" height="48" rx="6" class="bd cmd" />
+                    <text x="604" y="148" text-anchor="middle" class="xs">Sender + ioThread</text>
+                    <text x="604" y="166" text-anchor="middle" class="xs">일꾼 &middot; 전용 스레드</text>
+
+                    <text x="56" y="206" class="xs">
+                        KafkaProducer 생성자가 ioThread 를 start() 한다</text>
+                    <text x="56" y="226" class="xs">
+                        &rarr; KafkaTemplate 빈이 만들어지는 순간부터 그 스레드가 계속 돈다</text>
+
+                    <text x="726" y="104" class="lbl">전부</text>
+                    <text x="726" y="124" class="xs">같은 JVM 안의</text>
+                    <text x="726" y="142" class="xs">자바 객체다</text>
+                    <text x="726" y="172" class="xs">네트워크를 넘지</text>
+                    <text x="726" y="190" class="xs">않는다</text>
+
+                    <path d="M 14 286 H 846" class="cell" stroke-dasharray="4 3" />
+                    <text x="14" y="282" class="xs">
+                        브로커는 이 바깥에 있다 &mdash; Sender 가 전송할 때 비로소 네트워크를 넘는다</text>
+                </svg>
+            </div>
+
+            <h4>역할로 나누면 섞이지 않는다</h4>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>역할</th>
+                        <th>무엇</th>
+                        <th>설명</th>
+                    </tr>
+                    <tr>
+                        <th><em>변환기</em></th>
+                        <td>Serializer</td>
+                        <td>모습을 바꾼다. <em>아무것도 저장하지 않는다</em></td>
+                    </tr>
+                    <tr>
+                        <th><em>계산기</em></th>
+                        <td>Partitioner</td>
+                        <td>숫자를 낸다. <em>저장소가 아니다</em></td>
+                    </tr>
+                    <tr>
+                        <th rowspan="2"><em>저장소</em></th>
+                        <td>RecordAccumulator</td>
+                        <td>메모리 임시 저장</td>
+                    </tr>
+                    <tr>
+                        <td>파티션 2</td>
+                        <td>디스크 영구 저장. <em>도구가 아니라 파일이다</em></td>
+                    </tr>
+                    <tr>
+                        <th rowspan="2"><em>일꾼</em></th>
+                        <td>Sender 스레드</td>
+                        <td>버퍼에서 꺼내 보낸다</td>
+                    </tr>
+                    <tr>
+                        <td>리스너 컨테이너 스레드</td>
+                        <td>브로커에서 가져와 DB 에 넣는다</td>
+                    </tr>
+                    <tr>
+                        <th><em>주소</em></th>
+                        <td>offset 4</td>
+                        <td><em>&ldquo;어디 있나&rdquo; 를 가리키는 번호.</em> 저장소가 아니다</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="callout">
+                <span class="tag">offset 은 메모리의 &ldquo;번지&rdquo; 와 같다</span>
+                <pre class="code"><code>메모리    1번지 2번지 3번지 ...      번지가 "어느 칸" 인지 가리킨다
+파티션    offset 0 1 2 3 4 ...     offset 이 "어느 칸" 인지 가리킨다</code></pre>
+                <p><em>offset 은 상자가 아니라 상자에 붙은 번호표</em>다.
+                    그래서 컨슈머가 &ldquo;나 4번까지 읽었다&rdquo; 고
+                    <em>번호만 들고 다닐 수 있다.</em></p>
+            </div>
+
+            <h4>① Serializer &mdash; 인터페이스. 구현체는 내가 골랐다</h4>
+            <pre class="code"><code># application.properties — 이 두 줄이 Serializer 다
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.LongSerializer
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+
+LongSerializer   roomId(Long 5) -> 8바이트          Kafka 가 기본 제공
+JsonSerializer   EventDTO -> Jackson JSON -> UTF-8  Spring Kafka 가 제공 (Kafka 원본엔 없다)
+
+public interface Serializer&lt;T&gt; {
+    byte[] serialize(String topic, T data);     메서드 하나뿐이다
+}</code></pre>
+            <p><em>직접 만들 수도 있다.</em> <code>implements Serializer&lt;T&gt;</code> 하고
+                properties 에 그 클래스 이름을 적으면 된다. 나는 기성품 두 개를 쓴 것이다.</p>
+
+            <div class="callout">
+                <span class="tag">소비 쪽도 짝이 있다</span>
+                <pre class="code"><code>spring.kafka.consumer.key-deserializer=...LongDeserializer
+spring.kafka.consumer.value-deserializer=...ErrorHandlingDeserializer
+spring.kafka.consumer.properties.spring.deserializer.value.delegate.class=...JsonDeserializer</code></pre>
+                <p><code>ErrorHandlingDeserializer</code> 로 한 번 더 감싼 게 중요하다.
+                    <em>역직렬화 자체가 실패하면</em> 그 레코드는 영원히 처리되지 않고
+                    <em>컨슈머가 같은 자리에서 무한 재시도로 멈춘다(poison pill).</em>
+                    이 래퍼가 그걸 잡아서 DLT 로 보낸다.</p>
+            </div>
+
+            <h4>② Partitioner &mdash; 기본 구현이 자동으로 붙는다</h4>
+            <pre class="code"><code>org.apache.kafka.clients.producer.internals.BuiltInPartitioner
+                                   ^^^^^^^^^ internals 패키지 = 교체 전제가 아니다
+
+int partition = Utils.toPositive(Utils.murmur2(serializedKey)) % numPartitions;
+//                                     ^^^^^^^ 해시 함수 이름</code></pre>
+            <p>내 properties 에 <code>partitioner.class</code> 가 없으므로 <em>기본 그대로</em>다.
+                같은 입력이면 항상 같은 숫자가 나오므로
+                <em><code>roomId 5</code> 는 언제나 파티션 2</em> 로 간다.</p>
+
+            <h4>③ RecordAccumulator &mdash; 그냥 Map 이다</h4>
+            <pre class="code"><code>public final class RecordAccumulator {
+    private final ConcurrentMap&lt;TopicPartition, Deque&lt;ProducerBatch&gt;&gt; batches;
+    //                          파티션마다         배치들의 큐
+}
+
+batches = {
+  (castlechat.chat.message, 0) : [ 배치A ]
+  (castlechat.chat.message, 2) : [ 배치B ]   <- "안녕" 이 여기 들어간다
+  (castlechat.chat.message, 5) : [ 배치C ]
+}</code></pre>
+            <p>파티션별로 줄을 세워놓고 레코드를 쌓아두는 <em>메모리 자료구조</em>다. 그 이상이 아니다.
+                배치가 <code>batch.size</code>(기본 16KB)만큼 차거나
+                <code>linger.ms</code> 가 지나면 &ldquo;보낼 준비됨&rdquo; 으로 표시된다.</p>
+
+            <h4>④ Sender &mdash; CPU 스레드가 아니라 자바 스레드 1개</h4>
+            <div class="side-by-side">
+                <div>
+                    <pre class="code"><code>CPU 코어     물리 연산 장치. t3.medium 은 2개
+OS 스레드    커널이 스케줄링하는 단위
+             코어보다 훨씬 많이 만들 수 있다
+자바 스레드   JVM 의 Thread 객체
+             OS 스레드와 1:1 로 붙는다
+
+실행 중 스레드 목록을 찍으면
+  main
+  http-nio-8090-exec-1
+  http-nio-8090-exec-2
+  kafka-producer-network-thread | producer-1
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 이게 Sender</code></pre>
+                </div>
+                <div>
+                    <pre class="code"><code>public class Sender implements Runnable {
+    public void run() {
+        while (running) { runOnce(); }
+    }
+    void runOnce() {
+        sendProducerData(now);  // 준비된 배치 -> ProduceRequest
+        client.poll(...);       // 실제 네트워크 I/O
+    }
+}
+
+// KafkaProducer 생성자
+this.ioThread = new KafkaThread(
+    "kafka-producer-network-thread | " + clientId,
+    sender, true);
+this.ioThread.start();          // ★ 여기서 시작</code></pre>
+                </div>
+            </div>
+            <p><em>KafkaProducer 하나당 Sender 스레드도 하나</em>다.
+                내 앱엔 <code>KafkaTemplate</code> 이 하나니까 스레드도 하나고,
+                그 하나가 <em>모든 파티션으로의 전송을 담당</em>한다.
+                처리량이 아주 커지면 <em>여기도 병목이 될 수 있는 지점</em>이다.</p>
+
+            <h3>6 &mdash; send() 와 .get() &mdash; 누가, 무엇을, 어디에</h3>
+
+            <div class="cdiag full">
+                <svg viewBox="0 0 980 360" role="img"
+                    aria-label="exec 스레드가 직렬화와 파티션 계산까지 직접 하고 배치에 넣은 뒤 CountDownLatch 위에서 잠들면, Sender 스레드가 전송하고 응답을 받아 그 래치를 풀어 깨운다">
+                    <defs>
+                        <marker id="sw" markerWidth="7" markerHeight="7" refX="5.5" refY="2.5"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 5.5 2.5 L 0 5 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <text x="170" y="30" text-anchor="middle" class="ttl">exec-N (Tomcat 스레드)</text>
+                    <text x="700" y="30" text-anchor="middle" class="ttl">Sender 스레드</text>
+                    <path d="M 170 40 V 332" class="cell" />
+                    <path d="M 700 40 V 332" class="cell" />
+
+                    <rect x="34" y="52" width="272" height="86" rx="6" class="bd fillt" />
+                    <text x="170" y="74" text-anchor="middle" class="sm">send()</text>
+                    <text x="46" y="94" class="xs">① key · value 직렬화</text>
+                    <text x="46" y="112" class="xs">② Partitioner 로 파티션 2 계산</text>
+                    <text x="46" y="130" class="xs">③ accumulator 배치에 추가</text>
+
+                    <text x="316" y="80" class="xs">★ 직렬화도 파티션 계산도</text>
+                    <text x="316" y="98" class="xs">&nbsp;&nbsp;&nbsp;내 스레드가 한다</text>
+                    <text x="316" y="124" class="xs">Sender 는 "꺼내서 보내기" 만</text>
+
+                    <path d="M 306 152 H 694" class="ln" marker-end="url(#sw)" />
+                    <text x="500" y="146" text-anchor="middle" class="xs">
+                        ④ sender.wakeup() &mdash; 자고 있던 Sender 를 깨운다</text>
+
+                    <rect x="34" y="166" width="272" height="30" rx="6" class="bd fillw" />
+                    <text x="170" y="186" text-anchor="middle" class="xs">
+                        ⑤ Future 반환 (영수증)</text>
+
+                    <rect x="34" y="206" width="272" height="86" rx="6" class="bd dat" />
+                    <text x="170" y="228" text-anchor="middle" class="sm">.get()</text>
+                    <text x="46" y="248" class="xs">latch.await()</text>
+                    <text x="46" y="266" class="xs">&rarr; LockSupport.park()</text>
+                    <text x="46" y="286" class="lbl">★ WAITING &mdash; CPU 를 안 쓴다</text>
+
+                    <rect x="566" y="206" width="272" height="60" rx="6" class="bd cmd" />
+                    <text x="702" y="228" text-anchor="middle" class="xs">
+                        배치를 꺼내 ProduceRequest 전송</text>
+                    <text x="702" y="248" text-anchor="middle" class="xs">
+                        브로커 응답 수신 (partition, offset)</text>
+
+                    <path d="M 694 290 H 310" class="bus" marker-end="url(#sw)" />
+                    <text x="500" y="284" text-anchor="middle" class="xs">
+                        ⑥ result.done() &rarr; latch.countDown() &rarr; unpark</text>
+
+                    <rect x="34" y="302" width="272" height="30" rx="6" class="bd fillw" />
+                    <text x="170" y="322" text-anchor="middle" class="xs">
+                        ⑦ RUNNABLE 복귀 &mdash; 그 자리에서 이어간다</text>
+
+                    <text x="860" y="228" class="xs">Sender 는</text>
+                    <text x="860" y="246" class="xs">잠들지 않는다</text>
+                    <text x="860" y="272" class="xs">계속 돌면서</text>
+                    <text x="860" y="290" class="xs">배치를 살핀다</text>
+                </svg>
+            </div>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">send() &mdash; 누가 · 무엇을 · 어디에</span>
+                    <pre class="code"><code>누가    exec-N (Tomcat 스레드)
+        ★ Sender 가 아니다
+
+무엇을  직렬화된 바이트 레코드
+        key 8바이트 + value JSON 바이트
+        + 타임스탬프 + 헤더
+
+어디에  RecordAccumulator 안의
+        "파티션 2 전용 큐" 맨 끝 배치</code></pre>
+                    <p><em>직렬화와 파티션 계산까지 전부 내 스레드가 한다.</em>
+                        그래서 fan-out 때처럼 <em>여기도 내 스레드의 CPU 를 쓴다.</em></p>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">.get() &mdash; 누가 · 어디에 · 무엇이</span>
+                    <pre class="code"><code>누가    exec-N
+
+어디에  그 Future 안의 잠금 장치
+        FutureRecordMetadata
+          -> ProduceRequestResult
+            -> CountDownLatch(1)
+
+무엇이  latch.await()
+          -> LockSupport.park()
+          -> OS 에 "깨울 때까지 날 빼줘"</code></pre>
+                </div>
+            </div>
+
+            <div class="callout bad">
+                <span class="tag">&ldquo;잠든다&rdquo; 의 물리적 의미</span>
+                <div class="scroll-x">
+                    <table>
+                        <tr>
+                            <th>스레드 상태</th>
+                            <td><code>RUNNABLE</code> &rarr; <code>WAITING</code></td>
+                        </tr>
+                        <tr>
+                            <th>CPU</th>
+                            <td><em>전혀 안 쓴다.</em> 스케줄링 대상에서 빠진다</td>
+                        </tr>
+                        <tr>
+                            <th>스택 &middot; 레지스터</th>
+                            <td>그대로 보존된다. 깨면 <em>그 자리에서 이어간다</em></td>
+                        </tr>
+                        <tr>
+                            <th>메모리</th>
+                            <td>계속 차지한다 (스택 약 1MB)</td>
+                        </tr>
+                        <tr>
+                            <th>Tomcat 스레드 풀</th>
+                            <td><em>★ 200자리 중 한 자리를 묶는다</em> &mdash; 이게 진짜 비용</td>
+                        </tr>
+                    </table>
+                </div>
+                <p><em>CPU 입장에서는 손해가 없다.</em> 그동안 다른 스레드를 돌린다.
+                    문제는 <em>그 스레드가 다른 요청을 처리할 수 없다</em>는 것이다.</p>
+                <p>200개가 전부 <code>.get()</code> 에서 자고 있으면
+                    <em>CPU 는 한가한데 201번째 요청이 큐에서 대기</em>한다.
+                    <em>처리량 = maxThreads ÷ 건당 지연</em> 이 여기서 나온다.</p>
+            </div>
+
+            <h3>7 &mdash; 같은 걸 구조로 보면</h3>
+            <div class="cdiag full">
+                <svg viewBox="0 0 1000 520" role="img"
+                    aria-label="channel-engine 에서 exec 스레드가 버퍼에 넣고 잠들면 Sender 스레드가 브로커로 보내고, 별개로 worker 의 리스너 스레드가 브로커에서 끌어와 DB 에 넣는다">
+                    <defs>
+                        <marker id="fc" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <!-- 동기 / 비동기 경계 -->
+                    <path d="M 646 30 V 494" class="brace" stroke-dasharray="6 4" />
+                    <text x="640" y="24" text-anchor="end" class="lbl">
+                        여기까지가 사용자가 기다리는 구간</text>
+                    <text x="654" y="24" class="lbl">여기부터 비동기</text>
+
+                    <!-- ===== channel-engine ===== -->
+                    <rect x="14" y="40" width="300" height="412" rx="10" class="bd fillw" />
+                    <text x="26" y="62" class="ttl">channel-engine JVM</text>
+
+                    <rect x="26" y="74" width="276" height="152" rx="7" class="bd fillt" />
+                    <text x="164" y="95" text-anchor="middle" class="sm">exec-N (Tomcat 스레드)</text>
+                    <text x="38" y="117" class="xs">ChatCommandService</text>
+                    <text x="38" y="135" class="xs">&rarr; Publisher.publishDurable()</text>
+                    <path d="M 38 146 H 290" class="cell" />
+                    <text x="38" y="166" class="xs">① send() &mdash; 버퍼에 넣고 Future 반환</text>
+                    <text x="38" y="186" class="xs">② .get() &mdash; ★ 여기서 잠든다</text>
+                    <text x="38" y="212" class="xs">⑦ 깨어나 ChatCommandService 로 복귀</text>
+
+                    <path d="M 164 228 V 250" class="ln" marker-end="url(#fc)" />
+
+                    <rect x="26" y="252" width="276" height="56" rx="7" class="bd fillw" />
+                    <text x="164" y="274" text-anchor="middle" class="sm">RecordAccumulator</text>
+                    <text x="164" y="293" text-anchor="middle" class="xs">
+                        파티션별 배치 버퍼 (batch.size 16KB)</text>
+
+                    <path d="M 164 310 V 332" class="ln" marker-end="url(#fc)" />
+
+                    <rect x="26" y="334" width="276" height="58" rx="7" class="bd dat" />
+                    <text x="164" y="356" text-anchor="middle" class="sm">Sender 스레드</text>
+                    <text x="164" y="375" text-anchor="middle" class="xs">
+                        kafka-producer-network-thread</text>
+
+                    <text x="26" y="416" class="xs">★ 브로커로 보내는 건 내 스레드가 아니다</text>
+                    <text x="26" y="436" class="xs">별도 스레드가 배치를 꺼내 보낸다</text>
+
+                    <!-- ===== 브로커 ===== -->
+                    <rect x="334" y="40" width="296" height="412" rx="10" class="bd fillw" />
+                    <text x="346" y="62" class="ttl">Kafka 브로커 (1대)</text>
+                    <text x="346" y="82" class="xs">토픽 castlechat.chat.message</text>
+
+                    <rect x="346" y="94" width="272" height="34" rx="4" class="bd fillw" />
+                    <text x="358" y="116" class="xs">파티션 0</text>
+                    <rect x="346" y="132" width="272" height="34" rx="4" class="bd fillw" />
+                    <text x="358" y="154" class="xs">파티션 1</text>
+                    <rect x="346" y="170" width="272" height="34" rx="4" class="bd cmd" />
+                    <text x="358" y="192" class="xs">파티션 2 &mdash; 여기에 append</text>
+                    <text x="358" y="222" class="xs">&#8942;</text>
+
+                    <path d="M 304 362 H 340 V 196 H 344" class="bus" marker-end="url(#fc)" />
+                    <text x="346" y="252" class="xs">③ ProduceRequest 로 배치 전송</text>
+                    <text x="346" y="274" class="xs">④ 로그 끝에 append</text>
+                    <text x="346" y="292" class="xs">&nbsp;&nbsp;&nbsp;acks=all &rarr; ISR 복제 대기</text>
+                    <text x="346" y="310" class="xs">&nbsp;&nbsp;&nbsp;브로커 1대라 ISR 도 1개</text>
+                    <text x="346" y="332" class="xs">⑤ partition, offset 을 응답</text>
+                    <path d="M 344 352 H 310" class="bus" marker-end="url(#fc)" />
+                    <text x="346" y="356" class="xs">⑥ Future 완료 &rarr; exec-N 을 깨운다</text>
+
+                    <text x="346" y="400" class="lbl">메시지는 디스크에 남아 있다</text>
+                    <text x="346" y="420" class="xs">worker 가 꺼져 있어도 상관없다</text>
+                    <text x="346" y="438" class="xs">나중에 켜지면 그때 가져간다</text>
+
+                    <!-- ===== worker ===== -->
+                    <rect x="662" y="40" width="324" height="300" rx="10" class="bd fillw" />
+                    <text x="674" y="62" class="ttl">event-persist-worker JVM</text>
+
+                    <rect x="674" y="74" width="300" height="186" rx="7" class="bd fillt" />
+                    <text x="824" y="96" text-anchor="middle" class="sm">리스너 컨테이너 스레드</text>
+                    <text x="686" y="122" class="xs">while (true) {</text>
+                    <text x="686" y="142" class="xs">&nbsp;&nbsp;records = consumer.poll()</text>
+                    <text x="686" y="160" class="xs">&nbsp;&nbsp;★ 브로커에서 끌어온다 (pull)</text>
+                    <text x="686" y="184" class="xs">&nbsp;&nbsp;역직렬화 &rarr; 이벤트 DTO</text>
+                    <text x="686" y="204" class="xs">&nbsp;&nbsp;persistChatMessage(event)</text>
+                    <text x="686" y="224" class="xs">&nbsp;&nbsp;commit(offset)</text>
+                    <text x="686" y="244" class="xs">}</text>
+
+                    <path d="M 622 150 H 668" class="bus" marker-end="url(#fc)" />
+                    <text x="645" y="142" text-anchor="middle" class="xs">⑧</text>
+
+                    <path d="M 824 262 V 286" class="ln" marker-end="url(#fc)" />
+                    <text x="836" y="280" class="xs">⑨ INSERT</text>
+
+                    <rect x="700" y="288" width="248" height="46" rx="6" class="bd dat" />
+                    <text x="824" y="308" text-anchor="middle" class="sm">MariaDB</text>
+                    <text x="824" y="326" text-anchor="middle" class="xs">
+                        0행이면 이미 저장된 것 &rarr; 정상 종료</text>
+
+                    <text x="662" y="372" class="lbl">★ 아무도 주지 않는다. worker 가 가져간다</text>
+                    <text x="662" y="394" class="xs">
+                        cheg 는 worker 의 존재를 모른다. 있는지조차 모른다</text>
+                    <text x="662" y="414" class="xs">
+                        실패하면 500ms × 10회 재시도 후 .dlt 토픽으로 격리</text>
+                    <text x="662" y="440" class="xs">
+                        worker 가 죽었다 살아나면 커밋한 offset 부터 이어 읽는다</text>
+                    <text x="662" y="458" class="xs">
+                        &rarr; 유실이 아니라 &ldquo;반영이 늦는 것&rdquo; 이다</text>
+
+                    <path d="M 14 478 H 986" class="cell" stroke-dasharray="4 3" />
+                    <text x="14" y="502" class="lbl">
+                        사용자에게 &ldquo;성공&rdquo; 이라고 말한 시점 = ⑤ 브로커가 받았다고 한 시점.
+                        DB 에 들어간 시점이 아니다</text>
+                </svg>
+            </div>
+
+            <h3>8 &mdash; 보내는 쪽 &mdash; send() 와 .get() 은 다르다</h3>
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">send() &mdash; 즉시 반환한다</span>
+                    <pre class="code"><code>kafkaTemplate.send(토픽, roomId, event)</code></pre>
+                    <ul>
+                        <li>Serializer 가 key &middot; value 를 바이트로</li>
+                        <li>Partitioner 가 파티션을 고름</li>
+                        <li>RecordAccumulator 에 <em>넣기만</em> 하고
+                            <code>Future</code> 를 돌려준다</li>
+                        <li><em>이 시점엔 브로커에 아무것도 안 갔다.</em> 메모리에만 있다</li>
+                    </ul>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">.get() &mdash; 여기서 막힌다</span>
+                    <pre class="code"><code>.get(sendTimeoutMs, TimeUnit.MILLISECONDS)</code></pre>
+                    <ul>
+                        <li>그 <code>Future</code> 가 완료될 때까지
+                            <em>스레드를 재운다</em></li>
+                        <li><em>CPU 는 안 쓴다.</em> <code>WAITING</code> 상태로 내려간다</li>
+                        <li>대신 <em>Tomcat 스레드 풀의 한 자리를 묶는다</em></li>
+                        <li>실패하면 예외 &rarr; <em>사용자에게 전송 실패 응답</em></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout bad">
+                <span class="tag">그래서 생기는 비용 &mdash; 배치가 죽는다</span>
+                <p>Kafka 가 빠른 이유는 <em>배치</em>다.
+                    <code>linger.ms</code> 동안 모아 <code>batch.size</code> 만큼 한 번에 보낸다.</p>
+                <pre class="code"><code>배치 전송        수십만 건/s
+건당 .get()      수천 건/s      <- 10~100 배 차이
+
+내 설정 : linger.ms 는 기본값 0  ->  모으지 않는다
+          거기에 .get() 까지 겹쳐 배치 크기가 사실상 1</code></pre>
+                <p>다만 이건 <em>의도된 트레이드오프</em>다.
+                    <code>.get()</code> 을 빼면 <em>&ldquo;성공했습니다&rdquo; 라고 말한 뒤 유실될 수 있다.</em>
+                    prpr 3번의 &ldquo;durable save 후 response&rdquo; 가 이 한 줄이다.</p>
+            </div>
+
+            <h3>9 &mdash; 브로커에서 실제로 일어나는 일</h3>
+            <pre class="code"><code>파티션 2의 리더가 ProduceRequest 수신
+  -> 로그 파일 끝에 append
+  -> acks=all 이면 ISR(따라잡은 복제본들) 전부가 복제할 때까지 대기
+  -> 응답에 partition, offset 을 담아 회신</code></pre>
+
+            <div class="callout bad">
+                <span class="tag">정정할 것 &mdash; acks=all 이 fsync 를 뜻하지 않는다</span>
+                <p>내 <code>ChatMessageEventPublisher</code> 주석에
+                    &ldquo;브로커가 <em>디스크에 기록</em>을 마친 뒤에야 future 가 완료된다&rdquo;
+                    고 적혀 있는데, 엄밀히는 <em>OS 페이지 캐시까지</em>다.</p>
+                <p><code>fsync</code> 는 별개 설정(<code>log.flush.interval.messages</code> 등)이고
+                    기본값은 OS 에 맡긴다.
+                    <em>Kafka 는 fsync 대신 &ldquo;복제본 여러 개&rdquo; 로 내구성을 확보하는 설계</em>다.</p>
+                <pre class="code"><code>acks=all + RF 3   3대에 복제. 1대 디스크가 날아가도 안전   <- 정상 구성
+acks=all + RF 1   ★ 복제본이 없다. 그 1대가 날아가면 유실  <- 내 구성</code></pre>
+                <p>주석을 <em>&ldquo;브로커가 로그에 기록하고 ISR 이 복제를 마친 뒤&rdquo;</em> 로 고치고,
+                    <em>RF 가 1이라 ISR 도 1개</em> 라는 걸 같이 적어두는 게 정확하다.</p>
+            </div>
+
+            <h3>10 &mdash; 가져가는 쪽 &mdash; push 가 아니라 pull</h3>
+            <p><em>cheg 는 worker 에게 아무것도 주지 않는다.</em>
+                브로커에 쓰고 끝이다. worker 가 있는지조차 모른다.</p>
+
+            <pre class="code"><code>@KafkaListener(topics = ..., groupId = "event-persist-worker")   클래스에 붙는다
+public class ChatEventPersistWorker {
+
+    @KafkaHandler                                                메서드에 붙는다
+    public void persistChatMessage(ChatMessageCreatedEventDTO event) { ... }
+
+    @KafkaHandler
+    public void persistDeleteChatMessage(ChatMessageDeletedEventDTO event) { ... }
+
+    @KafkaHandler
+    public void persistReactChatMessage(ChatMessageReactedEventDTO event) { ... }
+}</code></pre>
+            <p>한 토픽에 <em>Created &middot; Deleted &middot; Reacted 세 종류가 섞여</em> 오므로
+                <code>@KafkaHandler</code> 가 <em>타입을 보고 분기</em>한다.
+                그래서 <code>@KafkaListener</code> 가 클래스에 붙어 있다.</p>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">멱등 소비 &mdash; 예외를 던지지 않는다</span>
+                    <pre class="code"><code>int inserted = chatMapper.insertChatMessage(msg);
+
+if (inserted == 0) {
+    log.info("이미 저장된 메시지");
+    return;        // ★ 예외를 던지지 않는다
+}</code></pre>
+                    <p>리밸런싱이나 커밋 전 종료로 <em>같은 메시지가 두 번 올 수 있다.</em>
+                        <code>messageId</code> 가 PK 라 두 번째는 0행이 된다.</p>
+                    <p>여기서 <em>예외를 던졌다면</em> 10회 재시도 후 DLT 로 갔을 것이다.
+                        <em>정상으로 넘기는 게 맞다.</em></p>
+                </div>
+                <div class="callout">
+                    <span class="tag">재시도와 DLT</span>
+                    <pre class="code"><code>DefaultErrorHandler(
+    recoverer,
+    new FixedBackOff(500L, 10L))
+
+500ms 간격 10회 재시도
+  -> 그래도 실패하면
+castlechat.chat.message.dlt 로 이동
+  ★ 파티션 번호까지 유지한다</code></pre>
+                    <p><em>버리지 않고 격리</em>한다. 나중에 사람이 보고 처리할 수 있다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #3 짚을 점
+             ===================================================== -->
+        <section class="note">
+            <h2>#3 짚을 점</h2>
+
+            <h3>11 &mdash; 왜 DB 를 끊어놨나</h3>
+            <div class="side-by-side">
+                <div class="callout bad">
+                    <span class="tag">끊지 않았다면</span>
+                    <pre class="code"><code>메시지 보내기
+  -> DB INSERT 를 동기로 기다림
+  -> 성공하면 응답</code></pre>
+                    <p>응답 속도가 <em>DB 쓰기 속도에 그대로 묶인다.</em>
+                        DB 가 느려지면 채팅이 전부 느려지고,
+                        <em>DB 가 죽으면 메시지를 아예 못 보낸다.</em></p>
+                </div>
+                <div class="callout">
+                    <span class="tag">끊어서 얻은 것</span>
+                    <p>응답은 <em>Kafka 가 받은 시점</em>에 돌아간다.
+                        DB 쓰기는 worker 가 자기 속도로 처리한다.</p>
+                    <p><em>DB 가 잠깐 죽어도 메시지는 계속 오간다.</em>
+                        쌓인 건 DB 가 살아나면 worker 가 밀린 만큼 따라잡는다.</p>
+                </div>
+            </div>
+
+            <div class="callout">
+                <span class="tag">대가도 있다 &mdash; 같이 말해야 한다</span>
+                <pre class="code"><code>화면에는 메시지가 보이는데 DB 에는 아직 없는 순간이 존재한다
+  -> 그 순간 새로고침하면 메시지가 안 보일 수 있다
+  -> 최종적 일관성(eventual consistency)
+
+worker 가 밀리면 그 지연이 길어진다
+  -> 지금은 모니터링이 없어서 얼마나 밀리는지 알 방법이 없다</code></pre>
+                <p><em>이걸 먼저 말하는 게 낫다.</em>
+                    장점만 말하면 &ldquo;그럼 단점은요&rdquo; 가 바로 온다.</p>
+            </div>
+
+            <h3>12 &mdash; 자주 묻는 것</h3>
+            <pre class="code"><code>Kafka 를 왜 쓰셨나요?
+  -> 응답을 DB 쓰기 속도에서 떼어내려고.
+     그리고 유실 없이 떼어내야 해서 acks=all 로 확인까지 기다린다
+
+★ acks=all 이라는데 브로커가 몇 대죠?
+  -> 1대다. ISR 도 1개라 사실상 acks=1 이다.
+     설정은 맞지만 내구성 보장은 실질적으로 없다.
+     운영이면 3대 + RF 3 + min.insync.replicas 2 여야 한다
+
+key 를 roomId 로 한 이유는?
+  -> 같은 방은 같은 파티션 -> 방 안의 순서 보장.
+     파티션을 늘려도 그 성질이 유지된다
+
+파티션을 6개로 한 이유는?
+  -> 컨슈머는 1개지만 나중에 늘릴 때를 위해.
+     파티션 수를 나중에 바꾸면 해시 결과가 달라져 순서가 깨진다
+
+중복 소비는 어떻게 막나요?
+  -> 못 막는다. Kafka 는 at-least-once 다.
+     대신 소비 쪽을 멱등하게 만들었다. inserted == 0 이면 정상 종료
+
+worker 가 죽으면 메시지가 사라지나요?
+  -> 아니다. 브로커에 남아 있다.
+     살아나면 커밋한 offset 부터 이어 읽는다. 유실이 아니라 반영이 늦는 것
+
+.get() 때문에 느리지 않나요?
+  -> 느리다. 배치가 죽는다.
+     처리량 대신 "성공이라 말한 건 반드시 저장됐다" 를 택한 것
+
+DLT 에 쌓이면 어떻게 하나요?
+  -> 지금은 사람이 봐야 한다. 재처리 도구가 없다 (솔직하게)</code></pre>
+        </section>
+
+    </main>
+</body>
+
+</html>
