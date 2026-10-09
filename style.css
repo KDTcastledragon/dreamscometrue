@@ -1098,7 +1098,7 @@ pre.code code {
 
     .hsq-heads,
     .hsq-step {
-        grid-template-columns: minmax(0, 1fr) 190px;
+        grid-template-columns: minmax(0, 1fr) 320px;
     }
 }
 
@@ -1824,4 +1824,69 @@ pre.code code {
 .cdiag.hdr svg {
     min-width: 500px;
     max-width: 700px;
+}
+
+/* Handshake 그림의 State 줄. 화살표 줄 사이에 끼워 양쪽 Kernel 의 State 를 보여준다. */
+.hsq-state .hsq-lane {
+    margin: 0;
+    padding: 0 2px;
+}
+
+.hsq-st {
+    padding: 2px 9px;
+    border-radius: 6px;
+    background: #eef1f0;
+    color: #3a4a43;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.hsq-st.sw {
+    background: #e7f2ec;
+    color: var(--accent);
+}
+
+/* 화살표 하나와 그 결과로 바뀐 State 를 한 묶음으로 보이게 구분선을 긋는다. */
+.hsq-grp {
+    padding: 4px 0;
+}
+
+.hsq-grp + .hsq-grp {
+    border-top: 1px dashed #c9d3cf;
+}
+
+/* Handshake 블록 : 왼쪽 그림을 넓게, 오른쪽에 주체 · 왜 3번인가 */
+.hs-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px 22px;
+    align-items: start;
+}
+
+@media (min-width: 1000px) {
+    .hs-grid {
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    }
+}
+
+.hs-side > .callout {
+    margin-top: 10px;
+}
+
+.hs-why table {
+    width: auto;
+}
+
+/* 모달이 열려 있는 동안 뒤 페이지는 스크롤되지 않는다. */
+html:has(dialog[open]) {
+    overflow: hidden;
+}
+
+html {
+    scrollbar-gutter: stable;
+}
+
+.hdr-modal {
+    overscroll-behavior: contain;
 }

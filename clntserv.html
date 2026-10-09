@@ -105,25 +105,25 @@
                         <small>DNS Resolver 가 목적지 IP 주소 탐색.</small>
                     </article>
 
-                    <article class="fnode kernel" data-step="2" data-extra="tcpip" data-chunks="ck-syn12 ck-conn ck-path ck-layer ck-closed ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="2" data-extra="tcpipModal" data-chunks="ck-syn12 ck-conn ck-path ck-layer ck-closed" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:11.6%">
                         <span class="fnode-no">2</span>
                         <span class="fnode-type">C-Kernel</span>
                         <small>SYN flag+Destination IP Address 패킷 전송. TCP State 변경. TCP 3-Way Handshake 시작.</small>
                     </article>
 
-                    <article class="fnode kernel" data-step="3" data-chunks="ck-synack ck-hs ck-why3 ck-state ck-kernel" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="3" data-extra="skbModal estModal cookieModal structModal isnModal" data-chunks="ck-synack ck-hs ck-kernel ck-sockwhen" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:11.6%">
                         <span class="fnode-no">3</span>
                         <span class="fnode-type">N-Kernel</span>
                         <small>N-Kernel SYN 패킷 수신. ~~~ 후,  Client에게 SYN+ACK 패킷 송신.</small>
                     </article>
 
-                    <article class="fnode kernel" data-step="4" data-chunks="ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="4" data-chunks="ck-hs" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:11.6%">
                         <span class="fnode-no">4</span>
                         <span class="fnode-type">C-Kernel</span>
                         <small>C-Kernel의 TCP/IP 스택이 TCP flag = syn+ack 패킷 수신.</small>
                     </article>
 
-                    <article class="fnode kernel" data-step="5" data-chunks="ck-why3 ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:30.8%">
+                    <article class="fnode kernel" data-step="5" data-chunks="ck-hs" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:30.8%">
                         <span class="fnode-no">5</span>
                         <span class="fnode-type">C-Kernel</span>
                         <small>C-Kernel의 TCP/IP 스택이 TCP flag = ACK 패킷을 NGINX 서버에 전송. 동시에 TCP State : SYN_SENT → ESTABLISHED 변경.</small>
@@ -558,69 +558,98 @@
 
             <div class="step-chunk" id="ck-hs">
             <h4>TCP 3-way Handshake &mdash; HTTP 는 아직 한 글자도 안 보냈다</h4>
-            <div class="side-by-side">
+            <div class="hs-grid">
                 <div class="hsq">
                 <div class="hsq-heads">
                     <div class="hsq-lane">
-                        <span class="hsq-head">Client</span>
-                        <span class="hsq-head">Server</span>
+                        <span class="hsq-head">Client &middot; C-Kernel</span>
+                        <span class="hsq-head">Server &middot; N-Kernel</span>
                     </div>
                 </div>
 
+                <div class="hsq-grp">
+                <div class="hsq-step hsq-state">
+                    <div class="hsq-lane"><span class="hsq-st">CLOSED</span><span class="hsq-st">LISTEN</span></div>
+                    <div class="hsq-note">서버 시작 때 NGINX 소프트웨어가 <code>listen(80)</code> 호출.</div>
+                </div>
+                </div>
+                <div class="hsq-grp">
                 <div class="hsq-step">
                     <div class="hsq-arrow to-right"><span>SYN</span></div>
                     <div class="hsq-note">"연결하고 싶다"</div>
                 </div>
+                <div class="hsq-step hsq-state">
+                    <div class="hsq-lane"><span class="hsq-st">SYN_SENT</span><span class="hsq-st">SYN_RECV</span></div>
+                    <div class="hsq-note">N-Kernel 이 request_sock 을 SYN Queue 에 넣는다.</div>
+                </div>
+                </div>
+                <div class="hsq-grp">
                 <div class="hsq-step">
                     <div class="hsq-arrow to-left"><span>SYN + ACK</span></div>
                     <div class="hsq-note">"좋다. 나도 연결하겠다"</div>
                 </div>
+                <div class="hsq-step hsq-state">
+                    <div class="hsq-lane"><span class="hsq-st">ESTABLISHED</span><span></span></div>
+                    <div class="hsq-note">C-Kernel 은 SYN+ACK 를 받는 순간 바뀐다.</div>
+                </div>
+                </div>
+                <div class="hsq-grp">
                 <div class="hsq-step">
                     <div class="hsq-arrow to-right"><span>ACK</span></div>
                     <div class="hsq-note">"확인했다"</div>
+                </div>
+                <div class="hsq-step hsq-state">
+                    <div class="hsq-lane"><span></span><span class="hsq-st">ESTABLISHED</span></div>
+                    <div class="hsq-note">정식 socket(TCB) 생성 &rarr; accept Queue 에 적립.</div>
+                </div>
+                <div class="hsq-step hsq-state">
+                    <div class="hsq-lane"><span></span><span class="hsq-st sw">accept() &rarr; fd 9</span></div>
+                    <div class="hsq-note">NGINX 소프트웨어가 꺼내 간다.</div>
+                </div>
                 </div>
 
                 <div class="hsq-cut"><span>여기까지 TCP. 이제야 HTTP</span></div>
 
                     <div class="hsq-step">
                         <div class="hsq-arrow to-right http"><span>GET / HTTP/1.1</span></div>
-                        <div class="hsq-note">첫 HTTP 요청</div>
+                        <div class="hsq-note">첫 HTTP 요청.</div>
                     </div>
                 </div>
 
-                <div class="callout">
-                    <span class="tag">주체</span>
-                    <p>SYN+ACK 를 보내는 건 <em>서버의 Linux Kernel</em>이다. NGINX 도 Spring Boot 도 아니다.</p>
-                    <p>NGINX 는 <code>accept()</code> 로 <em>완성된 연결</em>만 건네받는다. 자세한 건 #2 참고.</p>
+                <div class="hs-side">
+                    <div class="callout">
+                        <span class="tag">주체</span>
+                        <p>SYN+ACK 를 보내는 건 <em>서버의 Linux Kernel</em>이다. NGINX 도 Spring Boot 도 아니다.</p>
+                        <p>NGINX 소프트웨어는 <code>accept()</code> 로 <em>완성된 연결</em>만 건네받는다.</p>
+                    </div>
+                    <div class="hs-why">
+                    <h4>왜 2번이 아니라 3번인가</h4>
+                    <p>답은 <em>양쪽 모두 "내 말이 상대에게 닿는다" 를 확인해야 하기 때문</em>이다.</p>
+                    <div class="scroll-x">
+                        <table>
+                            <tr>
+                                <th>단계</th>
+                                <th>이걸 받고 나면 확인되는 것</th>
+                            </tr>
+                            <tr>
+                                <th>SYN</th>
+                                <td>서버가 "클라이언트 &rarr; 나" 경로가 살아 있음을 안다.</td>
+                            </tr>
+                            <tr>
+                                <th>SYN + ACK</th>
+                                <td>클라이언트가 <em>양방향</em>이 모두 살아 있음을 안다.</td>
+                            </tr>
+                            <tr>
+                                <th>ACK</th>
+                                <td>서버도 <em>"나 &rarr; 클라이언트"</em> 경로가 살아 있음을 안다.</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <p>2번에서 멈추면 <em>서버는 자기가 보낸 SYN+ACK 가 도착했는지 모른다.</em>
+                        그 상태로 데이터를 보내면 허공에 쏘는 꼴이 된다.</p>
+                    </div>
                 </div>
             </div>
-            </div>
-
-            <div class="step-chunk" id="ck-why3">
-            <h4>왜 2번이 아니라 3번인가</h4>
-            <p>답은 <em>양쪽 모두 "내 말이 상대에게 닿는다" 를 확인해야 하기 때문</em>이다.</p>
-            <div class="scroll-x">
-                <table>
-                    <tr>
-                        <th>단계</th>
-                        <th>이걸 받고 나면 확인되는 것</th>
-                    </tr>
-                    <tr>
-                        <th>SYN</th>
-                        <td>서버가 "클라이언트 &rarr; 나" 경로가 살아 있음을 안다</td>
-                    </tr>
-                    <tr>
-                        <th>SYN + ACK</th>
-                        <td>클라이언트가 <em>양방향</em>이 모두 살아 있음을 안다</td>
-                    </tr>
-                    <tr>
-                        <th>ACK</th>
-                        <td>서버도 <em>"나 &rarr; 클라이언트"</em> 경로가 살아 있음을 안다</td>
-                    </tr>
-                </table>
-            </div>
-            <p>2번에서 멈추면 <em>서버는 자기가 보낸 SYN+ACK 가 도착했는지 모른다.</em>
-                그 상태로 데이터를 보내면 허공에 쏘는 꼴이 된다.</p>
             </div>
 
             <div class="step-chunk" id="ck-closed">
@@ -662,32 +691,62 @@
             </ul>
             </div>
 
-            <div class="step-chunk" id="ck-state">
-            <div class="side-by-side">
-                <div>
-                    <h4>SYN 에 실제로 실리는 것</h4>
-                    <ul>
-                        <li><em>순서번호(ISN)</em> &mdash; 임의의 값으로 시작한다. 0 부터 시작하면 예전 연결의
-                            패킷과 섞이거나 위조가 쉬워진다.</li>
-                        <li><em>MSS</em> &mdash; 한 번에 받을 수 있는 최대 조각 크기. 보통 1460 바이트다.</li>
-                        <li><em>Window Size</em> &mdash; 버퍼 여유. 흐름 제어의 기준이 된다.</li>
-                        <li><em>Window Scale, SACK</em> &mdash; 고속 회선용 확장 옵션.</li>
-                    </ul>
-                </div>
-                <div>
-                    <h4>Kernel 의 연결 상태 전이</h4>
-                    <pre class="code"><code>Client                    Server
-CLOSED                    LISTEN      &lt;- NGINX 가 listen(80)
-  |  --- SYN ------------>  |
-SYN_SENT                  SYN_RCVD
-  |  &lt;-- SYN+ACK ---------  |
-  |  --- ACK ------------>  |
-ESTABLISHED               ESTABLISHED
-                            |
-                            +-> accept() 큐에 적립
-                                NGINX 가 꺼내감</code></pre>
-                </div>
+            <div class="step-chunk" id="ck-sockwhen">
+            <h4>socket 은 언제, 누가 만드나</h4>
+            <p><code>socket()</code> 은 <em>소프트웨어가 Kernel 에게 부탁하는 시스템 콜</em>이다. Kernel 이 스스로 부르지 않는다.
+                NGINX 소프트웨어도 브라우저처럼 <code>socket()</code> 을 부르지만, SYN 이 올 때가 아니라
+                <em>서버가 시작할 때 한 번</em> 부른다.</p>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>언제</th>
+                        <th>누가</th>
+                        <th>무엇을</th>
+                    </tr>
+                    <tr>
+                        <td>서버 시작 때 &middot; 한 번</td>
+                        <td>NGINX 소프트웨어</td>
+                        <td><code>socket()</code> &rarr; <code>bind(:80)</code> &rarr; <code>listen()</code>.
+                            N-Kernel 이 자기 메모리에 <em>listen socket</em> 을 만들고 번호 fd 6 을 돌려준다</td>
+                    </tr>
+                    <tr>
+                        <td>브라우저가 연결할 때</td>
+                        <td>Network Service Process</td>
+                        <td><code>socket()</code> &rarr; <code>connect()</code>.
+                            C-Kernel 이 socket 을 만들고(CLOSED) SYN 을 보낸다</td>
+                    </tr>
+                    <tr>
+                        <td>SYN 도착</td>
+                        <td><em>N-Kernel 혼자</em></td>
+                        <td>request_sock 생성. <code>socket()</code> 호출 아님. NGINX 소프트웨어는 모른다</td>
+                    </tr>
+                    <tr>
+                        <td>마지막 ACK 도착</td>
+                        <td><em>N-Kernel 혼자</em></td>
+                        <td>정식 socket(TCB) 생성 &rarr; accept Queue.
+                            <code>socket()</code> 호출 아님. listen socket 을 복제해서 Kernel 안에서 직접 만든다
+                            (Linux <code>tcp_v4_syn_recv_sock()</code>)</td>
+                    </tr>
+                    <tr>
+                        <td>그 다음</td>
+                        <td>NGINX 소프트웨어</td>
+                        <td><code>accept()</code> 로 꺼내 새 번호 fd 9 를 받는다.
+                            <em>NGINX 소프트웨어가 이 연결을 처음 만지는 순간</em></td>
+                    </tr>
+                </table>
             </div>
+            <p>서버 쪽은 <em>listen socket 하나 + 연결마다 socket 하나</em>다. listen socket 은 연결을 받는 창구일 뿐
+                데이터는 주고받지 않고, 데이터는 연결마다 생긴 socket(fd 9 등)으로 오간다.</p>
+
+            <h4>Client 쪽 listen socket &mdash; 보통 없다</h4>
+            <ul>
+                <li>listen socket 은 <em>연결을 받는 쪽</em>만 만든다. 브라우저는 연결을 거는 쪽이라
+                    <code>socket()</code> &rarr; <code>connect()</code> 만 하고 <code>listen()</code> 은 하지 않는다.
+                    그래서 이 연결에서 Client 쪽 listen socket 은 없다.</li>
+                <li>Client socket 의 번호도 fd 6 이 아니다. 번호는 OS 가 그때 비어 있는 걸 주는 값이고,
+                    fd 6 은 NGINX 소프트웨어 쪽 예시값이다.
+                    Windows 는 fd 라는 작은 정수 대신 <code>SOCKET</code> 핸들(예 <code>0x1A4</code>)을 준다.</li>
+            </ul>
             </div>
 
             <div class="step-chunk" id="ck-queue">
@@ -1756,7 +1815,7 @@ cheg     kafkaTemplate.send().get()     ⑥ ~ ⑦</code></pre>
         </form>
         <div class="note modal-note">
             <div class="step-head">
-                <h2 id="stepTitle"><span class="step-no"></span><span class="step-who"></span><button type="button" class="note-btn step-extra" hidden>TCP/IP/Frame</button></h2>
+                <h2 id="stepTitle"><span class="step-no"></span><span class="step-who"></span><button type="button" class="note-btn step-extra" data-modal="tcpipModal" hidden>TCP/IP/Frame</button><button type="button" class="note-btn step-extra" data-modal="skbModal" hidden>sk_buff</button><button type="button" class="note-btn step-extra" data-modal="estModal" hidden>established 표</button><button type="button" class="note-btn step-extra" data-modal="cookieModal" hidden>SYN Cookie</button><button type="button" class="note-btn step-extra" data-modal="structModal" hidden>C 구조체</button><button type="button" class="note-btn step-extra" data-modal="isnModal" hidden>ISN &middot; 옵션</button></h2>
                 <div class="step-nav">
                     <button type="button" class="note-btn" data-dir="-1">&larr; 이전</button>
                     <button type="button" class="note-btn" data-dir="1">다음 &rarr;</button>
@@ -1768,6 +1827,419 @@ cheg     kafkaTemplate.send().get()     ⑥ ~ ⑦</code></pre>
     </dialog>
 
     <!-- 박스 2번 모달의 [TCP/IP] 버튼이 여는 두 번째 모달. 닫아도 박스 모달은 그대로 남는다. -->
+    <!-- 박스 3번 모달의 [C 구조체] 버튼이 여는 모달 -->
+    <dialog id="skbModal" class="hdr-modal" aria-labelledby="skbModalTitle">
+        <form method="dialog">
+            <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
+        </form>
+        <div class="note modal-note">
+            <h2 id="skbModalTitle">sk_buff &mdash; Linux Kernel 안에서 패킷 하나를 담는 구조체</h2>
+
+            <h3>무엇인가</h3>
+            <p><code>struct sk_buff</code>(줄여서 <em>skb</em>)는 <em>Linux Kernel 이 패킷 하나를 담는 C 구조체</em>다.
+                받는 패킷이든 보내는 패킷이든 Kernel 안에서는 <em>전부 skb 하나로</em> 함수에서 함수로 넘어간다.
+                소스는 <code>include/linux/skbuff.h</code>.</p>
+            <ul>
+                <li>NIC Driver &middot; IP 계층 &middot; TCP 계층 &middot; 방화벽(iptables / netfilter) &middot; tcpdump 가
+                    전부 skb 를 주고받는다. <em>Linux 네트워크 코드의 중심 구조체</em>다.</li>
+                <li>서버를 쓰고 운영하는 동안에는 직접 보이지 않는다. Kernel 네트워크 코드 &middot; 드라이버 &middot;
+                    eBPF &middot; 네트워크 성능 튜닝을 볼 때 반드시 나온다.</li>
+                <li>Windows 에서 같은 역할을 하는 건 <code>NET_BUFFER_LIST</code>(NDIS)다.</li>
+            </ul>
+
+            <h3>구조 &mdash; 메타데이터 + 바이트 버퍼</h3>
+            <pre class="code"><code>struct sk_buff (메타데이터)              데이터 버퍼 (실제 바이트)
+
+  head  -----------------------------&gt;  +-- headroom    헤더를 앞에 붙일 빈 공간
+  data  -----------------------------&gt;  +-- Ethernet 14 B   &lt;- mac_header
+                                        +-- IP 20 B         &lt;- network_header
+                                        +-- TCP 32 B        &lt;- transport_header
+                                        +-- payload         SYN 은 0 B
+  tail  -----------------------------&gt;  +-- tailroom
+  end   -----------------------------&gt;  +
+
+  len       지금 data ~ tail 사이 바이트 수
+  dev       어느 NIC 로 들어왔나 / 나가나
+  sk        어느 socket 소속인가
+  protocol  0x0800 = IPv4  (Frame 의 EtherType 값)
+  next/prev 큐(SYN Queue 등이 아니라 송수신 대기열)에 줄 세우는 연결 고리</code></pre>
+            <p class="ins-cap">위 수신 패킷 기준이다. 칸 이름(<code>head</code> &middot; <code>data</code> &middot;
+                <code>tail</code> &middot; <code>end</code> &middot; <code>*_header</code> &middot; <code>dev</code> &middot;
+                <code>sk</code> &middot; <code>len</code>)은 실제 소스 그대로다.</p>
+
+            <h3>핵심 &mdash; 계층을 지날 때 바이트를 복사하지 않는다</h3>
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">받을 때 (N-Kernel)</span>
+                    <p>NIC 가 DMA 로 버퍼에 바이트를 넣고, Driver 가 skb 로 감싼다.
+                        <code>data</code> 는 Ethernet 헤더 시작을 가리킨다.</p>
+                    <p>IP 계층으로 넘길 때 <code>data</code> 를 14 B 앞으로(<code>skb_pull</code>),
+                        TCP 계층으로 넘길 때 20 B 더 앞으로. <em>포인터만 옮긴다.</em></p>
+                </div>
+                <div class="callout">
+                    <span class="tag">보낼 때 (C-Kernel 이 Linux 라면)</span>
+                    <p><code>tcp_connect()</code> 가 headroom 을 넉넉히 둔 skb 를 만들고 TCP 헤더를 쓴다.
+                        <code>ip_queue_xmit()</code> 가 그 앞에 IP 헤더를, <code>eth_header()</code> 가 Ethernet 헤더를
+                        <code>skb_push</code> 로 붙인다.</p>
+                    <p>12단계의 5 ~ 8 번이 <em>이 skb 하나 위에서</em> 일어난다.</p>
+                </div>
+            </div>
+            <div class="callout">
+                <span class="tag">Java 로 치면</span>
+                <p><code>ByteBuffer</code> 에 메타데이터를 붙인 것과 비슷하다. ByteBuffer 가
+                    <code>position</code> &middot; <code>limit</code> 을 옮기며 읽듯 skb 는 <code>data</code> &middot;
+                    <code>tail</code> 을 옮기며 헤더를 벗기고 붙인다.</p>
+            </div>
+
+        </div>
+    </dialog>
+
+    <dialog id="estModal" class="hdr-modal" aria-labelledby="estModalTitle">
+        <form method="dialog">
+            <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
+        </form>
+        <div class="note modal-note">
+            <h2 id="estModalTitle">established 표 &middot; listen 표 &mdash; N-Kernel 이 socket 을 찾는 곳</h2>
+
+            <p>맞다. <em>먼저 established 표에서 찾는다.</em> N-Kernel 의 TCP/IP 스택에는 해시 표가 두 개 있다.
+                Linux 소스에서는 <code>inet_hashinfo</code> 안의 <code>ehash</code>(established) 와
+                <code>lhash2</code>(listen) 다.</p>
+            <div class="callout">
+                <span class="tag">Java 로 치면</span>
+                <p>established 표 = <code>Map&lt;FourTuple, Sock&gt;</code>,
+                    listen 표 = <code>Map&lt;Port, ListenSock&gt;</code>. 값은 C 구조체(socket &middot; request_sock)의 주소다.</p>
+            </div>
+
+            <h3>established 표 &mdash; 키는 4-tuple</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>Client IP:Port</th>
+                        <th>Server IP:Port</th>
+                        <th>들어 있는 것</th>
+                        <th>State</th>
+                    </tr>
+                    <tr>
+                        <td><code>211.36.10.5:51234</code></td>
+                        <td><code>10.0.1.10:80</code></td>
+                        <td><em>request_sock</em> &mdash; 방금 SYN 을 받은 연결 후보</td>
+                        <td><code>SYN_RECV</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>118.40.22.9:60412</code></td>
+                        <td><code>10.0.1.10:80</code></td>
+                        <td>정식 socket(TCB) &mdash; 다른 사용자의 브라우저 연결</td>
+                        <td><code>ESTABLISHED</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>10.0.1.10:41022</code></td>
+                        <td><code>10.0.1.20:8080</code></td>
+                        <td>정식 socket &mdash; NGINX 소프트웨어 &rarr; Spring Boot 연결</td>
+                        <td><code>ESTABLISHED</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>59.10.3.77:50110</code></td>
+                        <td><code>10.0.1.10:80</code></td>
+                        <td>timewait sock &mdash; 끊긴 직후 잠시 남는 흔적</td>
+                        <td><code>TIME_WAIT</code></td>
+                    </tr>
+                </table>
+            </div>
+            <p class="ins-cap">예시값이다. Client IP 가 <code>192.168.0.5</code> 가 아니라 <code>211.36.10.5</code> 인 이유는,
+                N-Kernel 에 도착한 SYN 은 이미 Home Router 의 NAT 가 공인 IP 로 바꿔 놓았기 때문이다.</p>
+
+            <h3>listen 표 &mdash; 키는 로컬 Port</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>로컬 IP:Port</th>
+                        <th>들어 있는 것</th>
+                        <th>State</th>
+                    </tr>
+                    <tr>
+                        <td><code>0.0.0.0:80</code></td>
+                        <td><em>listen socket</em> &mdash; NGINX 소프트웨어가 시작할 때 만들었다. NGINX 쪽 번호는 fd 6.
+                            SYN Queue &middot; accept Queue 가 여기 딸려 있다</td>
+                        <td><code>LISTEN</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>0.0.0.0:22</code></td>
+                        <td>listen socket &mdash; sshd 소프트웨어</td>
+                        <td><code>LISTEN</code></td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>찾는 순서</h3>
+            <pre class="code"><code>[SYN 도착]  211.36.10.5:51234 -&gt; 10.0.1.10:80
+  1. established 표   4-tuple 해시 -&gt; 버킷 -&gt; 없음        __inet_lookup_established()
+  2. listen 표        Port 80 -&gt; listen socket 발견          __inet_lookup_listener()
+  3. request_sock 을 만들어 established 표에 등록 + SYN Queue 에 삽입
+
+[ACK 도착]  같은 4-tuple
+  1. established 표   있음 -&gt; request_sock 발견
+  2. 정식 socket(TCB) 을 만들어 표의 request_sock 자리를 교체 -&gt; accept Queue 로</code></pre>
+
+            <h3>직접 보기</h3>
+            <p>Linux 서버에서 <code>ss -tan</code>, Windows 에서 <code>netstat -an</code>.
+                한 줄이 표의 한 칸이다. 둘 다 읽기만 하는 명령이다.</p>
+            <pre class="code"><code>$ ss -tan
+State      Recv-Q Send-Q  Local Address:Port   Peer Address:Port
+LISTEN     0      511         0.0.0.0:80            0.0.0.0:*
+SYN-RECV   0      0         10.0.1.10:80        211.36.10.5:51234
+ESTAB      0      0         10.0.1.10:80        118.40.22.9:60412
+ESTAB      0      0         10.0.1.10:41022       10.0.1.20:8080
+TIME-WAIT  0      0         10.0.1.10:80         59.10.3.77:50110</code></pre>
+            <p class="ins-cap">예시 출력이다. LISTEN 줄의 Send-Q 511 은 accept Queue 의 최대 길이(backlog)다.</p>
+
+        </div>
+    </dialog>
+
+    <dialog id="cookieModal" class="hdr-modal" aria-labelledby="cookieModalTitle">
+        <form method="dialog">
+            <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
+        </form>
+        <div class="note modal-note">
+            <h2 id="cookieModalTitle">SYN Cookie &mdash; 저장하지 않고 상대에게 맡겨 두는 증표</h2>
+
+            <p>SYN Queue 가 꽉 찼을 때 N-Kernel 이 쓰는 방법이다. <em>request_sock 을 만들지 않고</em>,
+                기억해야 할 정보를 <em>SYN+ACK 의 Sequence Number 칸(= N-Kernel 의 ISN) 에 숫자로 새겨</em> 보낸다.
+                이 32bit 숫자가 쿠키다. 브라우저 쿠키와는 무관하고, &ldquo;상대에게 맡겨 둔 작은 증표&rdquo; 라는 뜻이다.</p>
+
+            <h3>쿠키는 이렇게 만든다 (Linux)</h3>
+            <pre class="code"><code>cookie (32bit) =  해시(4-tuple, 비밀키1)
+               +  Client 의 ISN
+               +  시간 카운터 (약 1분 단위)                       -&gt; 맨 위 8bit
+               +  해시(4-tuple, 시간, 비밀키2) + MSS 번호          -&gt; 아래 24bit
+                  MSS 번호 = 536 / 1300 / 1440 / 1460 중 몇 번째인지</code></pre>
+            <p class="ins-cap"><code>secure_tcp_syn_cookie()</code> 의 구조다. 비밀키는 부팅 때 정해지고 밖에서 알 수 없다.</p>
+
+            <h3>흐름</h3>
+            <pre class="code"><code>SYN       C-Kernel -&gt; N-Kernel    SYN Queue 꽉 참 -&gt; request_sock 안 만듦. 메모리 0
+SYN+ACK   N-Kernel -&gt; C-Kernel    seq = cookie
+ACK       C-Kernel -&gt; N-Kernel    ack = cookie + 1
+          N-Kernel : 1 을 빼서 cookie 복원 -&gt; 같은 계산을 거꾸로 해서 확인
+            - 해시가 맞나        내가 발급한 게 맞나
+            - 시간이 2분 이내인가
+            - MSS 는 무엇이었나
+          맞으면 그때 정식 socket(TCB) 생성 -&gt; accept Queue</code></pre>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">얻는 것</span>
+                    <p>SYN Flood 로 SYN 이 쏟아져도 <em>연결 후보에 메모리를 한 바이트도 안 쓴다.</em>
+                        정상 사용자는 ACK 를 보내므로 그대로 연결된다.</p>
+                </div>
+                <div class="callout bad">
+                    <span class="tag">잃는 것</span>
+                    <p>MSS 를 4가지 값으로만 표현한다. Window Scale &middot; SACK 은 TCP Timestamp 옵션이 있을 때만 살린다.
+                        상태가 없으니 SYN+ACK 를 재전송하지 않는다.</p>
+                </div>
+            </div>
+            <p>Linux 는 <code>net.ipv4.tcp_syncookies = 1</code> 이 기본값이다.
+                평소엔 request_sock 을 쓰고, <em>SYN Queue 가 넘칠 때만</em> 쿠키로 바뀐다.</p>
+
+        </div>
+    </dialog>
+
+    <dialog id="structModal" class="hdr-modal" aria-labelledby="structTitle">
+        <form method="dialog">
+            <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
+        </form>
+        <div class="note modal-note">
+            <h2 id="structTitle">C 구조체 &mdash; request_sock 은 무엇인가</h2>
+
+            <h3>구조체 = 이름 붙은 칸 여러 개를 한 덩어리로 묶은 타입</h3>
+            <p>구조체(<code>struct</code>)는 C 에서 <em>타입이 다른 값 여러 개를 이름 붙은 칸으로 묶어</em>
+                새 타입 하나로 만든 것이다. <em>메서드 없이 필드만 있는 Java 클래스(DTO, record)</em> 와 거의 같다.</p>
+            <div class="side-by-side">
+                <pre class="code"><code>// Java 로 쓰면
+class TcpRequestSock {
+    int     clientIp;      // 4-tuple
+    short   clientPort;
+    int     serverIp;
+    short   serverPort;
+    byte    state;         // SYN_RECV
+    int     rcvIsn;        // C-Kernel 의 ISN
+    int     sntIsn;        // N-Kernel 의 ISN
+    short   mss;           // 1460
+    byte    sndWscale;     // 8
+    boolean sackOk;        // true
+    Timer   rskTimer;      // 재전송 타이머
+}</code></pre>
+                <pre class="code"><code>/* C 로 쓰면 (같은 뜻) */
+struct tcp_request_sock {
+    __be32 rmt_addr;       /* 4-tuple */
+    __be16 rmt_port;
+    __be32 loc_addr;
+    __u16  loc_port;
+    u8     state;          /* SYN_RECV */
+    u32    rcv_isn;        /* C-Kernel 의 ISN */
+    u32    snt_isn;        /* N-Kernel 의 ISN */
+    u16    mss;
+    u8     snd_wscale;
+    u8     sack_ok;
+    struct timer_list rsk_timer;
+};</code></pre>
+            </div>
+            <p class="ins-cap">오른쪽은 이해하기 쉽게 칸 이름을 모아 줄인 것이다. 실제 커널 소스는
+                <code>request_sock</code> &rarr; <code>inet_request_sock</code> &rarr; <code>tcp_request_sock</code>
+                세 구조체를 겹쳐서 이 칸들을 나눠 담는다(<code>rcv_isn</code> &middot; <code>snt_isn</code> &middot;
+                <code>rsk_timer</code> &middot; <code>mss</code> 는 실제 칸 이름 그대로).</p>
+
+            <h3>Map &middot; HashSet 같은 자료구조가 아니다</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>C 구조체</th>
+                        <th>Map &middot; HashSet</th>
+                    </tr>
+                    <tr>
+                        <th>칸(키)</th>
+                        <td>컴파일할 때 정해진다. 실행 중에 칸을 늘리거나 뺄 수 없다</td>
+                        <td>실행 중에 마음대로 넣고 뺀다</td>
+                    </tr>
+                    <tr>
+                        <th>메모리</th>
+                        <td><em>칸들이 한 덩어리로 붙어 있다</em></td>
+                        <td>버킷 배열과 엔트리들이 흩어져 있다</td>
+                    </tr>
+                    <tr>
+                        <th>칸 찾기</th>
+                        <td><em>시작 주소 + 고정 거리(offset)</em>. 메모리 한 번 읽으면 끝</td>
+                        <td>키 해시 계산 &rarr; 버킷 &rarr; 비교</td>
+                    </tr>
+                    <tr>
+                        <th>역할</th>
+                        <td><em>값 하나</em> (연결 후보 1개)</td>
+                        <td>값 여러 개를 담는 <em>그릇</em></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="callout">
+                <span class="tag">Map 에 해당하는 건 따로 있다</span>
+                <p>SYN Queue 와 established 표가 <em>그릇(해시 표)</em> 이고,
+                    request_sock 은 그 안에 담기는 <em>원소 하나</em>다.
+                    Java 로 치면 <code>Map&lt;FourTuple, TcpRequestSock&gt;</code> 의 value 가 구조체다.</p>
+            </div>
+
+            <h3>메모리에서는 이렇게 생겼다</h3>
+            <pre class="code"><code>N-Kernel 의 RAM (Kernel 영역)
+
+0x...3e00   request_sock 시작 주소   &lt;- established 표 · SYN Queue 는 이 주소만 들고 있다
+  +0        4-tuple, state = SYN_RECV
+  ...       mss = 1460
+  ...       rsk_timer (재전송 타이머)
+  ...       snd_wscale = 8, sack_ok = 1
+  ...       rcv_isn = 3097674671
+  ...       snt_isn = 1405063271
+            (끝)                    &lt;- 칸이 전부 이 한 덩어리 안에 붙어 있다</code></pre>
+            <ul>
+                <li>N-Kernel 은 <em>request_sock 전용 메모리 창고(slab cache, 이름 <code>request_sock_TCP</code>)</em>
+                    에서 같은 크기의 칸 하나를 꺼내 쓴다. Linux 서버에서
+                    <code>sudo grep request_sock_TCP /proc/slabinfo</code> 로 지금 몇 개가 쓰이는지 볼 수 있다.</li>
+                <li>크기는 대략 <em>request_sock 수백 B</em>, <em>정식 TCB(<code>tcp_sock</code>) 2 KB 안팎</em>이다
+                    (커널 버전마다 다르다). SYN 만 받은 단계에서 가벼운 쪽을 쓰는 이유다.</li>
+            </ul>
+        </div>
+    </dialog>
+
+    <!-- 박스 3번 모달의 [ISN · 옵션] 버튼이 여는 모달 -->
+    <dialog id="isnModal" class="hdr-modal" aria-labelledby="isnTitle">
+        <form method="dialog">
+            <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
+        </form>
+        <div class="note modal-note">
+            <h2 id="isnTitle">ISN &middot; SYN 옵션</h2>
+
+            <h3>ISN (Initial Sequence Number)</h3>
+            <p>Sequence Number 는 <em>보내는 바이트에 붙이는 번호</em>고, ISN 은 그 <em>시작 번호</em>다.
+                32bit 이고 <em>C-Kernel 과 N-Kernel 이 각자 하나씩</em> 정한다.
+                SYN 은 데이터가 없어도 번호 1 개를 쓴 것으로 치기 때문에, 상대는 <em>ISN + 1</em> 로 답한다.</p>
+            <pre class="code"><code>C-Kernel -&gt; N-Kernel   SYN       seq = 3097674671  (C-Kernel 의 ISN)
+N-Kernel -&gt; C-Kernel   SYN+ACK   seq = 1405063271  (N-Kernel 의 ISN)
+                                 ack = 3097674672  (C-Kernel ISN + 1)
+C-Kernel -&gt; N-Kernel   ACK       seq = 3097674672
+                                 ack = 1405063272  (N-Kernel ISN + 1)</code></pre>
+            <p class="ins-cap">C-Kernel 쪽 값은 TCP/IP/Frame 그림과 같은 예시값이고, N-Kernel 쪽 값은 예시다.</p>
+
+            <h4>왜 0 부터 안 하고 랜덤으로 시작하나</h4>
+            <ul>
+                <li><em>옛 연결의 늦은 패킷</em>이 섞이지 않게. 같은 4-tuple 로 끊었다 다시 붙으면,
+                    네트워크를 떠돌던 이전 연결의 패킷이 새 연결의 번호 범위에 끼어들 수 있다.</li>
+                <li><em>번호를 맞혀서 가짜 패킷을 끼워넣는 공격</em>을 막으려고. 번호를 예측할 수 있으면
+                    남이 내 연결에 위조 패킷을 넣을 수 있다.</li>
+            </ul>
+            <p>Linux 는 <code>secure_tcp_seq()</code> 에서
+                <em>4-tuple 과 부팅 때 정한 비밀키를 섞은 해시 + 현재 시각</em>으로 ISN 을 만든다.
+                연결마다 다르고 남이 예측할 수 없다(RFC 6528).</p>
+
+            <h3>SYN 옵션 &mdash; 이 SYN 에 실제로 실린 12 바이트</h3>
+            <p>옵션은 <code>[종류 1B][길이 1B][값]</code> 형식이다. NOP 만 1 바이트 단독이다.</p>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>바이트</th>
+                        <th>옵션</th>
+                        <th>뜻</th>
+                    </tr>
+                    <tr>
+                        <td><code>02 04 05 B4</code></td>
+                        <td><em>MSS = 1460</em></td>
+                        <td>Maximum Segment Size. &ldquo;나는 세그먼트 하나에 데이터를 최대 1460 B 까지 받을 수 있다&rdquo;.
+                            1460 = Ethernet 1500 &minus; IP 헤더 20 &minus; TCP 헤더 20</td>
+                    </tr>
+                    <tr>
+                        <td><code>01</code></td>
+                        <td>NOP</td>
+                        <td>아무 뜻 없는 1 바이트. 다음 옵션을 4 바이트 경계에 맞추는 채움</td>
+                    </tr>
+                    <tr>
+                        <td><code>03 03 08</code></td>
+                        <td><em>Window Scale = 8</em></td>
+                        <td>TCP 헤더의 Window 칸은 16bit 라 최대 65535 B 밖에 못 적는다.
+                            &ldquo;Window 값에 2<sup>8</sup> = 256 을 곱해서 읽어라&rdquo; 는 배율 약속.
+                            고속 회선에서 한 번에 더 많이 보내려고 쓴다</td>
+                    </tr>
+                    <tr>
+                        <td><code>01 01</code></td>
+                        <td>NOP NOP</td>
+                        <td>채움</td>
+                    </tr>
+                    <tr>
+                        <td><code>04 02</code></td>
+                        <td><em>SACK Permitted</em></td>
+                        <td>Selective ACK 허락. 중간이 빠졌을 때 &ldquo;이 구간들은 받았다&rdquo; 를 골라서 알려도 되냐는 허락</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>옵션 말고 헤더에 같이 실리는 것 &mdash; Window Size</h3>
+            <p>이 SYN 의 Window Size 는 <code>64240</code>(<code>0xFAF0</code>)이다.
+                <em>&ldquo;지금 내 수신 버퍼에 이만큼 여유가 있다&rdquo;</em> 는 뜻이다.
+                상대는 ACK 를 받기 전까지 이 양을 넘게 보내지 않는다. 이것이 <em>흐름 제어</em>의 기준이다.</p>
+            <p>Window Scale 이 합의되면 이후 패킷의 Window 값은 배율(&times;256)을 곱해서 읽는다.
+                단 SYN &middot; SYN+ACK 자신의 Window 값에는 배율을 적용하지 않는다.</p>
+
+            <div class="side-by-side">
+                <div class="callout">
+                    <span class="tag">양쪽이 다 보내야 켜진다</span>
+                    <p>Window Scale 과 SACK 은 <em>SYN 과 SYN+ACK 양쪽에 다 실려야</em> 쓴다.
+                        그래서 N-Kernel 이 SYN 의 옵션을 request_sock 에 적어 두고,
+                        SYN+ACK 에 자기 값을 실어 보낸다.
+                        MSS 는 각자 &ldquo;나는 이만큼 받는다&rdquo; 를 알리는 것이라 서로 달라도 된다.</p>
+                </div>
+                <div class="callout">
+                    <span class="tag">SACK 이 있고 없고</span>
+                    <p>세그먼트 1~9 중 <em>4 만 빠졌다</em>고 하자.</p>
+                    <p>SACK 없음 &mdash; ACK 는 &ldquo;4 부터 줘&rdquo; 밖에 못 말한다. 보내는 쪽은 5~9 도 다시 보낼 수 있다.</p>
+                    <p>SACK 있음 &mdash; &ldquo;4 부터 줘. 5~9 는 받았다&rdquo; 를 같이 알린다. <em>4 만</em> 다시 보낸다.</p>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
     <dialog id="tcpipModal" class="hdr-modal" aria-labelledby="tcpipTitle">
         <form method="dialog">
             <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
@@ -2606,6 +3078,9 @@ Cookie: JSESSIONID=...\r\n
             var dlg = document.getElementById('stepModal');
             var body = dlg.querySelector('.step-body');
             var cur = 0;
+            var extras = Array.prototype.slice.call(dlg.querySelectorAll('.step-extra'));
+            var inners = extras.map(function (b) { return document.getElementById(b.dataset.modal); });
+            function innerOpen() { return inners.some(function (m) { return m.open; }); }
             function fill(i) {
                 cur = (i + nodes.length) % nodes.length;
                 var node = nodes[cur];
@@ -2613,7 +3088,8 @@ Cookie: JSESSIONID=...\r\n
                 var who = node.querySelector('.fnode-type');
                 dlg.querySelector('.step-who').textContent = who ? who.textContent : '';
                 dlg.querySelector('.step-orig p').textContent = node.querySelector('small').textContent;
-                dlg.querySelector('.step-extra').hidden = node.dataset.extra !== 'tcpip';
+                var want = (node.dataset.extra || '').split(' ');
+                extras.forEach(function (b) { b.hidden = want.indexOf(b.dataset.modal) < 0; });
                 body.innerHTML = '';
                 node.dataset.chunks.split(' ').forEach(function (id) {
                     var src = document.getElementById(id);
@@ -2634,21 +3110,25 @@ Cookie: JSESSIONID=...\r\n
             dlg.querySelectorAll('.step-nav button').forEach(function (b) {
                 b.addEventListener('click', function () { fill(cur + Number(b.dataset.dir)); });
             });
-            // TCP/IP 모달. 닫기(x) · ESC 는 이 모달만 닫아야 한다. 박스 모달은 절대 같이 닫히면 안 된다.
-            var inner = document.getElementById('tcpipModal');
-            dlg.querySelector('.step-extra').addEventListener('click', function () { inner.showModal(); });
-            inner.addEventListener('cancel', function (e) {   // ESC
-                e.preventDefault();
-                inner.close();
+            // 안쪽 모달(TCP/IP/Frame · C 구조체 · ISN). 닫기(x) · ESC 는 그 모달만 닫아야 한다. 박스 모달은 절대 같이 닫히면 안 된다.
+            extras.forEach(function (b, i) {
+                b.addEventListener('click', function () { inners[i].showModal(); });
+            });
+            inners.forEach(function (m) {
+                m.addEventListener('cancel', function (e) {   // ESC
+                    e.preventDefault();
+                    m.close();
+                });
+                m.addEventListener('close', function () {     // 안전장치. 혹시 같이 닫혔으면 되살린다
+                    if (!dlg.open) dlg.showModal();
+                });
             });
             dlg.addEventListener('cancel', function (e) {     // 안쪽 모달이 열려 있는 동안엔 바깥은 ESC 로 안 닫힌다
-                if (inner.open) e.preventDefault();
+                if (innerOpen()) e.preventDefault();
             });
-            inner.addEventListener('close', function () {     // 안전장치. 혹시 같이 닫혔으면 되살린다
-                if (!dlg.open) dlg.showModal();
-            });
-            dlg.addEventListener('keydown', function (e) {
-                if (inner.open) return;
+            // 문서 전체에서 받는다. 포커스가 있던 버튼이 다음 박스에서 숨겨지면 포커스가 모달 밖으로 빠지기 때문이다.
+            document.addEventListener('keydown', function (e) {
+                if (!dlg.open || innerOpen()) return;
                 if (e.key === 'ArrowRight') { e.preventDefault(); fill(cur + 1); }
                 if (e.key === 'ArrowLeft') { e.preventDefault(); fill(cur - 1); }
             });
