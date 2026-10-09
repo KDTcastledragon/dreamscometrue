@@ -5,22 +5,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>백엔드 공부</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%232f6d55%27%2F%3E%3Cg%20fill%3D%27%23ffffff%27%3E%3Crect%20x%3D%277%27%20y%3D%276%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2713%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2720%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%232f6d55%27%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%279%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2716%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2723%27%20r%3D%271.3%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%232f6d55%27%2F%3E%3Cg%20fill%3D%27%23ffffff%27%3E%3Crect%20x%3D%277%27%20y%3D%276%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2713%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2720%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%232f6d55%27%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%279%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2716%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2723%27%20r%3D%271.3%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
     <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
     <div class="wrap">
         <header class="page-head">
-            <button type="button" class="hdr-btn"
-                onclick="document.getElementById('qaModal').showModal()">예상 질문</button>
-            <button type="button" class="hdr-btn"
-                onclick="document.getElementById('etcModal').showModal()">etc</button>
+            <button type="button" class="hdr-btn" onclick="document.getElementById('qaModal').showModal()">예상
+                질문</button>
+            <button type="button" class="hdr-btn" onclick="document.getElementById('etcModal').showModal()">etc</button>
         </header>
 
         <nav class="subject-grid">
             <a class="subject-card" href="./clntserv.html">
-                <strong>Client &middot; Server 흐름 파악</strong>
+                <strong>Client --- Server 흐름</strong>
             </a>
             <a class="subject-card" href="./architecture.html">
                 <strong>Computer Architecture &amp; OS</strong>
@@ -55,11 +55,13 @@
                     <dt>Consumer</dt>
                     <dd>브로커에서 <em>읽는 애플리케이션</em>.
                         내 경우 <code>event-persist-worker</code>.
-                        <em>DB 가 아니다</em></dd>
+                        <em>DB 가 아니다</em>
+                    </dd>
                     <dt>DB 의 위치</dt>
                     <dd>Consumer 가 읽은 걸 <em>저장하는 대상</em>일 뿐 Kafka 와 무관하다.
                         <em>Kafka 는 DB 의 존재를 모른다.</em>
-                        worker 가 읽어서 로그를 찍든 메일을 보내든 Kafka 는 상관하지 않는다</dd>
+                        worker 가 읽어서 로그를 찍든 메일을 보내든 Kafka 는 상관하지 않는다
+                    </dd>
                     <dt>브로커</dt>
                     <dd>Kafka 서버 프로세스 자체. <code>kafka-0</code> 파드 안의 그 자바 프로세스</dd>
                 </dl>
@@ -67,14 +69,16 @@
 
             <p>각 항목은 <em>답변 뼈대 &middot; 근거 &middot; 주의할 것</em> 세 덩어리로 적는다.
                 <em>근거는 전부 실제 코드와 설정에서 확인한 것</em>이고,
-                근거가 없는 말은 적지 않는다.</p>
+                근거가 없는 말은 적지 않는다.
+            </p>
 
             <!-- ===== Q1 ===== -->
             <h3>Q1 &mdash; 다른 프로그램도 많은데 Kafka 를 선택한 이유가 뭔가요</h3>
 
             <h4>핵심 이유 &mdash; DB 쓰기를 응답 경로에서 뺐다</h4>
             <p>가장 먼저 말할 것은 이것이다.
-                <em>&ldquo;메시지를 보낸 사람에게 언제 성공이라고 답할 것인가&rdquo;</em> 의 문제다.</p>
+                <em>&ldquo;메시지를 보낸 사람에게 언제 성공이라고 답할 것인가&rdquo;</em> 의 문제다.
+            </p>
 
             <pre class="code"><code>[ DB 동기 ]   메시지 수신 -> DB INSERT 완료까지 대기 -> 성공 응답
 [ Kafka  ]   메시지 수신 -> Kafka 가 받았다고 할 때까지 대기 -> 성공 응답
@@ -99,9 +103,11 @@
                         <th>1</th>
                         <td><code>insertChatMessage</code></td>
                         <td><code>chat_messages</code> 에 메시지 본문 INSERT.
-                            <em>예전엔 여기서 auto_increment 로 messageId 를 받았다</em></td>
+                            <em>예전엔 여기서 auto_increment 로 messageId 를 받았다</em>
+                        </td>
                         <td><em>worker</em> 가 Kafka 소비 후.
-                            <code>INSERT IGNORE</code> + messageId 명시(멱등)</td>
+                            <code>INSERT IGNORE</code> + messageId 명시(멱등)
+                        </td>
                     </tr>
                     <tr>
                         <th>2</th>
@@ -116,7 +122,8 @@
                         <td>보낸 사람 본인의 읽음 위치(lrm)를 자기 메시지까지 올린다</td>
                         <td>Redis <em>write-behind</em>.
                             <code>ReadPositionFlushWorker</code> 가
-                            <em>5초마다</em> 모아서 DB 에 반영</td>
+                            <em>5초마다</em> 모아서 DB 에 반영
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -124,10 +131,11 @@
             <div class="callout bad">
                 <span class="tag">3번은 Kafka 때문에 바뀐 게 아니다</span>
                 <p>설계 문서에 <em>&ldquo;Redis lrm updateIfGreater (sender 본인 읽음위치.
-                    <em>기존과 동일</em>)&rdquo;</em> 라고 적혀 있다.</p>
+                        <em>기존과 동일</em>)&rdquo;</em> 라고 적혀 있다.</p>
                 <p>읽음 위치는 <em>prpr 4번 원칙 때문에 처음부터 write-behind</em> 였고,
                     Kafka 도입으로 옮긴 건 <em>1번과 2번</em>이다.
-                    <em>이 구분을 섞어 말하면 꼬인다.</em></p>
+                    <em>이 구분을 섞어 말하면 꼬인다.</em>
+                </p>
             </div>
 
             <h4>진짜 이점은 부하가 걸렸을 때 나온다</h4>
@@ -153,7 +161,7 @@
                     <tr>
                         <th>읽기에 주는 영향</th>
                         <td><em>★ 같은 DB 라 채팅방 열기 &middot; 이전 메시지 조회까지
-                            같이 느려진다</em></td>
+                                같이 느려진다</em></td>
                         <td>읽기 경로와 완전히 분리된다</td>
                     </tr>
                     <tr>
@@ -178,7 +186,7 @@
 
             <h4>&#9312; 락 경합 &mdash; 누가 무엇을 두고 다투나</h4>
             <p><em>여러 트랜잭션이 같은 자원을 동시에 건드리려 할 때
-                하나만 들어가고 나머지는 줄 서서 기다리는 것</em>이다.
+                    하나만 들어가고 나머지는 줄 서서 기다리는 것</em>이다.
                 채팅 메시지 <code>INSERT</code> 한 건에서 실제로 다투는 자원은 이렇다.</p>
             <div class="scroll-x">
                 <table>
@@ -191,7 +199,8 @@
                         <td><code>messageId</code> 가 Snowflake 라 <em>시간순으로 계속 커진다.</em>
                             그래서 모든 <code>INSERT</code> 가
                             <em>B+트리의 맨 오른쪽 페이지 한 곳</em>으로 몰린다.
-                            동시에 열 건이 들어오면 <em>그 한 페이지를 열 트랜잭션이 번갈아 잠근다</em></td>
+                            동시에 열 건이 들어오면 <em>그 한 페이지를 열 트랜잭션이 번갈아 잠근다</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>행 잠금<br><small>row lock</small></th>
@@ -201,7 +210,8 @@
                     <tr>
                         <th>redo 로그 &middot; fsync</th>
                         <td>커밋할 때마다 디스크에 기록을 확정해야 한다.
-                            <em>디스크 쓰기는 한 번에 하나</em>라 커밋이 몰리면 여기서 줄을 선다</td>
+                            <em>디스크 쓰기는 한 번에 하나</em>라 커밋이 몰리면 여기서 줄을 선다
+                        </td>
                     </tr>
                     <tr>
                         <th>커넥션 풀</th>
@@ -212,7 +222,7 @@
             </div>
             <h4>InnoDB 가 뭔가 &mdash; 스토리지 엔진</h4>
             <p><em>MySQL / MariaDB 에서 &ldquo;실제로 디스크에 어떻게 저장하고 읽을지&rdquo; 를
-                담당하는 부품</em>이다. SQL 을 해석하는 부분과 저장하는 부분이 나뉘어 있다.</p>
+                    담당하는 부품</em>이다. SQL 을 해석하는 부분과 저장하는 부분이 나뉘어 있다.</p>
 
             <pre class="code"><code>SQL 파서 · 옵티마이저        SQL 을 해석하고 실행 계획을 짠다
         |
@@ -235,7 +245,8 @@
                         <th>클러스터형 인덱스</th>
                         <td><em>테이블 자체가 PK 로 정렬된 B+트리</em>다.
                             인덱스가 테이블 옆에 따로 있는 게 아니라
-                            <em>행 데이터가 PK 순서대로 디스크에 줄 서 있다</em></td>
+                            <em>행 데이터가 PK 순서대로 디스크에 줄 서 있다</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>행 잠금</th>
@@ -245,7 +256,8 @@
                     <tr>
                         <th>트랜잭션 &middot; MVCC</th>
                         <td>커밋 &middot; 롤백이 되고,
-                            <em>읽기는 쓰기를 기다리지 않는다</em></td>
+                            <em>읽기는 쓰기를 기다리지 않는다</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>버퍼 풀</th>
@@ -267,8 +279,8 @@
                 <svg viewBox="0 0 960 412" role="img"
                     aria-label="chat_messages 테이블은 message_id 로 정렬된 B 플러스 트리이고, 시간순으로 커지는 새 메시지는 항상 맨 오른쪽 리프 페이지에 들어간다">
                     <defs>
-                        <marker id="bt" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
-                            orient="auto" markerUnits="strokeWidth">
+                        <marker id="bt" markerWidth="8" markerHeight="8" refX="6.5" refY="3" orient="auto"
+                            markerUnits="strokeWidth">
                             <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
                         </marker>
                     </defs>
@@ -353,11 +365,10 @@
             </div>
 
             <div class="cdiag wide">
-                <svg viewBox="0 0 880 250" role="img"
-                    aria-label="여러 스레드가 동시에 INSERT 하면 같은 리프 페이지의 래치를 얻으려고 한 줄로 줄을 선다">
+                <svg viewBox="0 0 880 250" role="img" aria-label="여러 스레드가 동시에 INSERT 하면 같은 리프 페이지의 래치를 얻으려고 한 줄로 줄을 선다">
                     <defs>
-                        <marker id="bt2" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
-                            orient="auto" markerUnits="strokeWidth">
+                        <marker id="bt2" markerWidth="8" markerHeight="8" refX="6.5" refY="3" orient="auto"
+                            markerUnits="strokeWidth">
                             <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
                         </marker>
                     </defs>
@@ -451,10 +462,12 @@
                 <span class="tag">물어보면 이렇게</span>
                 <p><code>messageId</code> 가 시간순이라
                     <em>항상 B+트리 맨 오른쪽 페이지에 들어갑니다.</em>
-                    그래서 동시 INSERT 가 <em>그 한 페이지를 두고 줄을 서게</em> 됩니다.</p>
+                    그래서 동시 INSERT 가 <em>그 한 페이지를 두고 줄을 서게</em> 됩니다.
+                </p>
                 <p>대신 <em>중간에 페이지가 쪼개지는 일이 없고 디스크를 순차로 씁니다.</em>
                     UUID 같은 무작위 키면 경합은 흩어지지만 페이지 분할과 랜덤 I/O 가 생기는데,
-                    <em>그쪽 비용이 훨씬 커서</em> 순차 키를 택했습니다.</p>
+                    <em>그쪽 비용이 훨씬 커서</em> 순차 키를 택했습니다.
+                </p>
                 <p>그리고 저는 애초에 <em>PK 를 미리 확정해야</em>
                     응답을 메모리에서 만들 수 있어서 Snowflake 가 필요했습니다.</p>
             </div>
@@ -463,7 +476,8 @@
                 <span class="tag">짚을 점 &mdash; Snowflake 의 그림자</span>
                 <p>시간순 단조증가는 <em>정렬 &middot; 페이징에는 유리</em>하지만,
                     <em>INSERT 가 한 페이지에 몰린다는 단점</em>이 따라온다.
-                    <code>AUTO_INCREMENT</code> 도 똑같은 성질이다.</p>
+                    <code>AUTO_INCREMENT</code> 도 똑같은 성질이다.
+                </p>
                 <p>물어보면 아는 척하지 말고 이렇게 &mdash;
                     &ldquo;시간순이라 맨 끝 페이지에 몰리는 건 맞습니다.
                     대신 <em>중간에 페이지가 쪼개지지 않아</em> 그쪽 비용은 줄었습니다.
@@ -481,9 +495,11 @@
                             줄이 길어지면 기다리는 동안 다른 것도 같이 막힌다</li>
                         <li>버퍼 풀에 없는 페이지를 건드리면
                             <em>디스크 랜덤 I/O</em> 가 발생한다.
-                            랜덤 쓰기는 순차 쓰기보다 <em>수십 배 느리다</em></li>
+                            랜덤 쓰기는 순차 쓰기보다 <em>수십 배 느리다</em>
+                        </li>
                         <li>커넥션 풀이 고갈되면 대기 &rarr; 타임아웃 &rarr;
-                            <em>재시도가 부하를 더 키운다</em></li>
+                            <em>재시도가 부하를 더 키운다</em>
+                        </li>
                     </ul>
                 </div>
                 <div class="callout">
@@ -498,7 +514,7 @@
                 </div>
             </div>
             <p>그래서 <em>&ldquo;선형&rdquo; 보다
-                &ldquo;동시 요청이 늘어도 건당 시간이 거의 안 변한다&rdquo;</em> 라고 말하는 게
+                    &ldquo;동시 요청이 늘어도 건당 시간이 거의 안 변한다&rdquo;</em> 라고 말하는 게
                 덜 추상적이다.</p>
 
             <h4>&#9314; Hikari 가 뭔가</h4>
@@ -515,7 +531,8 @@ SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
             <p><em>5로 잡은 이유</em>는 ConfigMap 주석에 적어뒀다 &mdash;
                 RDS <code>db.t4g.micro</code> 의 <code>max_connections</code> 가 약 40인데
                 DB 를 쓰는 서비스가 5개라, 기본값 10이면 50개가 필요해
-                <code>Too many connections</code> 가 난다.</p>
+                <code>Too many connections</code> 가 난다.
+            </p>
 
             <h4>&#9315; &ldquo;DB 커넥션을 쓰지 않는다&rdquo; &mdash; 표현이 모호했다</h4>
             <div class="callout bad">
@@ -536,7 +553,7 @@ DB 커넥션을 안 쓰는 것
   kafkaTemplate.send()      Kafka 브로커로 가는 별도 TCP 연결을 쓴다</code></pre>
             <p>핵심은 <em><code>INSERT</code> 가 커넥션을 점유하지 않는다</em>는 것이다.
                 동기 <code>INSERT</code> 였다면 <em>트랜잭션이 끝날 때까지
-                커넥션 하나를 계속 쥐고 있어야</em> 한다.</p>
+                    커넥션 하나를 계속 쥐고 있어야</em> 한다.</p>
             <div class="callout">
                 <span class="tag">더 중요한 건 &ldquo;누구의 풀&rdquo; 이냐다</span>
                 <pre class="code"><code>channel-engine       Hikari 5개   조회에 쓴다
@@ -573,10 +590,12 @@ public void persistChatMessage(ChatMessageCreatedEventDTO event) { ... }
                     파티션이 6개이므로 <em>6까지 의미가 있다.</em></p>
                 <p>지금은 1개 스레드가 파티션 6개를 순서대로 처리한다.
                     <em>설정 한 줄로 6배 병렬</em>이 된다 &mdash;
-                    DB 가 받아준다는 전제에서.</p>
+                    DB 가 받아준다는 전제에서.
+                </p>
                 <p>그 다음 단계는 <em>배치 INSERT</em> 다.
                     <code>BatchListener</code> 로 500건을 받아 <code>INSERT ... VALUES (..),(..)</code>
-                    한 번으로 묶으면 커밋 횟수가 500분의 1이 된다.</p>
+                    한 번으로 묶으면 커밋 횟수가 500분의 1이 된다.
+                </p>
             </div>
 
             <div class="callout">
@@ -585,7 +604,8 @@ public void persistChatMessage(ChatMessageCreatedEventDTO event) { ... }
 management.endpoints.web.exposure.include=health,info,metrics,prometheus
 management.prometheus.metrics.export.enabled=true</code></pre>
                 <p>Micrometer 가 Kafka 컨슈머 메트릭을 자동으로 모은다.
-                    <em>수집기를 붙이면 <code>records-lag</code>(밀린 건수) 를 볼 수 있다.</em></p>
+                    <em>수집기를 붙이면 <code>records-lag</code>(밀린 건수) 를 볼 수 있다.</em>
+                </p>
                 <p>다만 <em>건당 처리 시간 같은 커스텀 메트릭은 없다</em>
                     (<code>ChatMetrics</code> 가 주석 처리돼 있다).
                     &ldquo;얼마나 밀리는지는 볼 수 있지만 왜 느린지는 모른다&rdquo; 가 정확하다.</p>
@@ -606,10 +626,12 @@ management.prometheus.metrics.export.enabled=true</code></pre>
             <div class="callout bad">
                 <span class="tag">용어 &mdash; &ldquo;비동기 처리했다&rdquo; 는 부정확하다</span>
                 <p><code>.get()</code> 으로 브로커 응답까지 기다리므로
-                    <em>발행 자체는 동기</em>다. 비동기인 건 worker 쪽이다.</p>
+                    <em>발행 자체는 동기</em>다. 비동기인 건 worker 쪽이다.
+                </p>
                 <p>정확한 표현은 <em>&ldquo;DB 쓰기를 응답 경로에서 뺐다&rdquo;</em> 다.
                     &ldquo;비동기로 처리했다&rdquo; 고 하면
-                    <em>&ldquo;그럼 유실은요?&rdquo;</em> 가 바로 온다.</p>
+                    <em>&ldquo;그럼 유실은요?&rdquo;</em> 가 바로 온다.
+                </p>
             </div>
 
             <h4>대안을 안 쓴 이유 &mdash; 구체적으로</h4>
@@ -627,7 +649,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                             <em>그 큐에 있던 작업이 힙과 함께 통째로 사라진다.</em>
                             사용자는 이미 &ldquo;전송 성공&rdquo; 을 받았는데 DB 에는 영영 안 들어간다.<br>
                             큐가 가득 차면 <code>RejectedExecutionException</code> 이 나는데,
-                            <em>그때 그 메시지를 어디에 보관할지가 또 문제</em>다</td>
+                            <em>그때 그 메시지를 어디에 보관할지가 또 문제</em>다
+                        </td>
                     </tr>
                     <tr>
                         <th>Redis pub/sub</th>
@@ -635,7 +658,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                             그 순간 <code>SUBSCRIBE</code> 중인 클라이언트에게 전달하고 버린다.<br>
                             <em>worker 파드를 재배포하는 30초 동안</em>
                             들어온 메시지는 <em>받을 사람이 없어 그대로 사라진다.</em>
-                            재시작한 worker 는 그게 있었는지도 모른다</td>
+                            재시작한 worker 는 그게 있었는지도 모른다
+                        </td>
                     </tr>
                     <tr>
                         <th>RabbitMQ</th>
@@ -643,7 +667,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                             &middot; 나중에 <em>검색 색인</em>을 붙이려면 큐를 하나 더 매달아야 하는데
                             <em>그 시점 이후 메시지만</em> 받는다. 과거 것은 못 가져온다<br>
                             &middot; 저장 로직에 버그가 있었을 때 <em>되감아서 재처리할 수 없다.</em>
-                            Kafka 는 offset 을 되돌리면 된다</td>
+                            Kafka 는 offset 을 되돌리면 된다
+                        </td>
                     </tr>
                     <tr>
                         <th>DB 테이블 큐</th>
@@ -653,7 +678,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                             <em>DB 부하를 덜어내려는 게 목적인데 DB 를 더 치게 된다</em><br>
                             &middot; 폴링 주기를 늘리면 그만큼 지연이 커진다<br>
                             &middot; worker 를 늘리면 <em>같은 행을 두 번 집지 않도록</em>
-                            <code>SELECT FOR UPDATE SKIP LOCKED</code> 같은 잠금이 필요해진다</td>
+                            <code>SELECT FOR UPDATE SKIP LOCKED</code> 같은 잠금이 필요해진다
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -665,7 +691,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                     <h4>저장한다</h4>
                     <p class="kind-desc">소비해도 안 지우고 보관 기간까지 남긴다.
                         <em>worker 가 죽어 있어도 발행은 성공</em>하고,
-                        살아나면 커밋한 offset 부터 이어 읽는다.</p>
+                        살아나면 커밋한 offset 부터 이어 읽는다.
+                    </p>
                     <span class="kind-tag on">유실이 아니라 &quot;반영이 늦는 것&quot; 이 된다</span>
                 </div>
                 <div class="kind">
@@ -673,7 +700,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                     <h4>구독자를 나중에 붙인다</h4>
                     <p class="kind-desc">컨슈머 그룹이 다르면 <em>같은 메시지를 각자 전부</em> 받는다.</p>
                     <p class="kind-desc">검색 색인이나 통계 집계를 나중에 붙일 때
-                        <em>기존 worker 를 한 줄도 안 건드려도 된다.</em></p>
+                        <em>기존 worker 를 한 줄도 안 건드려도 된다.</em>
+                    </p>
                     <span class="kind-tag on">발행 쪽은 구독자를 몰라도 된다</span>
                 </div>
                 <div class="kind">
@@ -688,8 +716,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                 <p class="kind-note">
                     마무리는 이렇게 &mdash;
                     <em>&ldquo;ID 채번 방식이나 데이터 흐름처럼 나중에 바꾸기 어려운 것은
-                    처음에 정해야 한다고 봤습니다.
-                    동기 INSERT 로 짜놓고 나중에 이벤트 기반으로 바꾸면 사실상 재작성이라서요.&rdquo;</em>
+                        처음에 정해야 한다고 봤습니다.
+                        동기 INSERT 로 짜놓고 나중에 이벤트 기반으로 바꾸면 사실상 재작성이라서요.&rdquo;</em>
                 </p>
             </div>
 
@@ -699,22 +727,23 @@ management.prometheus.metrics.export.enabled=true</code></pre>
             <div class="callout">
                 <span class="tag">본 답변 &mdash; 2줄</span>
                 <p><em>&ldquo;디스크에 순차로만 쌓는 구조라 처리량이 높고, 소비해도 지우지 않습니다.
-                    그래서 소비자가 죽어도 유실이 없고,
-                    되감아 재처리하거나 소비자를 나중에 붙일 수 있습니다.&rdquo;</em></p>
+                        그래서 소비자가 죽어도 유실이 없고,
+                        되감아 재처리하거나 소비자를 나중에 붙일 수 있습니다.&rdquo;</em></p>
             </div>
 
             <p><em>이 한 줄이 Kafka 만의 차이를 짚는다.</em>
                 &ldquo;빠르다&rdquo; &middot; &ldquo;확장된다&rdquo; 는 어느 메시지 큐나 하는 말이지만,
                 <em>&ldquo;소비해도 안 지운다&rdquo; 는 로그 기반이라 가능한 것</em>이고
-                재처리 &middot; 다중 소비 &middot; 유실 방지가 전부 거기서 나온다.</p>
+                재처리 &middot; 다중 소비 &middot; 유실 방지가 전부 거기서 나온다.
+            </p>
             <p>그리고 <em>다음 질문을 내가 준비한 쪽으로 끌어온다.</em> 아래 둘이 거의 반드시 온다.</p>
 
             <h4>꼬리질문 &mdash; &ldquo;재처리는 어떻게 하나요?&rdquo;</h4>
             <div class="callout">
                 <span class="tag">답변</span>
                 <p><em>&ldquo;컨슈머 그룹의 offset 을 되돌리거나, 새 groupId 로 띄우면 됩니다.
-                    브로커가 그룹마다 offset 을 따로 들고 있어서
-                    메시지를 다시 보내달라고 할 필요가 없습니다.&rdquo;</em></p>
+                        브로커가 그룹마다 offset 을 따로 들고 있어서
+                        메시지를 다시 보내달라고 할 필요가 없습니다.&rdquo;</em></p>
             </div>
             <pre class="code"><code>방법 1 — offset 을 되감는다
   kafka-consumer-groups.sh --reset-offsets       --group event-persist-worker --topic castlechat.chat.message       --to-earliest   (또는 --to-offset N / --to-datetime ...)
@@ -749,8 +778,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
             <div class="callout">
                 <span class="tag">답변</span>
                 <p><em>&ldquo;groupId 가 다른 애플리케이션을 하나 더 띄우면
-                    같은 토픽을 독립적으로 전부 받습니다.
-                    기존 소비자도, 발행하는 쪽도 코드를 건드릴 필요가 없습니다.&rdquo;</em></p>
+                        같은 토픽을 독립적으로 전부 받습니다.
+                        기존 소비자도, 발행하는 쪽도 코드를 건드릴 필요가 없습니다.&rdquo;</em></p>
             </div>
             <pre class="code"><code>지금
   groupId = event-persist-worker      -> DB 저장
@@ -764,7 +793,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
 같은 그룹      파티션을 나눠 먹는다   (일을 분담)
 다른 그룹      각자 전부 받는다      (용도가 다름)</code></pre>
             <p>가능한 이유는 <em>브로커가 그룹마다 offset 을 따로 관리</em>하기 때문이다.
-                <code>__consumer_offsets</code> 라는 내부 토픽에 저장된다.</p>
+                <code>__consumer_offsets</code> 라는 내부 토픽에 저장된다.
+            </p>
 
             <div class="callout">
                 <span class="tag">대비해서 말하면 더 선명하다</span>
@@ -772,7 +802,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                     그렇게 해도 <em>그 시점 이후 메시지만</em> 받는다.</p>
                 <p>Kafka 는 <code>auto-offset-reset=earliest</code> 로 띄우면
                     <em>보관 기간 안의 과거 것부터 전부</em> 받는다.
-                    <em>&ldquo;발행하는 쪽이 구독자를 몰라도 된다&rdquo; 의 실제 이득이 이것</em>이다.</p>
+                    <em>&ldquo;발행하는 쪽이 구독자를 몰라도 된다&rdquo; 의 실제 이득이 이것</em>이다.
+                </p>
             </div>
 
             <div class="scroll-x">
@@ -807,7 +838,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                         <th>복제로<br>내구성</th>
                         <td>파티션마다 리더 + 팔로워.
                             <code>acks=all</code> 이면 ISR 전부가 복제할 때까지 기다린다.
-                            리더가 죽으면 팔로워가 승격</td>
+                            리더가 죽으면 팔로워가 승격
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -821,7 +853,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                     <li><em>지연이 아주 낮지는 않다.</em> 배치가 전제라
                         건당 즉시성이 필요하면 안 맞는다</li>
                     <li><em>at-least-once 다.</em> 중복이 올 수 있어
-                        <em>소비 쪽이 멱등해야 한다</em></li>
+                        <em>소비 쪽이 멱등해야 한다</em>
+                    </li>
                 </ul>
                 <p>강점만 읊으면 <em>&ldquo;그럼 단점은요&rdquo;</em> 가 바로 온다. 먼저 꺼내자.</p>
             </div>
@@ -841,7 +874,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                         <td>메시지 전송</td>
                         <td><code>ChatCommandService</code> 가 <code>INSERT</code> 를 하지 않는다.
                             이벤트만 발행하고 <em>응답을 메모리에서 조립</em>해 돌려준다.
-                            <code>INSERT</code> 는 <code>event-persist-worker</code> 담당</td>
+                            <code>INSERT</code> 는 <code>event-persist-worker</code> 담당
+                        </td>
                     </tr>
                     <tr>
                         <th>유실 방지</th>
@@ -849,14 +883,16 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                         <td><code>acks=all</code> + <code>enable.idempotence=true</code>,
                             그리고 <code>send().get(timeout)</code> 으로
                             <em>브로커가 받았다고 할 때까지 대기</em>.
-                            실패하면 사용자에게 전송 실패 응답</td>
+                            실패하면 사용자에게 전송 실패 응답
+                        </td>
                     </tr>
                     <tr>
                         <th>순서 보장</th>
                         <td>파티셔닝</td>
                         <td><code>send(토픽, roomId, event)</code> &mdash;
                             key 가 <code>roomId</code> 라
-                            <em>같은 방은 항상 같은 파티션</em></td>
+                            <em>같은 방은 항상 같은 파티션</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>확장 대비</th>
@@ -870,7 +906,8 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                         <td>소비 쪽</td>
                         <td><code>insertChatMessage</code> 가 0행이면
                             <em>예외를 던지지 않고 정상 종료.</em>
-                            <code>messageId</code> 가 Snowflake PK 라 중복이 자동으로 걸러진다</td>
+                            <code>messageId</code> 가 Snowflake PK 라 중복이 자동으로 걸러진다
+                        </td>
                     </tr>
                     <tr>
                         <th>실패 격리</th>
@@ -878,14 +915,16 @@ management.prometheus.metrics.export.enabled=true</code></pre>
                         <td><code>DefaultErrorHandler</code> +
                             <code>FixedBackOff(500ms, 10회)</code> &rarr;
                             <code>&lt;topic&gt;.dlt</code>.
-                            <em>버리지 않고 파티션 번호까지 유지해 격리</em></td>
+                            <em>버리지 않고 파티션 번호까지 유지해 격리</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>이벤트 분기</th>
                         <td>한 토픽 공유</td>
                         <td><code>@KafkaListener</code> 는 클래스에,
                             <code>@KafkaHandler</code> 는 메서드에.
-                            Created &middot; Deleted &middot; Reacted 를 <em>타입으로 분기</em></td>
+                            Created &middot; Deleted &middot; Reacted 를 <em>타입으로 분기</em>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -893,7 +932,7 @@ management.prometheus.metrics.export.enabled=true</code></pre>
             <div class="callout">
                 <span class="tag">가장 설명하기 좋은 한 줄</span>
                 <p><em>&ldquo;사용자에게 &lsquo;성공&rsquo; 이라고 말한 시점은
-                    DB 에 들어간 시점이 아니라 Kafka 가 받았다고 한 시점입니다.&rdquo;</em></p>
+                        DB 에 들어간 시점이 아니라 Kafka 가 받았다고 한 시점입니다.&rdquo;</em></p>
                 <p>그 다음에 <em>왜 그래도 되는지</em> 를 붙인다 &mdash;
                     Snowflake 로 PK 를 미리 확정했기 때문에 DB 를 안 읽고도 응답을 만들 수 있고,
                     Kafka 가 받은 이상 worker 가 언제 처리하든 유실되지 않기 때문이다.</p>
@@ -930,21 +969,26 @@ DB 에 들어가기 전에 조회하면 어떻게 되나요?
                     <tr>
                         <th>캡슐화<br><small>Encapsulation</small></th>
                         <td>데이터와 그걸 다루는 로직을 한 곳에 묶고
-                            <em>바깥에서 직접 못 건드리게</em> 막는다</td>
+                            <em>바깥에서 직접 못 건드리게</em> 막는다
+                        </td>
                         <td><code>public Map roomSessions</code> &mdash;
                             아무 데서나 <code>put</code> &middot; <code>remove</code> 한다.
-                            <em>어디서 깨졌는지 추적이 안 된다</em></td>
+                            <em>어디서 깨졌는지 추적이 안 된다</em>
+                        </td>
                         <td><code>private final</code> + 메서드로만 공개.
-                            <em>바꾸는 경로가 한 곳이라 규칙을 강제할 수 있다</em></td>
+                            <em>바꾸는 경로가 한 곳이라 규칙을 강제할 수 있다</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>상속<br><small>Inheritance</small></th>
                         <td>이미 있는 것을 물려받아 <em>달라지는 부분만</em> 새로 쓴다</td>
                         <td>프레임워크가 주는 공통 처리를
-                            <em>클래스마다 복사해서 쓴다</em></td>
+                            <em>클래스마다 복사해서 쓴다</em>
+                        </td>
                         <td><code>extends TextWebSocketHandler</code> &mdash;
                             연결 &middot; 종료 &middot; 에러 처리는 부모가 하고
-                            <em>나는 메시지 처리만</em> 쓴다</td>
+                            <em>나는 메시지 처리만</em> 쓴다
+                        </td>
                     </tr>
                     <tr>
                         <th>다형성<br><small>Polymorphism</small></th>
@@ -952,17 +996,20 @@ DB 에 들어가기 전에 조회하면 어떻게 되나요?
                         <td><code>if (type == A) ... else if (type == B) ...</code> &mdash;
                             새 타입마다 <em>그 if 를 전부 찾아 고쳐야 한다</em></td>
                         <td>인터페이스 타입으로 받아 호출.
-                            <em>구현체를 갈아끼워도 호출부는 그대로</em></td>
+                            <em>구현체를 갈아끼워도 호출부는 그대로</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>추상화<br><small>Abstraction</small></th>
                         <td><em>&ldquo;무엇을 하는가&rdquo; 만 남기고
-                            &ldquo;어떻게 하는가&rdquo; 는 감춘다</em></td>
+                                &ldquo;어떻게 하는가&rdquo; 는 감춘다</em></td>
                         <td>핸들러가 <code>chEngineStub</code> 을 직접 들고
                             <em>proto 객체를 조립한다.</em>
-                            gRPC 를 바꾸면 핸들러도 다 바뀐다</td>
+                            gRPC 를 바꾸면 핸들러도 다 바뀐다
+                        </td>
                         <td><code>WsGateChatClient.createChatMessage(cmd)</code> &mdash;
-                            <em>&ldquo;만들어 달라&rdquo; 만 남고 gRPC 는 감춰진다</em></td>
+                            <em>&ldquo;만들어 달라&rdquo; 만 남고 gRPC 는 감춰진다</em>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -979,13 +1026,15 @@ DB 에 들어가기 전에 조회하면 어떻게 되나요?
                         <th>S<br><small>Single Responsibility<br>단일 책임</small></th>
                         <td>클래스가 <em>바뀌어야 할 이유는 하나</em>여야 한다.
                             &ldquo;누가 이 클래스를 고치라고 요구하는가&rdquo; 가
-                            <em>한 종류</em>여야 한다는 뜻</td>
+                            <em>한 종류</em>여야 한다는 뜻
+                        </td>
                         <td><em>위반</em> &mdash; 한 클래스가 JSON 파싱 + 인증 +
                             비즈니스 로직 + 소켓 전송을 다 한다.
                             전송 방식만 바꿔도 그 거대한 클래스를 건드린다<br>
                             <em>지킴</em> &mdash; Dispatcher(라우팅) &middot;
                             ChatHandler(처리) &middot; OutboundWriter(전송) &middot;
-                            Auth(인증) 으로 분리</td>
+                            Auth(인증) 으로 분리
+                        </td>
                     </tr>
                     <tr>
                         <th>O<br><small>Open-Closed<br>개방 폐쇄</small></th>
@@ -996,7 +1045,8 @@ DB 에 들어가기 전에 조회하면 어떻게 되나요?
                             계속 추가한다<br>
                             <em>지킴</em> &mdash; <code>Map&lt;String, Handler&gt;</code> 에
                             등록해두고 꺼내 쓴다.
-                            새 타입은 <em>새 클래스 하나만</em> 추가하면 된다</td>
+                            새 타입은 <em>새 클래스 하나만</em> 추가하면 된다
+                        </td>
                     </tr>
                     <tr>
                         <th>L<br><small>Liskov Substitution<br>리스코프 치환</small></th>
@@ -1004,22 +1054,25 @@ DB 에 들어가기 전에 조회하면 어떻게 되나요?
                             &ldquo;부모가 한 약속을 자식이 어기지 마라&rdquo;</td>
                         <td><em>위반</em> &mdash; 부모 <code>save()</code> 는 항상 저장하는데
                             자식이 <em>조건에 따라 아무것도 안 하거나
-                            <code>UnsupportedOperationException</code> 을 던진다.</em>
+                                <code>UnsupportedOperationException</code> 을 던진다.</em>
                             부모 타입으로 쓰던 코드가 터진다<br>
                             <em>지킴</em> &mdash; 자식이 부모보다
                             <em>더 까다로운 입력을 요구하지 않고,
-                            더 약한 결과를 돌려주지 않는다</em></td>
+                                더 약한 결과를 돌려주지 않는다</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>I<br><small>Interface Segregation<br>인터페이스 분리</small></th>
                         <td>안 쓰는 메서드까지 떠안기는
-                            <em>뚱뚱한 인터페이스를 만들지 않는다</em></td>
+                            <em>뚱뚱한 인터페이스를 만들지 않는다</em>
+                        </td>
                         <td><em>위반</em> &mdash; <code>ChatUseCase</code> 하나에
                             조회 5개 + 쓰기 5개.
                             <em>읽기만 필요한 쪽도 쓰기 메서드를 다 구현해야</em> 한다<br>
                             <em>지킴</em> &mdash;
                             <code>ChatCommandUseCase</code> /
-                            <code>ChatQueryUseCase</code> 로 분리</td>
+                            <code>ChatQueryUseCase</code> 로 분리
+                        </td>
                     </tr>
                     <tr>
                         <th>D<br><small>Dependency Inversion<br>의존 역전</small></th>
@@ -1030,7 +1083,8 @@ DB 에 들어가기 전에 조회하면 어떻게 되나요?
                             <em>REST 로 바꾸면 핸들러도 고쳐야</em> 한다<br>
                             <em>지킴</em> &mdash;
                             <code>private final WsGateChatClient</code>(인터페이스).
-                            <em>구현체를 바꿔도 핸들러는 한 줄도 안 바뀐다</em></td>
+                            <em>구현체를 바꿔도 핸들러는 한 줄도 안 바뀐다</em>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -1056,16 +1110,18 @@ ISP   "이 인터페이스를 구현하는 쪽" 이       -> 사용자/구현자
   ★ 하위가 상위가 정한 규격을 따르게 된다 = 방향이 뒤집혔다</code></pre>
                 <p><em>인터페이스를 누가 소유하느냐</em>가 핵심이다.
                     <code>WsGateChatClient</code> 는 <em>게이트웨이 쪽에 있다.</em>
-                    gRPC 구현이 거기 맞추는 것이다.</p>
+                    gRPC 구현이 거기 맞추는 것이다.
+                </p>
             </div>
 
             <div class="callout">
                 <span class="tag">외운 티를 안 내려면</span>
                 <p>정의만 읊으면 <em>&ldquo;그래서 어디에 쓰셨나요&rdquo;</em> 가 바로 온다.
-                    <em>정의 한 줄 + 내 코드 한 줄</em>을 묶어서 말하는 게 낫다.</p>
+                    <em>정의 한 줄 + 내 코드 한 줄</em>을 묶어서 말하는 게 낫다.
+                </p>
                 <p>예 &mdash; <em>&ldquo;DIP 는 구체가 아니라 추상에 의존하라는 건데,
-                    제 WebSocket 핸들러가 gRPC 구현체가 아니라
-                    <code>WsGateChatClient</code> 인터페이스에만 의존합니다.&rdquo;</em></p>
+                        제 WebSocket 핸들러가 gRPC 구현체가 아니라
+                        <code>WsGateChatClient</code> 인터페이스에만 의존합니다.&rdquo;</em></p>
             </div>
 
             <!-- ===== Q5 ===== -->
@@ -1079,11 +1135,12 @@ private final WsGateChatClient wsGateChatClient;    // ★ 인터페이스에 �
 WsGateChatClient          (인터페이스)
   └ WsGateChatClientGrpc  (구현체 — chEngineStub 을 들고 gRPC 호출)</code></pre>
             <p><em>핸들러는 &ldquo;메시지를 만들어 달라&rdquo; 고만 하고
-                그게 gRPC 인지 REST 인지 모른다.</em>
+                    그게 gRPC 인지 REST 인지 모른다.</em>
                 통신 방식을 바꿔도 핸들러 코드는 한 줄도 안 바뀐다.</p>
             <p>같은 패턴이 <em>인터페이스 &middot; 구현체 쌍 15개</em>에 걸쳐 있다 &mdash;
                 <code>WsGateFriendClient</code>, <code>WsGateRoomClient</code>,
-                <code>ChatCommandUseCase</code>, <code>RoomQueryUseCase</code> &hellip;</p>
+                <code>ChatCommandUseCase</code>, <code>RoomQueryUseCase</code> &hellip;
+            </p>
 
             <h4>SRP &mdash; 역할별로 쪼갰다</h4>
             <div class="scroll-x">
@@ -1095,12 +1152,14 @@ WsGateChatClient          (인터페이스)
                     <tr>
                         <th><code>WsGateDispatcher</code></th>
                         <td><em>라우팅만.</em> JSON 을 DTO 로 바꾸고
-                            <code>wsType</code> 으로 담당 핸들러에 넘기는 것까지</td>
+                            <code>wsType</code> 으로 담당 핸들러에 넘기는 것까지
+                        </td>
                     </tr>
                     <tr>
                         <th><code>WsGateChatHandler</code></th>
                         <td>채팅 요청 처리. 친구 &middot; 방 &middot; 연결은
-                            <em>각각 다른 핸들러</em>가 맡는다</td>
+                            <em>각각 다른 핸들러</em>가 맡는다
+                        </td>
                     </tr>
                     <tr>
                         <th><code>WsGateOutboundWriter</code></th>
@@ -1143,7 +1202,8 @@ private final Map&lt;Long, Map&lt;Long, WebSocketSession&gt;&gt; roomSessions = 
 //  오직 SessionRegistry 내부에 정해진 메서드로만 간접적으로 접근/변경한다."</code></pre>
             <p><code>private final</code> 로 막고 <code>getRoomSessions()</code>,
                 <code>getViewingUserIds()</code> 같은 메서드로만 열어뒀다.
-                <em>맵을 밖에 노출하면 네 개의 색인이 서로 어긋난다.</em></p>
+                <em>맵을 밖에 노출하면 네 개의 색인이 서로 어긋난다.</em>
+            </p>
 
             <h4>상속 &middot; 다형성</h4>
             <pre class="code"><code>public class WsGateDispatcher extends TextWebSocketHandler {
@@ -1159,7 +1219,8 @@ Spring 은 WebSocketHandler 타입으로만 알고 handleMessage() 를 부른다
                 <span class="tag">선을 그을 것 &mdash; OCP 와 LSP</span>
                 <p><em>OCP 와 LSP 는 뚜렷한 사례가 없다.</em>
                     <code>Dispatcher</code> 의 <code>switch</code> 는 새 타입이 생길 때마다
-                    <em>기존 코드를 고쳐야 하므로 오히려 OCP 위반에 가깝다.</em></p>
+                    <em>기존 코드를 고쳐야 하므로 오히려 OCP 위반에 가깝다.</em>
+                </p>
                 <p>물어보면 <em>솔직하게 말하는 쪽이 낫다</em> &mdash;
                     &ldquo;<code>switch</code> 가 늘어나는 구조라 OCP 관점에서는 약합니다.
                     핸들러를 <code>Map&lt;wsType, Handler&gt;</code> 로 등록하는 방식으로 바꾸면
@@ -1182,7 +1243,8 @@ Spring 은 WebSocketHandler 타입으로만 알고 handleMessage() 를 부른다
                             <th>REST<br>(JSON/HTTP)</th>
                             <td>계약이 <em>빌드에 참여하지 않는다.</em>
                                 명세를 고쳐도 코드는 그대로 컴파일되고,
-                                <em>어긋난 건 런타임에야 드러난다</em></td>
+                                <em>어긋난 건 런타임에야 드러난다</em>
+                            </td>
                         </tr>
                         <tr>
                             <th>메시지 큐</th>
@@ -1192,7 +1254,8 @@ Spring 은 WebSocketHandler 타입으로만 알고 handleMessage() 를 부른다
                         <tr>
                             <th>공유 DB</th>
                             <td>서비스를 나눈 의미가 사라진다.
-                                <em>스키마가 바뀌면 전부 같이 깨진다</em></td>
+                                <em>스키마가 바뀌면 전부 같이 깨진다</em>
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -1200,10 +1263,12 @@ Spring 은 WebSocketHandler 타입으로만 알고 handleMessage() 를 부른다
                     <span class="tag">핵심은 속도가 아니라 &ldquo;계약&rdquo; 이다</span>
                     <p><em>&ldquo;REST 보다 빠릅니다&rdquo; 만 말하면 약하다.</em>
                         내부 통신에서 진짜 문제는 속도가 아니라
-                        <em>두 서비스의 약속이 어긋나는 것</em>이다.</p>
+                        <em>두 서비스의 약속이 어긋나는 것</em>이다.
+                    </p>
                     <p>gRPC 는 <code>.proto</code> 파일 하나가 <em>양쪽의 단일 진실</em>이고,
                         거기서 <em>DTO 와 스텁이 자동 생성</em>된다.
-                        <em>약속이 어긋나면 컴파일이 안 된다.</em></p>
+                        <em>약속이 어긋나면 컴파일이 안 된다.</em>
+                    </p>
                 </div>
             </div>
 
@@ -1232,12 +1297,14 @@ Spring 은 WebSocketHandler 타입으로만 알고 handleMessage() 를 부른다
     -> ★ 빌드에서 잡힌다</code></pre>
                 <p>한 줄로 하면 &mdash;
                     <em>REST 의 계약은 사람이 읽고 손으로 옮겨 적는 것이고,
-                    gRPC 의 계약은 기계가 읽어 코드로 만드는 것</em>이다.</p>
+                        gRPC 의 계약은 기계가 읽어 코드로 만드는 것</em>이다.
+                </p>
                 <p>내 구조에서 특히 강한 이유가 하나 더 있다.
                     <code>common-contract</code> 가 <em>공유 Gradle 모듈</em>이라
                     <code>channel-engine</code> 과 <code>websocket-gateway</code> 가
                     <em>같은 jar 를 의존</em>한다.
-                    <em>한쪽만 몰래 바꿀 수가 없다.</em></p>
+                    <em>한쪽만 몰래 바꿀 수가 없다.</em>
+                </p>
             </div>
 
             <div class="callout">
@@ -1294,10 +1361,11 @@ websocket-gateway (클라이언트)
                 <div class="callout">
                     <span class="tag">BlockingStub 을 쓴 이유</span>
                     <p>메시지 생성은 <em>결과(messageId, offset 등)를 받아야
-                        다음 단계로 갈 수 있다.</em>
+                            다음 단계로 갈 수 있다.</em>
                         그래서 동기 스텁을 썼다.</p>
                     <p>주석에도 그렇게 적어뒀다 &mdash;
-                        <em>&ldquo;요청 보내고 응답 올 때까지 현재 thread 가 기다리는 동기 client&rdquo;.</em></p>
+                        <em>&ldquo;요청 보내고 응답 올 때까지 현재 thread 가 기다리는 동기 client&rdquo;.</em>
+                    </p>
                     <p><em>처리량 관점에서는 손해</em>지만
                         그건 알고 택한 것이라고 말하면 된다.</p>
                 </div>
@@ -1320,7 +1388,8 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
                         <th>브라우저에서<br>직접 못 쓴다</th>
                         <td>HTTP/2 트레일러를 브라우저가 못 다뤄
                             <code>grpc-web</code> 프록시가 필요하다.
-                            <em>그래서 외부는 WebSocket, 내부만 gRPC</em> 로 나눴다</td>
+                            <em>그래서 외부는 WebSocket, 내부만 gRPC</em> 로 나눴다
+                        </td>
                     </tr>
                     <tr>
                         <th>디버깅이<br>어렵다</th>
@@ -1330,7 +1399,8 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
                     <tr>
                         <th>진입 장벽</th>
                         <td>proto 작성 &middot; 코드 생성 &middot; 빌드 설정이 필요하다.
-                            <em>서비스가 두세 개면 REST 가 나을 수 있다</em></td>
+                            <em>서비스가 두세 개면 REST 가 나을 수 있다</em>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -1338,7 +1408,7 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
             <div class="callout">
                 <span class="tag">마무리로 쓸 한 줄</span>
                 <p><em>&ldquo;서비스가 여섯 개라 양쪽 DTO 를 손으로 맞추는 게 가장 깨지기 쉬운 지점이라고 봤습니다.
-                    proto 한 벌을 공유 모듈에 두니까 어긋나면 빌드에서 잡힙니다.&rdquo;</em></p>
+                        proto 한 벌을 공유 모듈에 두니까 어긋나면 빌드에서 잡힙니다.&rdquo;</em></p>
                 <p>속도가 아니라 <em>&ldquo;깨질 수 있는 지점을 줄였다&rdquo;</em> 로 말하는 게
                     실무적으로 들린다.</p>
             </div>
@@ -1377,7 +1447,8 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
                     <span class="tag">읽을 때 주의</span>
                     <p>클로드 코드 / 코덱스가 자격요건에 있지만,
                         <em>깊은 뜻으로 읽지 말 것.</em> 요즘은 다들 쓰니까
-                        &ldquo;AI 없이 손코딩만 해본 사람은 거르겠다&rdquo; 정도의 필터일 가능성이 크다.</p>
+                        &ldquo;AI 없이 손코딩만 해본 사람은 거르겠다&rdquo; 정도의 필터일 가능성이 크다.
+                    </p>
                     <p>다만 <em>적혀 있는 이상 물어볼 수는 있다.</em>
                         답할 준비는 하되 <em>비중은 두지 않는다.</em> 어필 순서에서 5순위.</p>
                 </div>
@@ -1438,7 +1509,8 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
                         <td>과제비는 <em>비목</em>(인건비 &middot; 연구재료비 &middot; 연구활동비 등)
                             별로 쓸 수 있는 범위가 정해져 있다. 돈을 쓸 때마다 세금계산서 &middot;
                             거래명세서 &middot; 이체증 같은 증빙을 남겨야 하고, 정산 때 전부 제출한다.
-                            <em>증빙이 없거나 기준을 벗어나면 그 돈은 인정 안 된다.</em></td>
+                            <em>증빙이 없거나 기준을 벗어나면 그 돈은 인정 안 된다.</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>비목별 예산 관리<br>&middot; 변경 처리</th>
@@ -1451,13 +1523,15 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
                         <td>연구원 한 명이 여러 과제에 참여하면 <em>참여율을 나눠야</em> 하고
                             총합이 100%를 넘을 수 없다.
                             <code>계상률 × 연봉 × 참여개월</code> 이 그 과제에서 받을 수 있는 인건비다.
-                            <em>잘못 계산하면 초과분이 통째로 불인정된다.</em></td>
+                            <em>잘못 계산하면 초과분이 통째로 불인정된다.</em>
+                        </td>
                     </tr>
                     <tr>
                         <th>불용 &middot; 반려<br>&middot; 환수 리스크 점검</th>
                         <td><em>불용</em> = 안 쓰고 남은 돈. 반납해야 하고 많으면 다음 과제 평가에 불리.<br>
                             <em>반려</em> = 집행 등록을 올렸는데 기관이 퇴짜 놓는 것.<br>
-                            <em>환수</em> = 이미 쓴 돈을 부적정으로 판정해 토해내게 하는 것. 제일 무섭다.</td>
+                            <em>환수</em> = 이미 쓴 돈을 부적정으로 판정해 토해내게 하는 것. 제일 무섭다.
+                        </td>
                     </tr>
                     <tr>
                         <th>연구비 정산<br>&middot; 현장점검 대응</th>
@@ -1477,7 +1551,8 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
                     <tr>
                         <th>과제 진행 상황<br>추적</th>
                         <td>과제를 여러 개 동시에 하면 기간 &middot; 예산 &middot; 단계가 제각각이다.
-                            <em>마감을 놓치면 되돌릴 수 없는 것들이 있다.</em></td>
+                            <em>마감을 놓치면 되돌릴 수 없는 것들이 있다.</em>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -1485,7 +1560,8 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
             <div class="callout bad">
                 <span class="tag">전부를 관통하는 한 가지 &mdash; 시스템 간 값이 일치해야 한다</span>
                 <p>블로그 글에 그대로 나온다. 급여를 실제로 지급했어도
-                    <em>IRIS 에 반영이 안 됐으면 인건비가 불인정된다.</em></p>
+                    <em>IRIS 에 반영이 안 됐으면 인건비가 불인정된다.</em>
+                </p>
                 <pre class="code"><code>참여자 등록 누락
    -> 계상률 미반영
       -> 협약정보 불일치
@@ -1495,7 +1571,8 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
                 <p><em>급여대장 &middot; 4대보험 &middot; 원천세로는 부족하다.</em>
                     세무자료는 &ldquo;지급했다&rdquo; 만 증명한다.
                     연구행정은 참여등록 &middot; 기간 &middot; 계상률 &middot; 협약정보가
-                    <em>전부 서로 맞는지</em>를 본다.</p>
+                    <em>전부 서로 맞는지</em>를 본다.
+                </p>
             </div>
 
             <div class="side-by-side">
@@ -1504,13 +1581,15 @@ api 'io.grpc:grpc-stub:1.63.0'      // 내려서 해결</code></pre>
                     <p>규정이 복잡하고 <em>해마다 바뀐다.</em> 외부 시스템이 다섯 개인데
                         서로 값이 맞아야 한다. 틀리면 돈을 토해낸다.</p>
                     <p>엑셀로 수작업하면 반드시 실수가 나고,
-                        <em>실수를 발견하는 시점이 이미 늦는다.</em></p>
+                        <em>실수를 발견하는 시점이 이미 늦는다.</em>
+                    </p>
                 </div>
                 <div class="callout">
                     <span class="tag">내 경험과 닿는 지점</span>
                     <p>이건 결국 <em>정합성 검증</em> 문제다.
                         여러 곳에 흩어진 값이 서로 맞는지 확인하고,
-                        <em>늦기 전에</em> 어긋난 걸 찾아내는 일이다.</p>
+                        <em>늦기 전에</em> 어긋난 걸 찾아내는 일이다.
+                    </p>
                     <p>데모 계정 200건 중 13건이 조용히 빠졌던 건과 같은 종류의 문제다.</p>
                 </div>
             </div>
@@ -1528,12 +1607,13 @@ EZbaro      연구비 관리 시스템</code></pre>
                 <p>오히려 기사에는 반대로 적혀 있다.
                     &ldquo;RCMS &middot; IRIS 등 외부 사업비 관리 시스템
                     <em>입력 전</em> 기업이 자체적으로 계상률과 집행 가능 금액을
-                    검증할 수 있는 기능을 추가했다&rdquo;.</p>
+                    검증할 수 있는 기능을 추가했다&rdquo;.
+                </p>
                 <p>즉 제품은 <em>정부 시스템에 직접 입력하기 전에 미리 검증해주는 도구</em>다.
                     정부 시스템은 공개 API 를 잘 주지 않으니, 연동이 안 되기 때문에
                     &ldquo;입력 전 검증&rdquo; 이 가치가 되는 구조일 수 있다.</p>
                 <p><em>&ldquo;RCMS 연동이 핵심 난제라고 들었습니다&rdquo; 라고 말하면
-                    조사를 잘못했다는 게 바로 드러난다.</em></p>
+                        조사를 잘못했다는 게 바로 드러난다.</em></p>
             </div>
 
             <h3>공고 재해석 &mdash; &ldquo;추천 &middot; 검색 알고리즘&rdquo; 의 정체</h3>
@@ -1582,7 +1662,8 @@ EZbaro      연구비 관리 시스템</code></pre>
                     <tr>
                         <th>협업 &middot; 문서화</th>
                         <td>prpr.md &middot; ctxt.md &middot; checklist.md &middot; context-notes.md
-                            <em>자체 규칙 운영</em></td>
+                            <em>자체 규칙 운영</em>
+                        </td>
                         <td><em>강 &middot; 희소</em></td>
                     </tr>
                     <tr>
@@ -1595,7 +1676,8 @@ EZbaro      연구비 관리 시스템</code></pre>
                         <td><em>EKS 실운영</em> &mdash; eksctl &middot; Kustomize 리소스 19개 &middot;
                             Pod Identity 로 IAM 연결 &middot; CloudFormation(RDS &middot; S3 &middot; ECR)<br>
                             <em>월 $244 를 항목별로 분해하고 $125 로 내리는 기동/정지 자동화</em><br>
-                            이후 비용 때문에 Lightsail 1대 22컨테이너로 다운사이징</td>
+                            이후 비용 때문에 Lightsail 1대 22컨테이너로 다운사이징
+                        </td>
                         <td><em>강</em></td>
                     </tr>
                 </table>
@@ -1676,14 +1758,16 @@ EZbaro      연구비 관리 시스템</code></pre>
                     <span class="kind-no">2</span>
                     <h4>MathJax 구분자 유실</h4>
                     <p class="kind-desc">스크립트로 파일을 생성하다 백슬래시 한 겹이 날아가
-                        <em>문서의 모든 괄호가 수식으로 먹혔다.</em></p>
+                        <em>문서의 모든 괄호가 수식으로 먹혔다.</em>
+                    </p>
                     <span class="kind-tag on">렌더 결과를 직접 확인</span>
                 </div>
                 <div class="kind">
                     <span class="kind-no">3</span>
                     <h4>TCP 상태 설명 오류</h4>
                     <p class="kind-desc">&ldquo;LISTEN &rarr; SYN_RCVD&rdquo; 는 RFC 상태도 표현일 뿐,
-                        <em>실제 구현은 listen socket 이 LISTEN 을 유지</em>한다.</p>
+                        <em>실제 구현은 listen socket 이 LISTEN 을 유지</em>한다.
+                    </p>
                     <span class="kind-tag on">GPT 교차검증 후 코드 확인</span>
                 </div>
                 <p class="kind-note">
@@ -1706,7 +1790,7 @@ AttachmentCaptionWorker         첨부 캡션 비동기 생성</code></pre>
                 <p>Lua 스크립트는 Redis 가 <em>단일 스레드로 통째로 실행</em>하므로 원자적이다.
                     Gemini 무료 쿼터를 초과하지 않게 막는다.</p>
                 <p>추천 알고리즘이 아니라 <em>외부 API 를 제품에 붙일 때 생기는 진짜 문제
-                    (쿼터 &middot; 장애 &middot; 비용)를 다룬 경험</em>으로 말하는 게 사실이고,
+                        (쿼터 &middot; 장애 &middot; 비용)를 다룬 경험</em>으로 말하는 게 사실이고,
                     실무에서 더 자주 필요한 능력이다.</p>
             </div>
 
@@ -1742,12 +1826,14 @@ AttachmentCaptionWorker         첨부 캡션 비동기 생성</code></pre>
                 </table>
             </div>
             <p>&ldquo;해본 적은 없지만 개념은 압니다&rdquo; 가 &ldquo;모릅니다&rdquo; 보다 낫고,
-                <em>설익은 척하는 것보다는 둘 다 낫다.</em></p>
+                <em>설익은 척하는 것보다는 둘 다 낫다.</em>
+            </p>
 
 
             <h3>회사 맥락에서 어필 순서</h3>
             <p>위 <em>준비 순서</em> 가 &ldquo;뭘 정리할지&rdquo; 라면, 이건
-                <em>&ldquo;대화에서 뭘 먼저 꺼낼지&rdquo;</em> 다. 회사를 알고 나서 순서가 바뀌었다.</p>
+                <em>&ldquo;대화에서 뭘 먼저 꺼낼지&rdquo;</em> 다. 회사를 알고 나서 순서가 바뀌었다.
+            </p>
 
             <div class="trio">
                 <div class="kind is-render">
@@ -1755,7 +1841,8 @@ AttachmentCaptionWorker         첨부 캡션 비동기 생성</code></pre>
                     <h4>외장 &mdash; Excel 일괄등록</h4>
                     <p class="kind-desc">이 회사 도메인과 가장 가깝다.
                         <em>연구행정은 엑셀 지옥</em>이고, 제품 기능에
-                        &ldquo;선정기업 집행서식 관리&rdquo; 가 들어 있다.</p>
+                        &ldquo;선정기업 집행서식 관리&rdquo; 가 들어 있다.
+                    </p>
                     <span class="kind-tag on">포트폴리오에서 비중을 키울 것</span>
                 </div>
                 <div class="kind is-render">
@@ -1778,7 +1865,8 @@ AttachmentCaptionWorker         첨부 캡션 비동기 생성</code></pre>
                     <h4>외부 API 를 제품에 붙인 경험</h4>
                     <p class="kind-desc">회사가 외부 시스템과 연동하는지는 <em>모른다.</em>
                         그러니 회사 얘기로 시작하지 말고
-                        <em>내 경험만</em> 말한다. Gemini 를 붙이며 쿼터 &middot; 장애를 다룬 것.</p>
+                        <em>내 경험만</em> 말한다. Gemini 를 붙이며 쿼터 &middot; 장애를 다룬 것.
+                    </p>
                     <span class="kind-tag">Redis Lua Rate Limiter</span>
                 </div>
                 <div class="kind">
@@ -1786,7 +1874,8 @@ AttachmentCaptionWorker         첨부 캡션 비동기 생성</code></pre>
                     <h4>클로드 코드 &mdash; 각도를 틀어서</h4>
                     <p class="kind-desc">&ldquo;빨리 만든다&rdquo; 가 아니라
                         <em>&ldquo;AI 가 짠 계산 로직을 검증 없이 안 쓴다&rdquo;</em> 로.
-                        사업비 계산이 틀리면 고객이 환수당한다.</p>
+                        사업비 계산이 틀리면 고객이 환수당한다.
+                    </p>
                     <span class="kind-tag">사례 1 2 3 을 "틀린 걸 잡았다" 쪽으로</span>
                 </div>
             </div>
@@ -1799,7 +1888,8 @@ ext_dev_log_view         이력 추적</code></pre>
                 <span class="tag">판단이 뒤집힌 지점</span>
                 <p>전에 &ldquo;스페셜한 케이스일 때만 쓰는 기능&rdquo; 이라며
                     아키텍처에서 빼려 했던 게 Excel 일괄등록이다.
-                    <em>이 회사에서는 그게 핵심 역량이다.</em></p>
+                    <em>이 회사에서는 그게 핵심 역량이다.</em>
+                </p>
             </div>
 
             <h4>2순위 &mdash; EKS 를 어떻게 말할지</h4>
@@ -1837,7 +1927,8 @@ EIP                  $3.7
 월 $244  /  일 $8</code></pre>
                     <p>목적은 단순 합계가 아니라
                         <em>&ldquo;끌 수 있는 것&rdquo; 과 &ldquo;존재하는 한 과금되는 것&rdquo; 을
-                        분리</em>하는 것이었다.</p>
+                            분리</em>하는 것이었다.
+                    </p>
                     <p>노드그룹 0 + ELB 삭제 + RDS 정지로 <em>$244 &rarr; $125.</em></p>
                 </div>
             </div>
@@ -1845,7 +1936,8 @@ EIP                  $3.7
             <div class="callout bad">
                 <span class="tag">제일 좋은 소재 &mdash; 실행 전에 검증해서 사고를 막은 건</span>
                 <p>절감폭이 가장 큰 방법은 <code>eksctl delete cluster</code> 후 재생성이다.
-                    <em>그런데 실제 리소스를 조회해보니 그 방식은 DB 를 파괴한다.</em></p>
+                    <em>그런데 실제 리소스를 조회해보니 그 방식은 DB 를 파괴한다.</em>
+                </p>
                 <pre class="code"><code>EKS VPC 와 RDS VPC 가 동일
 RDS 보안그룹 인바운드가 EKS 클러스터 SG 를 참조
 eks-cluster.yaml 에 vpc: 블록이 없음 -> eksctl 이 매번 새 VPC 생성
@@ -1854,7 +1946,8 @@ eks-cluster.yaml 에 vpc: 블록이 없음 -> eksctl 이 매번 새 VPC 생성
    재생성 시 : RDS 가 옛 VPC 에 고아로 남아 접근 불가</code></pre>
                 <p>스크립트를 넘기기 전에 VPC/SG 의존관계를 조회해 검증했고,
                     <em>그래서 채택하지 않았다.</em>
-                    검증 없이 실행했으면 DB 접근 불가 사고가 났다.</p>
+                    검증 없이 실행했으면 DB 접근 불가 사고가 났다.
+                </p>
                 <p><em>이 회사 제품이 오류 탐지 엔진이라는 걸 생각하면 결이 정확히 맞는다.</em></p>
             </div>
 
@@ -1916,9 +2009,11 @@ eks-cluster.yaml 에 vpc: 블록이 없음 -> eksctl 이 매번 새 VPC 생성
                     <p>내 코드에 <code>AiRecommendController</code>,
                         <code>AiRecommendService</code> 처럼 <em>이름이 박혀 있다.</em>
                         공고에도 &ldquo;추천 &middot; 검색 고도화&rdquo; 가 있으니
-                        &ldquo;추천 기능이 있네요, 어떤 방식인가요&rdquo; 정도는 물어볼 수 있다.</p>
+                        &ldquo;추천 기능이 있네요, 어떤 방식인가요&rdquo; 정도는 물어볼 수 있다.
+                    </p>
                     <p>이름값에 끌려가 &ldquo;추천 알고리즘을 구현했다&rdquo; 로 말하면 꼬인다.
-                        <em>실제로는 최근 메시지를 모아 Gemini 에 넘기고 받아오는 LLM 호출</em>이다.</p>
+                        <em>실제로는 최근 메시지를 모아 Gemini 에 넘기고 받아오는 LLM 호출</em>이다.
+                    </p>
                     <p>먼저 선을 긋고, <em>할 수 있는 얘기(쿼터 &middot; 장애 처리)로 넘긴다.</em></p>
                 </div>
                 <div class="callout bad">
@@ -1926,7 +2021,8 @@ eks-cluster.yaml 에 vpc: 블록이 없음 -> eksctl 이 매번 새 VPC 생성
                     <p>사용자 2만명, 연 1,000억 관리 회사다.
                         castleChat 은 <em>실사용자가 없는 개인 프로젝트</em>다.</p>
                     <p>&ldquo;트래픽은 안 겪어봤다&rdquo; 를 먼저 말하고
-                        <em>&ldquo;대신 구조를 왜 그렇게 짰는지는 설명할 수 있다&rdquo;</em> 로 간다.</p>
+                        <em>&ldquo;대신 구조를 왜 그렇게 짰는지는 설명할 수 있다&rdquo;</em> 로 간다.
+                    </p>
                 </div>
             </div>
             <h3>&ldquo;우리 회사에 왜 지원하셨나요&rdquo; &mdash; 답변</h3>
@@ -1949,21 +2045,25 @@ eks-cluster.yaml 에 vpc: 블록이 없음 -> eksctl 이 매번 새 VPC 생성
                 <span class="tag">본 답변 (1분)</span>
                 <p>회사를 찾아보면서 가장 인상 깊었던 건,
                     <em>스타트업이 연구에 써야 할 시간을 행정에 뺏기고 있다</em>는 문제를
-                    정면으로 다루고 계신다는 점이었습니다.</p>
+                    정면으로 다루고 계신다는 점이었습니다.
+                </p>
                 <p>사업비 규정이 복잡하고 자주 바뀌다 보니
                     <em>열심히 연구하고도 서류 하나 때문에 비용을 인정받지 못하는 일</em>이 생긴다는 걸
                     블로그 글을 보고 알았습니다.
-                    그런 걸 소프트웨어가 대신 챙겨준다면 정말 도움이 되겠다고 생각했습니다.</p>
+                    그런 걸 소프트웨어가 대신 챙겨준다면 정말 도움이 되겠다고 생각했습니다.
+                </p>
                 <p>제가 해본 것 중에 <em>장비 대여를 관리하는 시스템</em>이 있는데,
                     담당자가 엑셀로 손수 정리하던 걸 일괄등록으로 바꾼 적이 있습니다.
                     규모는 훨씬 작지만,
                     <em>사람이 반복하면 꼭 실수가 나는 일을 시스템이 받아주는 게</em>
-                    어떤 의미인지는 조금 느껴봤습니다.</p>
+                    어떤 의미인지는 조금 느껴봤습니다.
+                </p>
                 <p>그리고 제가 개발하면서 가장 신경 쓰는 건
                     <em>&ldquo;됐다고 믿지 않는 것&rdquo;</em>입니다.
                     한번은 계정 200건을 넣었는데 <em>13건이 조용히 빠진</em> 적이 있습니다.
                     <em>에러도 없었고 성공으로 나왔는데</em>, 끝나고 개수를 세어보고서야 알았습니다.
-                    그 뒤로는 작업이 끝나면 결과를 꼭 확인합니다.</p>
+                    그 뒤로는 작업이 끝나면 결과를 꼭 확인합니다.
+                </p>
                 <p><em>틀리면 고객에게 바로 손해가 가는 일</em>을 하시는 곳이라고 들어서,
                     이런 습관이 조금이라도 보탬이 될 수 있지 않을까 해서 지원했습니다.</p>
             </div>
@@ -2000,7 +2100,8 @@ eks-cluster.yaml 에 vpc: 블록이 없음 -> eksctl 이 매번 새 VPC 생성
                     <tr>
                         <th>엑셀 수작업 &rarr; 일괄등록</th>
                         <td>도메인이 겹치는 실물 경험.
-                            <em>&ldquo;규모는 훨씬 작지만&rdquo;</em> 으로 분수를 지킨다</td>
+                            <em>&ldquo;규모는 훨씬 작지만&rdquo;</em> 으로 분수를 지킨다
+                        </td>
                     </tr>
                     <tr>
                         <th>200건 중 13건</th>
@@ -2023,7 +2124,8 @@ eks-cluster.yaml 에 vpc: 블록이 없음 -> eksctl 이 매번 새 VPC 생성
                         <li>회사에 뭐가 필요하다고 단정하는 말</li>
                         <li>사원수 &middot; 매출 같은 숫자</li>
                         <li>도메인을 아는 척.
-                            <em>&ldquo;~라는 글을 봤습니다&rdquo;</em> 가 안전하다</li>
+                            <em>&ldquo;~라는 글을 봤습니다&rdquo;</em> 가 안전하다
+                        </li>
                         <li>외운 티. 숫자만 정확히 기억하고 문장은 그때그때</li>
                     </ul>
                 </div>
@@ -2033,9 +2135,11 @@ eks-cluster.yaml 에 vpc: 블록이 없음 -> eksctl 이 매번 새 VPC 생성
                         <li><em>13건</em>, <em>200건</em> 두 숫자는 정확히.
                             구체적인 숫자가 신뢰를 만든다</li>
                         <li><em>&ldquo;에러도 없었고 성공으로 나왔다&rdquo;</em> 를 빼먹지 말 것.
-                            <em>조용한 실패</em>라는 게 핵심이다</li>
+                            <em>조용한 실패</em>라는 게 핵심이다
+                        </li>
                         <li>&ldquo;규모는 훨씬 작지만&rdquo;, &ldquo;조금 느껴봤습니다&rdquo; 같은
-                            <em>완충 표현</em>을 빼지 말 것</li>
+                            <em>완충 표현</em>을 빼지 말 것
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -2043,7 +2147,8 @@ eks-cluster.yaml 에 vpc: 블록이 없음 -> eksctl 이 매번 새 VPC 생성
             <div class="callout">
                 <span class="tag">클로드 코드는 여기서 꺼내지 말 것</span>
                 <p>자격요건이긴 하지만 &ldquo;왜 지원했나&rdquo; 에서 꺼내면 <em>또 공고 분석이 된다.</em>
-                    <em>따로 물어볼 때</em> 답하는 게 맞다. 그때는 통제 규칙과 검증 사례로 간다.</p>
+                    <em>따로 물어볼 때</em> 답하는 게 맞다. 그때는 통제 규칙과 검증 사례로 간다.
+                </p>
             </div>
 
             <h3>나올 가능성이 높은 질문</h3>

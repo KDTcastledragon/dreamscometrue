@@ -95,11 +95,9 @@
 
                         <!-- 5행 : 좌 -> 우 -->
                         <path class="farch-flow" marker-end="url(#fa)" d="M 320 957 L 380 957" />
-                        <path class="farch-flow" marker-end="url(#fa)" d="M 670 957 L 730 957" />
                     </svg>
 
                     <!-- 1행 : 연결 수립. 좌 -> 우 -->
-                    <div class="farch-band" style="top:1.7%">연결 수립</div>
 
                     <article class="fnode client" data-step="1" data-chunks="ck-url ck-dns" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:11.6%">
                         <span class="fnode-no">1</span>
@@ -107,122 +105,104 @@
                         <small>DNS Resolver 가 목적지 IP 주소 탐색.</small>
                     </article>
 
-                    <article class="fnode kernel" data-step="2" data-extra="tcpip" data-chunks="ck-conn ck-path ck-layer ck-closed ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="2" data-extra="tcpip" data-chunks="ck-syn12 ck-conn ck-path ck-layer ck-closed ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:11.6%">
                         <span class="fnode-no">2</span>
-                        <span class="fnode-type">Client Kernel</span>
-                        <small>3-way handshake 시작. 목적지 IP 와 TCP flag = SYN 포함한 패킷을 Default Gateway 에 전송. 동시에, client의 kernel TCP State : CLOSED → SYN_SENT 변경.</small>
+                        <span class="fnode-type">C-Kernel</span>
+                        <small>SYN flag+Destination IP Address 패킷 전송. TCP State 변경. TCP 3-Way Handshake 시작.</small>
                     </article>
 
-                    <article class="fnode kernel" data-step="3" data-chunks="ck-hs ck-state ck-kernel" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="3" data-chunks="ck-synack ck-hs ck-why3 ck-state ck-kernel" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:11.6%">
                         <span class="fnode-no">3</span>
                         <span class="fnode-type">N-Kernel</span>
-                        <small>NGINX가 떠 있는 서버의 OS의 Kernel(===N-Kernel)의 TCP/IP 스택이 SYN 확인. SYN Queue 에 "연결 후보" 를 TCP State === SYN_RCVD 상태로 새로 만들어 넣음. NGINX 의 listen socket 은 LISTEN 유지 (fd = 6).</small>
+                        <small>N-Kernel SYN 패킷 수신. ~~~ 후,  Client에게 SYN+ACK 패킷 송신.</small>
                     </article>
 
-                    <article class="fnode kernel" data-step="4" data-chunks="ck-hs ck-why3" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:11.6%">
+                    <article class="fnode kernel" data-step="4" data-chunks="ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:11.6%">
                         <span class="fnode-no">4</span>
-                        <span class="fnode-type">N-Kernel</span>
-                        <small>N-Kernel의 TCP/IP 스택이 TCP flag = syn+ack 와 목적지(client PC) IP 포함한 패킷을 client에게 전송. 연결은 SYN Queue에 "보관되어" 있다.</small>
+                        <span class="fnode-type">C-Kernel</span>
+                        <small>C-Kernel의 TCP/IP 스택이 TCP flag = syn+ack 패킷 수신.</small>
                     </article>
 
-                    <!-- 2행 : 연결 완료. 우 -> 좌 -->
-                    <div class="farch-band right" style="top:19.9%">연결 완료</div>
-
-                    <article class="fnode kernel" data-step="5" data-chunks="ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:30.8%">
+                    <article class="fnode kernel" data-step="5" data-chunks="ck-why3 ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:30.8%">
                         <span class="fnode-no">5</span>
-                        <span class="fnode-type">Client Kernel</span>
-                        <small>Client Kernel의 TCP/IP 스택이 TCP flag = syn+ack 패킷 수신.</small>
+                        <span class="fnode-type">C-Kernel</span>
+                        <small>C-Kernel의 TCP/IP 스택이 TCP flag = ACK 패킷을 NGINX 서버에 전송. 동시에 TCP State : SYN_SENT → ESTABLISHED 변경.</small>
                     </article>
 
-                    <article class="fnode kernel" data-step="6" data-chunks="ck-why3 ck-state" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:30.8%">
+                    <article class="fnode kernel" data-step="6" data-chunks="ck-queue" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:30.8%">
                         <span class="fnode-no">6</span>
-                        <span class="fnode-type">Client Kernel</span>
-                        <small>Client Kernel의 TCP/IP 스택이 TCP flag = ACK 패킷을 NGINX 서버에 전송. 동시에 TCP State : SYN_SENT → ESTABLISHED 변경.</small>
-                    </article>
-
-                    <article class="fnode kernel" data-step="7" data-chunks="ck-queue" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:30.8%">
-                        <span class="fnode-no">7</span>
                         <span class="fnode-type">N-Kernel</span>
                         <small>N-Kernel이 패킷을 받고, TCP State : SYN_RCVD → ESTABLISHED 변경. 연결이 SYN 큐에서 accept 큐로 이동. 3-way handshake 성공. 연결 성공.</small>
                     </article>
 
-                    <article class="fnode server" data-step="8" data-chunks="ck-queue ck-kernel" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:30.8%">
-                        <span class="fnode-no">8</span>
+                    <article class="fnode server" data-step="7" data-chunks="ck-queue ck-kernel" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:30.8%">
+                        <span class="fnode-no">7</span>
                         <span class="fnode-type">NGINX</span>
                         <small>NGINX 가 accept() 로 꺼냄  conn_fd = 9 ─▶  연결 socket 새로 생김. ★ NGINX 가 이 연결에 처음 관여.</small>
                     </article>
 
-                    <!-- 3행 : HTTP 요청. 좌 -> 우 -->
-                    <div class="farch-band" style="top:39.2%">HTTP 요청</div>
-
-                    <article class="fnode client" data-step="9" data-chunks="ck-get" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:50.1%">
-                        <span class="fnode-no">9</span>
+                    <article class="fnode client" data-step="8" data-chunks="ck-get" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:30.8%">
+                        <span class="fnode-no">8</span>
                         <span class="fnode-type">Browser</span>
-                        <small>web browser가, 앞에서 만든 4-tuple Client Kernel socket에 GET / HTTP/1.1 바이트를 write(). socket 실체는 Client Kernel 안에 있고 browser가 가진 건 fd 번호뿐임. write() 는 시스템 콜이라, kernel이 받아서  Send Buffer로 복사.</small>
+                        <small>web browser가, 앞에서 만든 4-tuple C-Kernel socket에 GET / HTTP/1.1 바이트를 write(). socket 실체는 C-Kernel 안에 있고 browser가 가진 건 fd 번호뿐임. write() 는 시스템 콜이라, kernel이 받아서  Send Buffer로 복사.</small>
+                    </article>
+
+                    <article class="fnode kernel" data-step="9" data-chunks="ck-get" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:50.1%">
+                        <span class="fnode-no">9</span>
+                        <span class="fnode-type">C-Kernel</span>
+                        <small>C-Kernel 의 TCP/IP 스택이 해당 socket의 TCB에서 순서번호를 이어받아 세그먼트를 만들어 전송. handshake 를 다시 하지 않음.</small>
                     </article>
 
                     <article class="fnode kernel" data-step="10" data-chunks="ck-get" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:50.1%">
                         <span class="fnode-no">10</span>
-                        <span class="fnode-type">Client Kernel</span>
-                        <small>Client Kernel 의 TCP/IP 스택이 해당 socket의 TCB에서 순서번호를 이어받아 세그먼트를 만들어 전송. handshake 를 다시 하지 않음.</small>
-                    </article>
-
-                    <article class="fnode kernel" data-step="11" data-chunks="ck-get" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:50.1%">
-                        <span class="fnode-no">11</span>
                         <span class="fnode-type">N-Kernel</span>
                         <small>N-Kernel 의 TCP/IP 스택이, 도착한 세그먼트의 4-tuple로 socket을 찾아내고(역다중화) GET 바이트를 그 socket의 Receive Buffer 에 쌓음.</small>
+                    </article>
+
+                    <article class="fnode server" data-step="11" data-chunks="ck-nginx" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:50.1%">
+                        <span class="fnode-no">11</span>
+                        <span class="fnode-type">NGINX</span>
+                        <small>NGINX 가 read() 로 꺼냄  ★ HTTP 를 처음 봄.</small>
                     </article>
 
                     <article class="fnode server" data-step="12" data-chunks="ck-nginx" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:50.1%">
                         <span class="fnode-no">12</span>
                         <span class="fnode-type">NGINX</span>
-                        <small>NGINX 가 read() 로 꺼냄  ★ HTTP 를 처음 봄.</small>
-                    </article>
-
-                    <!-- 4행 : 응답과 Rendering. 우 -> 좌 -->
-                    <div class="farch-band right" style="top:58.4%">응답 &middot; Rendering</div>
-
-                    <article class="fnode server" data-step="13" data-chunks="ck-nginx" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:69.4%">
-                        <span class="fnode-no">13</span>
-                        <span class="fnode-type">NGINX</span>
                         <small>NGINX가 try_files -&gt; index.html 200ok 송신.</small>
                     </article>
 
-                    <article class="fnode client" data-step="14" data-chunks="ck-parse ck-sub ck-crp" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:69.4%">
-                        <span class="fnode-no">14</span>
+                    <article class="fnode client" data-step="13" data-chunks="ck-parse ck-sub ck-crp" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:69.4%">
+                        <span class="fnode-no">13</span>
                         <span class="fnode-type">Browser</span>
                         <small>client에서 critical rendering path 과정을 거쳐 화면 뜸.</small>
                     </article>
 
-                    <article class="fnode client" data-step="15" data-chunks="ck-react" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:69.4%">
-                        <span class="fnode-no">15</span>
+                    <article class="fnode client" data-step="14" data-chunks="ck-react" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:69.4%">
+                        <span class="fnode-no">14</span>
                         <span class="fnode-type">React</span>
                         <small>JS 실행 후, React가 GET /user/isMe 요청을 목적지 IP로 패킷 전송.</small>
                     </article>
 
-                    <article class="fnode server" data-step="16" data-chunks="ck-login ck-proxy" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:69.4%">
-                        <span class="fnode-no">16</span>
+                    <article class="fnode server" data-step="15" data-chunks="ck-login ck-proxy" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:69.4%">
+                        <span class="fnode-no">15</span>
                         <span class="fnode-type">NGINX</span>
                         <small>NGINX가 요청 받고, connect() 호출. N-Kernel 이 SYN 패킷 전송. NGINX &lt;-&gt; Spring Boot Handshake 수행됨. springboot 8080으로 proxy. (proxy === NGINX가 클라이언트 역할을 대신 해주는 것.) *현재 NGINX.conf 에 upstream keepalive 가 없어 요청마다 새 연결이 생긴다.</small>
                     </article>
 
-                    <!-- 5행 : API 응답과 SPA. 좌 -> 우 -->
-                    <div class="farch-band" style="top:77.7%">API 응답 &middot; SPA</div>
-
-                    <article class="fnode server" data-step="17" data-chunks="ck-login" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:88.6%">
-                        <span class="fnode-no">17</span>
+                    <article class="fnode server" data-step="16" data-chunks="ck-login" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:69.4%">
+                        <span class="fnode-no">16</span>
                         <span class="fnode-type">Spring Boot</span>
                         <small>springboot에서 redis session 조회 후, 결과(로그인상태)를 담은 패킷을 NGINX에게 전송.</small>
                     </article>
 
-                    <article class="fnode server" data-step="18" data-chunks="ck-login" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:88.6%">
-                        <span class="fnode-no">18</span>
+                    <article class="fnode server" data-step="17" data-chunks="ck-login" tabindex="0" role="button" aria-haspopup="dialog" style="left:12.5%;top:88.6%">
+                        <span class="fnode-no">17</span>
                         <span class="fnode-type">NGINX</span>
                         <small>NGINX가 client에게 전달.</small>
                     </article>
 
-                    <article class="fnode client" data-step="19" data-chunks="ck-route" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:88.6%">
-                        <span class="fnode-no">19</span>
+                    <article class="fnode client" data-step="18" data-chunks="ck-route" tabindex="0" role="button" aria-haspopup="dialog" style="left:37.5%;top:88.6%">
+                        <span class="fnode-no">18</span>
                         <span class="fnode-type">React</span>
                         <small>React 가 "비로그인" 을 받고 navigate('/login'). 서버 요청 없이 이미 받은 JS 안에서 화면만 교체 → 로그인 화면 출력.</small>
                     </article>
@@ -267,15 +247,14 @@
             <div class="callout my-flow">
                 <ol class="seq">
                     <li>DNS Resolver 가 목적지 IP 주소 탐색.</li>
-                    <li>3-way handshake 시작. 목적지 IP 와 TCP flag = SYN 포함한 패킷을 Default Gateway 에 전송. 동시에, client의 kernel TCP State : CLOSED → SYN_SENT 변경.</li>
-                    <li>NGINX가 떠 있는 서버의 OS의 Kernel(===N-Kernel)의 TCP/IP 스택이 SYN 확인. SYN Queue 에 "연결 후보" 를 TCP State === SYN_RCVD 상태로 새로 만들어 넣음. NGINX 의 listen socket 은 LISTEN 유지 (fd = 6).</li>
-                    <li>N-Kernel의 TCP/IP 스택이 TCP flag = syn+ack 와 목적지(client PC) IP 포함한 패킷을 client에게 전송. 연결은 SYN Queue에 "보관되어" 있다.</li>
-                    <li>Client Kernel의 TCP/IP 스택이 TCP flag = syn+ack 패킷 수신.</li>
-                    <li>Client Kernel의 TCP/IP 스택이 TCP flag = ACK 패킷을 NGINX 서버에 전송. 동시에 TCP State : SYN_SENT → ESTABLISHED 변경.</li>
+                    <li>SYN flag+Destination IP Address 패킷 전송. TCP State 변경. TCP 3-Way Handshake 시작.</li>
+                    <li>N-Kernel SYN 패킷 수신. ~~~ 후,  Client에게 SYN+ACK 패킷 송신.</li>
+                    <li>C-Kernel의 TCP/IP 스택이 TCP flag = syn+ack 패킷 수신.</li>
+                    <li>C-Kernel의 TCP/IP 스택이 TCP flag = ACK 패킷을 NGINX 서버에 전송. 동시에 TCP State : SYN_SENT → ESTABLISHED 변경.</li>
                     <li>N-Kernel이 패킷을 받고, TCP State : SYN_RCVD → ESTABLISHED 변경. 연결이 SYN 큐에서 accept 큐로 이동. 3-way handshake 성공. 연결 성공.</li>
                     <li>NGINX 가 accept() 로 꺼냄  conn_fd = 9 ─▶  연결 socket 새로 생김. ★ NGINX 가 이 연결에 처음 관여.</li>
-                    <li>web browser가, 앞에서 만든 4-tuple Client Kernel socket에 GET / HTTP/1.1 바이트를 write(). socket 실체는 Client Kernel 안에 있고 browser가 가진 건 fd 번호뿐임. write() 는 시스템 콜이라, kernel이 받아서  Send Buffer로 복사.</li>
-                    <li>Client Kernel 의 TCP/IP 스택이 해당 socket의 TCB에서 순서번호를 이어받아 세그먼트를 만들어 전송. handshake 를 다시 하지 않음.</li>
+                    <li>web browser가, 앞에서 만든 4-tuple C-Kernel socket에 GET / HTTP/1.1 바이트를 write(). socket 실체는 C-Kernel 안에 있고 browser가 가진 건 fd 번호뿐임. write() 는 시스템 콜이라, kernel이 받아서  Send Buffer로 복사.</li>
+                    <li>C-Kernel 의 TCP/IP 스택이 해당 socket의 TCB에서 순서번호를 이어받아 세그먼트를 만들어 전송. handshake 를 다시 하지 않음.</li>
                     <li>N-Kernel 의 TCP/IP 스택이, 도착한 세그먼트의 4-tuple로 socket을 찾아내고(역다중화) GET 바이트를 그 socket의 Receive Buffer 에 쌓음.</li>
                     <li>NGINX 가 read() 로 꺼냄  ★ HTTP 를 처음 봄.</li>
                     <li>NGINX가 try_files -&gt; index.html 200ok 송신.</li>
@@ -389,6 +368,26 @@
             </div>
             </div>
 
+            <!-- 박스 2 상세. 직접 정리한 순서라 문장은 원문 그대로 둔다. -->
+            <div class="step-chunk" id="ck-syn12">
+            <div class="callout my-flow">
+                <ol class="seq">
+                    <li>Network Service Process 가 socket() 호출. Kernel 이 TCB 생성, TCP State = CLOSED. 소켓 번호(fd) 반환.</li>
+                    <li>Web Browser의 Network Service Process가 그 socket 번호로 connect() 호출.</li>
+                    <li>Kernel 메모리에 있는 TCP/IP 스택의 Routing Table 조회. (참고:Windows는 tcpip.sys가 들고 있고 route print로 봄. Linux에서는 FIB(Forwarding Information Base)이고 ip route로 봄.)</li>
+                    <li>IP 계층의 경로 조회 함수(Linux기준 /boot/vmlinuz의 fib_table_lookup())가 Routing Table 전체에 longest prefix match 를 적용해 한 줄을 고른다. 그 줄에 next hop · 나갈 NIC 가 적혀 있고, Source IP 는 그 NIC 의 IP 로 정해진다. 더 구체적인 줄이 없다면 0.0.0.0/0(Default Gateway)이 남는다. (VPN, Docker, WSL이 있다면, 10.0.0.0/8 · 172.17.0.0/16 같은 추가 경로 있음.) NIC, Source IP 는 경로 조회 결과에 포함됨. 인터넷 주소는 보통 Default Gateway로 감.</li>
+                    <li>출발지 Port 배정, 4-tuple 완성, ISN 결정. TCP State : CLOSED → SYN_SENT 변경.</li>
+                    <li>TCP/IP스택이 TCP segment , IP Packet 조립. (Linux 기준 tcp_connect() 과 ip_queue_xmit()이 TCP , IP 조립.)</li>
+                    <li>Kernel 메모리의 TCP/IP 스택에 있는 ARP Cache 조회. Cache에 값이 없을 경우, ARP로 next hop IP를 이용하여 MAC Address를 찾음. (같은 LAN · Docker · WSL 은 next hop = 목적지 자신. tun 방식 VPN 은 MAC 이 없어서 ARP 를 안 함.)</li>
+                    <li>Linux는 Kernel의 L2 Code의 eth_header()(net/ethernet/eth.c)가 14Byte Ethernet Header 생성. (dev_hard_header()는 이 함수를 부르는 입구다.) 그 다음 dev_queue_xmit() → qdisc(Kernel의 송신 대기열) → NIC Driver의 ndo_start_xmit() 호출. Windows 는 tcpip.sys 가 Frame 을 만들어 NDIS(ndis.sys)를 거쳐 NIC Driver(miniport, 내 PC 는 Intel 의 Netwtw10.sys)로 넘긴다.</li>
+                    <li>NIC Driver가 TX Ring 에 Frame 위치를 적고, NIC 의 레지스터를 써서 "가져가" 신호 (doorbell).</li>
+                    <li>NIC의 DMA(Direct Memory Access) 엔진이 PCIe를 통해 CPU를 거치지 않고 RAM 에서 Frame Byte를 직접 읽어 온다.</li>
+                    <li>MAC 블록에서 Preamble(+SFD) 과 FCS(CRC-32) 를 붙인다. PHY 에서 비트를 신호로 바꿔 내보낸다.</li>
+                    <li>NIC 가 인터럽트로 "보냈다" 를 알리고 드라이버가 버퍼를 정리.</li>
+                </ol>
+            </div>
+            </div>
+
             <div class="step-chunk" id="ck-conn">
             <h4>connect() &mdash; 누구의 함수이고 누가 일하나</h4>
             <p><code>connect(소켓, 43.202.208.133:80)</code> 은 브라우저가 만든 함수가 아니다.
@@ -427,18 +426,21 @@
             </div>
             <p><em>Winsock 은 Kernel 이 아니다.</em> Windows 프로그램이 네트워크를 쓰려고 부르는
                 user mode 라이브러리고, 그 안에서 <code>afd.sys</code> 로 요청을 넘겨야 Kernel 로 들어간다.
-                Linux 는 다르다. <code>connect()</code> 가 libc 를 거쳐 곧바로 <em>시스템 콜</em>이 된다.</p>
+                <br><strong class="danger">Linux</strong> 는 다르다. <code>connect()</code> 가 libc 를 거쳐 곧바로 <em>시스템 콜</em>이 된다.</p>
 
             <h4>connect() 를 부르면 Kernel 이 하는 일</h4>
             <ol class="seq">
+                <li>라우팅 테이블에서 <em>경로를 고른다.</em> Default Gateway 로 갈지, 어느 NIC 로, Source IP 는 무엇으로 할지가 정해진다.</li>
                 <li>내 쪽 포트를 배정한다(예 <code>51234</code>). 이제 4-tuple(출발지 IP:Port + 목적지 IP:Port)이 완성된다.</li>
-                <li>이 연결의 <em>TCB</em> 를 만든다.</li>
+                <li><code>socket()</code> 때 이미 만들어진 <em>TCB</em> 에 4-tuple 과 ISN 을 기록한다.</li>
                 <li>State 를 <em><code>CLOSED</code> &rarr; <code>SYN_SENT</code></em> 로 바꾸고,
                     SYN 패킷을 만들어 Default Gateway 로 내보낸다.</li>
                 <li>SYN+ACK 가 오면 ACK 를 보내고 <code>ESTABLISHED</code> 가 된다.
                     <em>connect() 가 리턴했다 = Handshake 가 끝났다.</em><br>
                     <small>Chrome 은 non-blocking 으로 불러 연결이 완성되면 이벤트로 알림을 받는다. 기준은 같다.</small></li>
             </ol>
+            <p class="ins-cap">SYN 의 TCP &middot; IP &middot; Frame 헤더를 만드는 세부 순서는 아래
+                &lsquo;Kernel 이 패킷을 조립하는 순서&rsquo; 에 있다.</p>
 
             <h4>서버 쪽 짝은 listen() &middot; accept()</h4>
             <p>NGINX 는 시작할 때 <code>listen(80)</code> 으로 소켓을 <code>LISTEN</code> 상태로 만들고,
@@ -451,7 +453,7 @@
             <div class="step-chunk" id="ck-path">
             <h3>패킷이 실제로 가는 길</h3>
             <p>여기가 "네트워크를 아느냐" 를 가르는 지점이다. <code>connect()</code> 한 번에 패킷이
-                Client Kernel &rarr; Home Router(NAT) &rarr; 라우터들 &rarr; 방화벽 &rarr; N-Kernel 순서로 지나간다.
+                C-Kernel &rarr; Home Router(NAT) &rarr; 라우터들 &rarr; 방화벽 &rarr; N-Kernel 순서로 지나간다.
                 단계별 설명은 #2 의 &lsquo;SYN 이 실제로 가는 경로&rsquo; 에 있다.</p>
 
             <div class="callout">
@@ -464,16 +466,28 @@
             <div class="step-chunk" id="ck-layer">
             <h4>Kernel 이 패킷을 조립하는 순서</h4>
             <ol class="seq">
-                <li><span class="who k">서브넷 판단</span> 내 IP <code>192.168.0.5</code> 와 서브넷 마스크
-                    <code>255.255.255.0</code> 을 AND 해서 내 망은 <code>192.168.0.0/24</code> 임을 안다.
-                    목적지 <code>43.202.208.133</code> 은 <em>여기 없다</em> &rarr; 기본 게이트웨이로 보낸다.</li>
-                <li><span class="who k">ARP</span> 기본 게이트웨이의 <em>IP 는 아는데 MAC 을 모른다.</em>
+                <li><span class="who k">경로 선택</span> 목적지 IP 를 라우팅 테이블에서 찾는다.
+                    내 IP <code>192.168.0.5</code> 와 서브넷 마스크 <code>255.255.255.0</code> 을 AND 해서
+                    내 망은 <code>192.168.0.0/24</code> 임을 안다.
+                    목적지 <code>43.202.208.133</code> 은 <em>여기 없다</em> &rarr; Default Gateway 로 보낸다.
+                    <em>어느 NIC 로 나갈지와 Source IP 도 여기서 정해진다.</em></li>
+                <li><span class="who k">포트 &middot; ISN &middot; TCB</span> 출발지 포트를 <em>임시 포트(49152~65535)</em> 중에서 하나 고른다.
+                    응답이 어느 프로그램 것인지 구분하는 열쇠다. 그리고 ISN 을 정해 <code>socket()</code> 때 만들어진 TCB 에 기록하고,
+                    State 를 <code>CLOSED</code> &rarr; <code>SYN_SENT</code> 로 바꾼다.</li>
+                <li><span class="who k">TCP 헤더</span> <em>flag = SYN</em>, Sequence Number = ISN,
+                    Options(MSS &middot; Window Scale &middot; SACK) 로 SYN 세그먼트를 만든다.
+                    Source IP 가 정해져야 체크섬도 계산할 수 있어서 위 단계가 먼저다.</li>
+                <li><span class="who k">IP 헤더</span> Source IP &middot; Destination IP, Protocol = 6(TCP), TTL 로
+                    <em>IP 패킷</em>을 만든다.</li>
+                <li><span class="who k">ARP</span> Default Gateway 의 <em>IP 는 아는데 MAC 을 모르면</em>
                     "<code>192.168.0.1</code> 쓰는 사람 MAC 알려줘" 를 브로드캐스트로 뿌려 알아낸다.
-                    <em>ARP 는 같은 랜 안에서만 동작한다.</em></li>
-                <li><span class="who k">포트 배정</span> 출발지 포트를 <em>임시 포트(49152~65535)</em> 중에서 하나 고른다.
-                    응답이 어느 프로그램 것인지 구분하는 열쇠다.</li>
-                <li><span class="who k">캡슐화</span> TCP 헤더 &rarr; IP 헤더 &rarr; Ethernet 헤더 순으로 감싼다.</li>
+                    이미 캐시에 있으면 생략한다. <em>ARP 는 같은 랜 안에서만 동작한다.</em></li>
+                <li><span class="who k">Ethernet 헤더</span> 목적지 MAC = Default Gateway 의 MAC, 출발지 MAC = 내 NIC.
+                    <em>Frame</em> 이 완성되고 NIC 가 내보낸다.</li>
             </ol>
+            <p class="ins-cap">위는 <em>만드는 순서</em>다(TCP &rarr; IP &rarr; Frame 으로 바깥을 감싼다).
+                랜선에 <em>실제로 나가는 순서</em>는 다르다. SYN 은 MAC 을 알아낼 때까지 대기하고
+                <em>ARP 질의가 먼저 나간다.</em></p>
 
             <h4>계층별로 누가 무엇을 보는가</h4>
             <div class="scroll-x">
@@ -530,6 +544,16 @@
             <p>응답은 같은 경로를 되짚어 온다. Home Router 가 나갈 때 기록해둔 <em>NAT 테이블</em>이 열쇠다.
                 "공인 IP:51234 로 온 응답은 사설 <code>192.168.0.5:51234</code> 에게" 라는 기록이 없으면
                 Home Router 는 그 패킷을 누구에게 줘야 할지 몰라서 버린다.</p>
+            </div>
+
+            <!-- 3 · 4 번을 합치기 전에 정리했던 원문. -->
+            <div class="step-chunk" id="ck-synack">
+            <div class="callout my-flow">
+                <ol class="seq">
+                    <li>NGINX가 떠 있는 서버의 OS의 Kernel(===N-Kernel)의 TCP/IP 스택이 SYN 확인. SYN Queue 에 "연결 후보" 를 TCP State === SYN_RCVD 상태로 새로 만들어 넣음. NGINX 의 listen socket 은 LISTEN 유지 (fd = 6).</li>
+                    <li>N-Kernel의 TCP/IP 스택이 TCP flag = syn+ack 와 목적지(client PC) IP 포함한 패킷을 client에게 전송. 연결은 SYN Queue에 "보관되어" 있다.</li>
+                </ol>
+            </div>
             </div>
 
             <div class="step-chunk" id="ck-hs">
@@ -600,7 +624,7 @@
             </div>
 
             <div class="step-chunk" id="ck-closed">
-            <h4>Client Kernel 의 TCP State</h4>
+            <h4>C-Kernel 의 TCP State</h4>
             <div class="scroll-x">
                 <table>
                     <tr>
@@ -955,19 +979,19 @@ CSS  --파싱--> CSSOM 트리 -+
                     <tr>
                         <td>1</td>
                         <td><code>SYN</code></td>
-                        <td><em>Client PC Kernel</em><br>(브라우저가 <code>connect()</code> 로 부탁)</td>
+                        <td><em>C-Kernel</em><br>(브라우저가 <code>connect()</code> 로 부탁)</td>
                         <td><em>N-Kernel</em></td>
                     </tr>
                     <tr>
                         <td>2</td>
                         <td><code>SYN+ACK</code></td>
                         <td><em>N-Kernel</em></td>
-                        <td>Client PC Kernel</td>
+                        <td>C-Kernel</td>
                     </tr>
                     <tr>
                         <td>3</td>
                         <td><code>ACK</code></td>
-                        <td>Client PC Kernel</td>
+                        <td>C-Kernel</td>
                         <td>N-Kernel</td>
                     </tr>
                     <tr>
@@ -1012,7 +1036,7 @@ CSS  --파싱--> CSSOM 트리 -+
             <ol class="seq">
                 <li><span class="who">브라우저</span> <code>socket()</code> + <code>connect()</code> 호출.
                     여기서 브라우저 역할은 끝이고 나머지는 Kernel이 한다.</li>
-                <li><span class="who k">Client Kernel</span> "목적지가 내 서브넷에 없네" 판단 &rarr;
+                <li><span class="who k">C-Kernel</span> "목적지가 내 서브넷에 없네" 판단 &rarr;
                     Default Gateway(= Home Router)로 보내기로 결정. ARP 로 Home Router 의 MAC 을 알아내 전송.</li>
                 <li><span class="who">Home Router</span> NAT(NAPT). 출발지 IP 를 사설 &rarr; 공인으로 바꿔치기하고,
                     돌아올 응답을 누구에게 줄지 포트로 기억해둔다.</li>
@@ -1468,7 +1492,7 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
         <section class="note">
             <h2>#2 브라우저에서 wsgate 까지</h2>
 
-            <h3>브라우저 &middot; Client Kernel</h3>
+            <h3>브라우저 &middot; C-Kernel</h3>
             <ol class="seq">
                 <li><span class="who">React</span> <code>JSON.stringify({wsType:"SEND_MESSAGE", payload:{roomId:5, messageText:"안녕"}})</code>
                     &rarr; <code>ws.send(문자열)</code></li>
@@ -1476,7 +1500,7 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
                     <code>FIN=1</code> &middot; <code>opcode=0x1(text)</code> &middot;
                     <em><code>MASK=1</code> &mdash; 클라이언트가 보내는 프레임은 반드시 마스킹</em>.
                     그리고 <code>write()</code> 로 커널 송신 버퍼에 복사</li>
-                <li><span class="who k">Client Kernel</span> TCP/IP 스택이 세그먼트 &rarr; IP 패킷으로 감싼다.
+                <li><span class="who k">C-Kernel</span> TCP/IP 스택이 세그먼트 &rarr; IP 패킷으로 감싼다.
                     목적지 IP 는 끝까지 서버 IP, 바뀌는 건 MAC 뿐이다.
                     <em>이미 연결된 상태라 DNS &middot; ARP &middot; Handshake 는 없다</em></li>
             </ol>
@@ -1495,7 +1519,7 @@ api.site.com  ->  백엔드       <-- 여기에 공인 IP + 도메인이 필요�
                     </tr>
                     <tr>
                         <th>A</th>
-                        <td>Client Kernel</td>
+                        <td>C-Kernel</td>
                         <td>브라우저</td>
                         <td>연결 1 의 클라이언트 끝</td>
                     </tr>
@@ -1707,7 +1731,7 @@ cheg     kafkaTemplate.send().get()     ⑥ ~ ⑦</code></pre>
             <pre class="code"><code>"안녕" 문자열
   -> JSON                   ws 전송용
   -> WS Frame 바이트         브라우저
-  -> TCP 세그먼트 · IP 패킷  Client Kernel
+  -> TCP 세그먼트 · IP 패킷  C-Kernel
   -> Command 객체            wsgate
   -> protobuf 바이너리       gRPC
   -> Command 객체            channel-engine
@@ -1732,7 +1756,7 @@ cheg     kafkaTemplate.send().get()     ⑥ ~ ⑦</code></pre>
         </form>
         <div class="note modal-note">
             <div class="step-head">
-                <h2 id="stepTitle"><span class="step-no"></span><span class="step-who"></span><button type="button" class="note-btn step-extra" hidden>TCP/IP</button></h2>
+                <h2 id="stepTitle"><span class="step-no"></span><span class="step-who"></span><button type="button" class="note-btn step-extra" hidden>TCP/IP/Frame</button></h2>
                 <div class="step-nav">
                     <button type="button" class="note-btn" data-dir="-1">&larr; 이전</button>
                     <button type="button" class="note-btn" data-dir="1">다음 &rarr;</button>
@@ -1749,7 +1773,7 @@ cheg     kafkaTemplate.send().get()     ⑥ ~ ⑦</code></pre>
             <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
         </form>
         <div class="note modal-note">
-            <h2 id="tcpipTitle">TCP / IP 헤더 &mdash; SYN 패킷</h2>
+            <h2 id="tcpipTitle">TCP / IP / Frame &mdash; SYN 패킷</h2>
             <div class="side-by-side">
                 <div class="cdiag hdr">
                     <svg viewBox="0 0 540 434" role="img"
@@ -1876,10 +1900,66 @@ cheg     kafkaTemplate.send().get()     ⑥ ~ ⑦</code></pre>
                     </svg>
                 </div>
             </div>
-            <p class="ins-cap">헤더만 그렸다. TCP segment 가 IP packet 의 payload 로 들어가고, SYN 은 데이터가 없다.
+            <div class="cdiag full">
+                    <svg viewBox="0 0 1100 332" role="img"
+                        aria-label="Ethernet Frame 구조와 SYN 패킷의 예시 값. Preamble, SFD, Destination MAC, Source MAC, EtherType, Payload, FCS 순서이고 Payload 안에 IP 헤더와 TCP 헤더가 들어 있다">
+                        <text x="10" y="18" class="ttl">Ethernet Frame</text>
+                        <rect x="10" y="64" width="130" height="64" class="bd fillt" />
+                        <text x="75" y="83" text-anchor="middle" style="font-size:11px;font-weight:700">Preamble</text>
+                        <text x="75" y="101" text-anchor="middle" style="font-size:11px">10101010 &times; 7</text>
+                        <text x="75" y="118" text-anchor="middle" class="xs" style="font-size:10px">7 B</text>
+                        <rect x="140" y="64" width="76" height="64" class="bd fillt" />
+                        <text x="178" y="83" text-anchor="middle" style="font-size:10px;font-weight:700">SFD</text>
+                        <text x="178" y="101" text-anchor="middle" style="font-size:10px">10101011</text>
+                        <text x="178" y="118" text-anchor="middle" class="xs" style="font-size:10px">1 B</text>
+                        <rect x="216" y="64" width="172" height="64" class="bd dat" />
+                        <text x="302" y="83" text-anchor="middle" style="font-size:11px;font-weight:700">Destination MAC</text>
+                        <text x="302" y="101" text-anchor="middle" style="font-size:11px">88:36:6C:7A:10:01</text>
+                        <text x="302" y="118" text-anchor="middle" class="xs" style="font-size:10px">6 B &middot; Default Gateway</text>
+                        <rect x="388" y="64" width="172" height="64" class="bd cmd" />
+                        <text x="474" y="83" text-anchor="middle" style="font-size:11px;font-weight:700">Source MAC</text>
+                        <text x="474" y="101" text-anchor="middle" style="font-size:11px">14:4F:8A:5D:3E:C2</text>
+                        <text x="474" y="118" text-anchor="middle" class="xs" style="font-size:10px">6 B &middot; 내 NIC</text>
+                        <rect x="560" y="64" width="104" height="64" class="bd cmd" />
+                        <text x="612" y="83" text-anchor="middle" style="font-size:11px;font-weight:700">EtherType</text>
+                        <text x="612" y="101" text-anchor="middle" style="font-size:11px">0x0800</text>
+                        <text x="612" y="118" text-anchor="middle" class="xs" style="font-size:10px">2 B &middot; IPv4</text>
+                        <rect x="664" y="64" width="316" height="64" class="bd fillw" />
+                        <text x="822" y="83" text-anchor="middle" style="font-size:11px;font-weight:700">Payload</text>
+                        <text x="822" y="101" text-anchor="middle" style="font-size:11px">IP packet</text>
+                        <text x="822" y="118" text-anchor="middle" class="xs" style="font-size:10px">52 B</text>
+                        <rect x="980" y="64" width="110" height="64" class="bd fillt" />
+                        <text x="1035" y="83" text-anchor="middle" style="font-size:11px;font-weight:700">FCS</text>
+                        <text x="1035" y="101" text-anchor="middle" style="font-size:11px">0x661DB4C7</text>
+                        <text x="1035" y="118" text-anchor="middle" class="xs" style="font-size:10px">4 B &middot; CRC-32</text>
+                        <path d="M 12 60 V 52 H 214 V 60" class="cell" />
+                        <text x="113" y="47" text-anchor="middle" class="xs" style="font-size:10.5px">NIC 의 MAC 블록이 붙인다</text>
+                        <path d="M 218 60 V 52 H 662 V 60" class="cell" />
+                        <text x="440" y="47" text-anchor="middle" class="xs" style="font-size:10.5px">Kernel 이 만든다 &mdash; Ethernet Header 14 B (eth_header())</text>
+                        <path d="M 666 60 V 52 H 978 V 60" class="cell" />
+                        <text x="822" y="47" text-anchor="middle" class="xs" style="font-size:10.5px">IP 계층이 만든 IP packet 그대로</text>
+                        <path d="M 982 60 V 52 H 1088 V 60" class="cell" />
+                        <text x="1035" y="47" text-anchor="middle" class="xs" style="font-size:10.5px">NIC 가 붙인다</text>
+                        <path d="M 664 128 L 664 162 M 980 128 L 980 162" class="cell" stroke-dasharray="4 3" />
+                        <rect x="664" y="162" width="140" height="46" class="bd fillw" />
+                        <text x="734" y="180" text-anchor="middle" style="font-size:10.5px;font-weight:700">IP Header 20 B</text>
+                        <text x="734" y="197" text-anchor="middle" class="xs" style="font-size:9.5px">192.168.0.5 &rarr; 43.202.208.133</text>
+                        <rect x="804" y="162" width="176" height="46" class="bd fillw" />
+                        <text x="892" y="180" text-anchor="middle" style="font-size:10.5px;font-weight:700">TCP Header 32 B</text>
+                        <text x="892" y="197" text-anchor="middle" class="xs" style="font-size:9.5px">51234 &rarr; 80 &middot; SYN</text>
+                        <text x="10" y="154" class="xs" style="font-size:10.5px">Kernel &rarr; NIC Driver 로 넘기는 건 Destination MAC ~ Payload = 66 B</text>
+                        <text x="10" y="174" class="xs" style="font-size:10.5px">Frame 크기(FCS 포함) = 70 B &middot; 선로에 실제로 나가는 건 Preamble ~ FCS = 78 B</text>
+                        <text x="10" y="238" class="xs" style="font-size:11px">EtherType 0x0800 &rarr; Payload 가 IPv4 packet 이라는 표시. IP 헤더의 Protocol 6(= TCP) 과 같은 역할이다.</text>
+                        <text x="10" y="258" class="xs" style="font-size:11px">Destination MAC 은 서버가 아니라 Default Gateway(Home Router) 의 MAC 이다. ARP 로 알아낸 값이고, 홉마다 새로 쓰인다.</text>
+                        <text x="10" y="278" class="xs" style="font-size:11px">Preamble &middot; SFD 는 수신 NIC 가 박자를 맞추는 신호, FCS 는 수신 NIC 가 깨진 Frame 을 걸러내는 체크섬이다.</text>
+                        <text x="10" y="298" class="xs" style="font-size:11px">Frame 은 FCS 포함 최소 64 B 다. 이 SYN 은 70 B 라 padding 이 붙지 않는다.</text>
+                        <text x="10" y="318" class="xs" style="font-size:11px">그림은 유선 Ethernet 기준이다. Wi-Fi 는 이 14 B 헤더를 802.11 헤더로 바꿔 끼우고 전파로 보낸다.</text>
+                    </svg>
+            </div>
+            <p class="ins-cap">헤더만 그렸다. TCP segment 가 IP packet 의 payload 로 들어가고, IP packet 이 다시 Frame 의 Payload 로 들어간다. SYN 은 데이터가 없다.
                 분홍색은 2번 박스 문장의 &lsquo;목적지 IP&rsquo; 와 &lsquo;SYN 플래그&rsquo;, 초록색은 그 밖의 핵심 칸이다.<br>
                 값은 예시지만 체크섬 두 개는 이 헤더 바이트로 실제 계산했다(헤더를 다시 더하면 0 이 된다).
-                Sequence Number 와 Identification 은 연결 &middot; 패킷마다 달라지는 값이다.</p>
+                Sequence Number 와 Identification 은 연결 &middot; 패킷마다 달라지는 값이다.<br>MAC 주소 두 개는 예시고, FCS 는 위 Frame 바이트로 실제 계산한 CRC-32 다.</p>
         </div>
     </dialog>
 
