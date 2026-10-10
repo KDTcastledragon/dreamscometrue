@@ -554,7 +554,7 @@ pre.code code {
 
 .farch-flow {
     fill: none;
-    stroke: #3f7a64;
+    stroke: #1f2421;
     stroke-width: 2;
     stroke-linecap: round;
     vector-effect: non-scaling-stroke;
@@ -567,7 +567,7 @@ pre.code code {
 }
 
 .farch-head {
-    fill: #3f7a64;
+    fill: #1f2421;
     stroke: none;
 }
 
@@ -588,17 +588,17 @@ pre.code code {
 
 .fnode-no {
     position: absolute;
-    top: -9px;
-    left: -9px;
-    width: 21px;
-    height: 21px;
-    border: 2px solid #fff;
+    top: -11px;
+    left: -11px;
+    width: 25px;
+    height: 25px;
+    border: none;
     border-radius: 50%;
     background: var(--accent);
     color: #fff;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
-    line-height: 17px;
+    line-height: 25px;
     text-align: center;
 }
 
@@ -1619,6 +1619,18 @@ pre.code code {
     color: #fff;
 }
 
+/* 헤더 버튼 밑에 강조 on/off 버튼 */
+.top-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hdr-btn[aria-pressed="true"] {
+    background: var(--accent);
+    color: #fff;
+}
+
 /* 내용이 길어서 본문만큼 넓게 열고 세로로 스크롤시킨다.
    dialog 라 ESC 로 닫히는 건 브라우저가 해준다. */
 /* position 을 주지 않는다. relative 를 주면 브라우저 기본값(fixed, 화면 중앙)이 덮여서
@@ -1761,15 +1773,50 @@ pre.code code {
 
 /* ===== 흐름도 박스 -> 상세 모달 ===== */
 .farch .fnode[data-step] {
+    border: none;
     cursor: pointer;
-    transition: box-shadow 0.15s, border-color 0.15s;
+    transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, background-color 0.18s ease-out;
 }
 
+.farch .fnode-no {
+    transition: transform 0.18s ease-out;
+}
+
+/* hover 때만 크게. 위치를 translate 로 잡고 있어서 scale 을 같이 써야 제자리에서 커진다. */
 .farch .fnode[data-step]:hover,
 .farch .fnode[data-step]:focus-visible {
-    border-color: var(--accent);
-    box-shadow: 0 10px 26px rgb(37 91 63 / 0.28);
+    z-index: 5;
+    transform: translate(-50%, -50%) scale(1.25);
+    box-shadow: 0 22px 48px rgb(37 91 63 / 0.55);
     outline: none;
+}
+
+/* 그림자는 박스 배경색 계열로. 파랑(브라우저) · 회색(Kernel) · 초록(서버 프로세스) */
+.farch .fnode.client[data-step]:hover,
+.farch .fnode.client[data-step]:focus-visible {
+    box-shadow: 0 22px 48px rgb(28 112 150 / 0.55);
+}
+
+.farch .fnode.kernel[data-step]:hover,
+.farch .fnode.kernel[data-step]:focus-visible {
+    box-shadow: 0 22px 48px rgb(70 82 94 / 0.55);
+}
+
+.farch .fnode.server[data-step]:hover,
+.farch .fnode.server[data-step]:focus-visible {
+    box-shadow: 0 22px 48px rgb(30 110 72 / 0.55);
+}
+
+.farch .fnode[data-step]:hover .fnode-no,
+.farch .fnode[data-step]:focus-visible .fnode-no {
+    transform: scale(1.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .farch .fnode[data-step],
+    .farch .fnode-no {
+        transition: none;
+    }
 }
 
 .step-head {
@@ -1804,7 +1851,13 @@ pre.code code {
 
 .step-orig p {
     font-size: 15px;
+    font-weight: 700;
 }
+
+/* 모달 제목 배경 = 그 박스의 배경색 */
+.step-orig[data-who="client"] { background: #8fd0e8; }
+.step-orig[data-who="kernel"] { background: #ccd2d7; }
+.step-orig[data-who="server"] { background: #7fcaa4; }
 
 /* 번호가 없는 참고 노트. 흐름(번호 있는 목록)과 섞이지 않도록 회색 면으로 둔다. */
 .ref-notes {
@@ -1889,4 +1942,47 @@ html {
 
 .hdr-modal {
     overscroll-behavior: contain;
+}
+
+/* 함수 흐름 그림의 계층 띠 · TCB 표시 */
+.cdiag .lay-user { fill: #eef1f0; }
+.cdiag .lay-sys { fill: #fbe9e7; }
+.cdiag .lay-sock { fill: #f4efe3; }
+.cdiag .lay-tcp { fill: #e3f0ea; }
+.cdiag .lay-ip { fill: #e4ebf4; }
+.cdiag .lay-l2 { fill: #ede7f4; }
+.cdiag .lay-drv { fill: #e9eceb; }
+.cdiag .tcbk { fill: #c0392b; }
+.cdiag .tcbk-t { fill: #ffffff; }
+.cdiag .notcb { fill: #8a9590; }
+.cdiag .notcb-t { fill: #ffffff; }
+.cdiag .stepk { fill: #6b7671; }
+.cdiag .stepk-t { fill: #ffffff; }
+
+/* ===== 흐름도 자동 강조 =====
+   hover 보다 덜 커진다(hover +25% / 자동 +12.5%). 배경은 빨간색 계열.
+   hover 규칙이 선택자가 더 구체적이라, 자동 강조 중인 박스에 마우스를 올리면 hover 모양이 이긴다. */
+.farch .fnode.is-auto {
+    z-index: 4;
+    transform: translate(-50%, -50%) scale(1.125);
+    background: #f4a29d;
+    box-shadow: 0 14px 32px rgb(176 40 36 / 0.45);
+}
+
+.farch .fnode.is-auto .fnode-no {
+    transform: scale(1.45);
+}
+
+/* 강조 중인 박스에서 나가는 화살표 */
+.farch-flow {
+    transition: stroke 0.18s ease-out, stroke-width 0.18s ease-out;
+}
+
+.farch-flow.is-auto {
+    stroke: #d0312d;
+    stroke-width: 4;
+}
+
+.farch-head.hot {
+    fill: #d0312d;
 }
