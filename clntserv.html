@@ -123,12 +123,12 @@
                         <span class="fnode-type">C-Kernel</span>
                         <small>C-Kernel이 SYN+ACK 패킷 수신. ESTABLISHED 기록 후, N-Kernel 에게 ACK 패킷 전송.</small>
                     </article>
-                    <article class="fnode kernel" data-step="5" data-chunks="ck-queue" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:30.8%">
+                    <article class="fnode kernel" data-step="5" data-chunks="ck-ack ck-queue" tabindex="0" role="button" aria-haspopup="dialog" style="left:87.5%;top:30.8%">
                         <span class="fnode-no">5</span>
                         <span class="fnode-type">N-Kernel</span>
-                        <small>N-Kernel이 패킷을 받고, TCP State : SYN_RCVD → ESTABLISHED 변경. 연결이 SYN 큐에서 accept 큐로 이동. 3-way handshake 성공. 연결 성공.</small>
+                        <small>N-Kernel ACK 패킷 수신. 연결이 SYN Queue에서 accept Queue로 이동 후, ESTABLISHED 기록. Handshake 성공.</small>
                     </article>
-                    <article class="fnode server" data-step="6" data-chunks="ck-queue ck-kernel" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:30.8%">
+                    <article class="fnode server" data-step="6" data-chunks="ck-kernel" tabindex="0" role="button" aria-haspopup="dialog" style="left:62.5%;top:30.8%">
                         <span class="fnode-no">6</span>
                         <span class="fnode-type">NGINX</span>
                         <small>NGINX 가 accept() 로 꺼냄  conn_fd = 9 ─▶  연결 socket 새로 생김. ★ NGINX 가 이 연결에 처음 관여.</small>
@@ -232,7 +232,7 @@
                     <li>SYN flag+Destination IP Address 패킷 전송. TCP State 변경. TCP 3-Way Handshake 시작.</li>
                     <li>N-Kernel SYN 패킷 수신.  SYN_RECV 기록 후, Client에게 SYN+ACK 패킷 송신.</li>
                     <li>C-Kernel이 SYN+ACK 패킷 수신. ESTABLISHED 기록 후, N-Kernel 에게 ACK 패킷 전송.</li>
-                    <li>N-Kernel이 패킷을 받고, TCP State : SYN_RCVD → ESTABLISHED 변경. 연결이 SYN 큐에서 accept 큐로 이동. 3-way handshake 성공. 연결 성공.</li>
+                    <li>N-Kernel ACK 패킷 수신. 연결이 SYN Queue에서 accept Queue로 이동 후, ESTABLISHED 기록. Handshake 성공.</li>
                     <li>NGINX 가 accept() 로 꺼냄  conn_fd = 9 ─▶  연결 socket 새로 생김. ★ NGINX 가 이 연결에 처음 관여.</li>
                     <li>web browser가, 앞에서 만든 4-tuple C-Kernel socket에 GET / HTTP/1.1 바이트를 write(). socket 실체는 C-Kernel 안에 있고 browser가 가진 건 fd 번호뿐임. write() 는 System Call이라, kernel이 받아서  Send Buffer로 복사.</li>
                     <li>C-Kernel 의 TCP/IP 스택이 해당 socket의 TCB에서 순서번호를 이어받아 세그먼트를 만들어 전송. handshake 를 다시 하지 않음.</li>
@@ -647,6 +647,41 @@
                 </table>
             </div>
             <p class="ins-cap">NIC 수신(1번)과 L2 &rarr; NIC 송신 과정은 양쪽이 같다.</p>
+            </div>
+
+            <!-- 박스 5 상세. N-Kernel 이 ACK 를 받아 TCB 를 만들고 accept Queue 에 넣는 순서. -->
+            <div class="step-chunk" id="ck-ack">
+            <div class="callout my-flow">
+                <ol class="seq">
+                    <li>NIC가 수신한 Byte를 DMA로 RAM에 입력. N-Kernel이 sk_buff 구조체로 감싸고, sk_buff를 TCP/IP 스택의 ip_rcv() -&gt; tcp_v4_rcv() 함수(입구 역할)로 넘김.</li>
+                    <li>TCP/IP 스택 내부의 established 표에서 4-tuple로 찾음. 나오는 것은 TCB 가 아니라, SYN 을 받을 때(3번 박스 6번) 넣어 둔 request_sock(state = NEW_SYN_RECV). (Linux 의 SYN Queue 는 따로 있는 줄이 아니라, established 표에 들어간 request_sock 들과 그 개수다.)</li>
+                    <li>request_sock 이 기억해 둔 listen socket 을 꺼내 tcp_check_req() 함수로 간다. listen 표는 보지 않는다.</li>
+                    <li>tcp_check_req() 검사 ①. 같은 SYN 이 다시 온 거면 SYN+ACK 을 재전송하고 끝낸다.</li>
+                    <li>tcp_check_req() 검사 ②. Acknowledgment Number 가 N-Kernel 의 ISN + 1 이 아니면 RST 를 보낸다.</li>
+                    <li>tcp_check_req() 검사 ③. RST 나 SYN flag 가 켜져 있으면 request_sock 을 지운다. ACK flag 가 없으면 버린다.</li>
+                    <li>tcp_check_req() 검사 ④. NGINX 가 listen 80 deferred;(TCP_DEFER_ACCEPT) 이면 데이터 없는 ACK 는 버리고 첫 데이터를 기다린다.</li>
+                    <li>tcp_v4_syn_recv_sock() 함수가 accept Queue 가 꽉 찼는지 본다. 꽉 찼으면 TCB 를 만들지 않고 이 ACK 를 버린다. request_sock 은 남아서 SYN+ACK 을 재전송하고, C-Kernel 은 이미 ESTABLISHED 다.</li>
+                    <li>tcp_create_openreq_child() 함수가 listen socket 을 복제해 새 TCB(struct tcp_sock) 생성. TCP State = SYN_RECV. 이 연결의 TCB 는 여기서 처음 생긴다.</li>
+                    <li>request_sock 에 적어 둔 4-tuple · 양쪽 ISN · 옵션을 새 TCB 로 옮긴다.</li>
+                    <li>경로를 찾아(inet_csk_route_child_sock()) 새 TCB 에 저장하고, listen socket 의 Port 80 을 물려받는다(__inet_inherit_port()).</li>
+                    <li>inet_ehash_nolisten() 함수가 established 표의 request_sock 자리를 새 TCB 로 교체.</li>
+                    <li>inet_csk_complete_hashdance() 함수가 request_sock 을 SYN Queue 에서 뺀다. SYN+ACK 재전송 타이머도 멈춘다.</li>
+                    <li>그 request_sock 을 accept Queue 끝에 붙인다. 이때 request_sock 의 sk 칸이 새 TCB 를 가리킨다.</li>
+                    <li>tcp_child_process() → tcp_rcv_state_process() 함수로 가서, 새 TCB 가 ACK 처리를 시작한다.</li>
+                    <li>tcp_validate_incoming() 함수가 Sequence Number 가 받을 범위 안인지, RST · SYN 이 섞여 있지 않은지 검사.</li>
+                    <li>tcp_ack() 함수가 이 ACK 를 받아들일 수 있는지 판정. 이것이 진짜 "ACK 처리" 다. 받아들일 수 없으면 RST 를 보내고 끝낸다.</li>
+                    <li>판정을 통과하면 TCP State : SYN_RECV → ESTABLISHED 변경. 3-way Handshake 성공. (이때 부르는 새 TCB 의 sk_state_change() 는, 아직 accept() 전이라 기다리는 프로세스가 없어 사실상 아무도 받지 않는다.)</li>
+                    <li>ESTABLISHED 뒤 정리. snd_una = ACK 번호, 상대 Window(Window Scale 적용), MSS · 송신 속도를 정하고 빠른 처리 경로(fast path)를 켠다.</li>
+                    <li>ACK 에 데이터가 실려 왔으면 tcp_data_queue() 가 Receive Buffer 에 넣는다. 이어서 보낼 데이터 · 보낼 ACK 가 있는지 확인한다.</li>
+                    <li>tcp_rcv_state_process() 가 끝까지 돌고 돌아오면, tcp_child_process() 가 "처리 전 SYN_RECV 였고 지금은 바뀌었는지" 확인. 맞으면 listen socket 의 sk_data_ready() 호출.</li>
+                    <li>sk_data_ready() 의 실체는 sock_def_readable(). listen socket 의 대기 줄(wait queue)에 기다리는 것이 있으면 wake_up_interruptible_sync_poll(EPOLLIN) 호출.</li>
+                    <li>대기 줄에는 NGINX 가 시작할 때 epoll_ctl(ADD, listen fd, EPOLLIN) 으로 매달아 둔 epoll 항목이 있다. 그 항목의 ep_poll_callback() 함수가 실행된다.</li>
+                    <li>ep_poll_callback() 이 listen fd 를 epoll 준비 목록(rdllist)에 올리고, epoll_wait() 안에서 자고 있는 NGINX 워커를 wake_up().</li>
+                    <li>"깨운다" 는 신호(signal)가 아니다. 스케줄러가 그 워커 프로세스를 sleep → 실행 가능 상태로 바꿔 실행 대기열에 넣는 것이다.</li>
+                    <li>sk_data_ready() 는 ACK 전용이 아니라 "읽을 거리가 생겼다" 는 공통 함수다. listen socket 에서 읽을 거리 = accept Queue 에 완성된 연결이 있다는 뜻이다(inet_csk_listen_poll()).</li>
+                    <li>응답 패킷은 보내지 않는다. ACK 에 대한 ACK 는 없다. 여기까지가 N-Kernel 몫이고, 워커가 CPU 를 받아 epoll_wait() 에서 돌아오는 것부터 6번 박스다.</li>
+                </ol>
+            </div>
             </div>
 
             <div class="step-chunk" id="ck-hs">
@@ -2053,34 +2088,66 @@ Network Service Process         connect(fd, 43.202.208.133:80)    libc 함수
 
             <h3>&#9654; TCB 구조체는 이렇게 겹쳐 있다</h3>
             <div class="cdiag full">
-                <svg viewBox="0 0 1120 380" role="img" aria-label="struct tcp_sock 안에 inet_connection_sock, inet_sock, sock, sock_common 이 차례로 겹쳐 들어 있다. tcp_sock 전체가 TCB 다">
+                <svg viewBox="0 0 1120 572" role="img" aria-label="fd 9 에서 struct file, struct socket 을 거쳐 TCB(struct tcp_sock) 로 이어진다. tcp_sock 안에 inet_connection_sock, inet_sock, sock, sock_common 이 맨 앞 칸으로 겹쳐 있고, 메모리에는 주소 0 부터 한 덩어리로 놓인다">
                     <defs><marker id="fvb" markerWidth="8" markerHeight="8" refX="6.5" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" /></marker></defs>
-                    <rect x="300" y="30" width="800" height="330" rx="8" class="bd cmd" />
-                    <text x="314" y="52" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700" class="lbl">struct tcp_sock</text>
-                    <text x="314" y="70" class="xs" style="font-size:11.5px">TCP 만의 칸 &mdash; snd_nxt &middot; rcv_nxt &middot; snd_una &middot; srtt_us &middot; write_seq &hellip;</text>
-                    <rect x="320" y="84" width="760" height="264" rx="8" class="bd fillw" />
-                    <text x="334" y="106" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700" class="lbl">struct inet_connection_sock</text>
-                    <text x="334" y="124" class="xs" style="font-size:11.5px">연결형 공통 &mdash; icsk_accept_queue &middot; 재전송 타이머 &middot; 혼잡 제어</text>
-                    <rect x="340" y="138" width="720" height="198" rx="8" class="bd fillw" />
-                    <text x="354" y="160" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700" class="lbl">struct inet_sock</text>
-                    <text x="354" y="178" class="xs" style="font-size:11.5px">IPv4 공통 &mdash; inet_sport &middot; inet_saddr &middot; TTL &middot; TOS</text>
-                    <rect x="360" y="192" width="680" height="132" rx="8" class="bd fillw" />
-                    <text x="374" y="214" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700" class="lbl">struct sock</text>
-                    <text x="374" y="232" class="xs" style="font-size:11.5px">모든 소켓 공통 &mdash; sk_receive_queue &middot; sk_write_queue &middot; 버퍼 크기</text>
-                    <rect x="380" y="246" width="640" height="66" rx="8" class="bd fillw" />
-                    <text x="394" y="268" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700" class="lbl">struct sock_common</text>
-                    <text x="394" y="286" class="xs" style="font-size:11.5px">맨 안쪽 &mdash; 4-tuple(skc_daddr &middot; skc_dport &middot; skc_num &hellip;) &middot; skc_state</text>
+                    <rect x="300" y="30" width="800" height="414" rx="8" class="bd cmd" />
+                    <text x="314" y="52" class="lbl" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700">struct tcp_sock</text>
+                    <text x="314" y="70" class="xs" style="font-size:11.5px">TCP 만의 칸 &mdash; snd_nxt &middot; snd_una &middot; rcv_nxt &middot; write_seq &middot; srtt_us &middot; snd_cwnd &middot; 재전송 대기열(tcp_rtx_queue)</text>
+                    <text x="314" y="88" class="xs" style="font-family:Consolas,'Courier New',monospace;font-size:11px">첫 칸 = struct inet_connection_sock inet_conn</text>
+                    <rect x="320" y="102" width="760" height="330" rx="8" class="bd fillw" />
+                    <text x="334" y="124" class="lbl" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700">struct inet_connection_sock</text>
+                    <text x="334" y="142" class="xs" style="font-size:11.5px">연결형 공통 &mdash; icsk_accept_queue(SYN Queue &middot; accept Queue) &middot; 재전송 타이머 &middot; 혼잡 제어</text>
+                    <text x="334" y="160" class="xs" style="font-family:Consolas,'Courier New',monospace;font-size:11px">첫 칸 = struct inet_sock icsk_inet</text>
+                    <rect x="340" y="174" width="720" height="246" rx="8" class="bd fillw" />
+                    <text x="354" y="196" class="lbl" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700">struct inet_sock</text>
+                    <text x="354" y="214" class="xs" style="font-size:11.5px">IPv4 공통 &mdash; inet_sport &middot; inet_saddr &middot; TTL &middot; TOS</text>
+                    <text x="354" y="232" class="xs" style="font-family:Consolas,'Courier New',monospace;font-size:11px">첫 칸 = struct sock sk</text>
+                    <rect x="360" y="246" width="680" height="162" rx="8" class="bd fillw" />
+                    <text x="374" y="268" class="lbl" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700">struct sock</text>
+                    <text x="374" y="286" class="xs" style="font-size:11.5px">모든 소켓 공통 &mdash; sk_receive_queue &middot; sk_write_queue &middot; 버퍼 크기 &middot; sk_socket(왼쪽 struct socket 을 되돌아 가리킴)</text>
+                    <text x="374" y="304" class="xs" style="font-family:Consolas,'Courier New',monospace;font-size:11px">첫 칸 = struct sock_common __sk_common</text>
+                    <rect x="380" y="318" width="640" height="78" rx="8" class="bd fillw" />
+                    <text x="394" y="340" class="lbl" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700">struct sock_common</text>
+                    <text x="394" y="358" class="xs" style="font-size:11.5px">4-tuple(skc_daddr &middot; skc_rcv_saddr &middot; skc_dport &middot; skc_num) &middot; skc_state(TCP State)</text>
+                    <text x="394" y="376" class="xs" style="font-size:11.5px">skc_node = established 표에 매달리는 고리. 표는 이 맨 앞부분만 보고 찾는다</text>
                     <rect x="1040" y="40" width="31.6" height="20" rx="10" class="tcbk" /><text x="1055.8" y="54" text-anchor="middle" style="font-size:11px;font-weight:700" class="tcbk-t">TCB</text>
-                    <text x="1030" y="54" text-anchor="end" class="xs">= 이 덩어리 전체</text>
-                    <rect x="20" y="120" width="230" height="110" rx="8" class="bd lay-user" />
-                    <text x="34" y="144" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700" class="lbl">struct socket</text>
-                    <text x="34" y="166" class="xs" style="font-size:11.5px">fd 쪽 껍데기</text>
-                    <text x="34" y="186" class="xs" style="font-size:11.5px">소프트웨어의 fd 9 가 여기를 가리키고,</text>
-                    <text x="34" y="204" class="xs" style="font-size:11.5px">여기서 sk 칸이 오른쪽을 가리킨다</text>
-                    <path d="M 250 175 H 296" class="ln" marker-end="url(#fvb)" />
-                    <text x="20" y="262" class="xs" style="font-size:11.5px">C 에서는 안쪽 구조체를 첫 칸에 넣어 겹친다.</text>
-                    <text x="20" y="280" class="xs" style="font-size:11.5px">그래서 tcp_sock 의 주소 = sock 의 주소다.</text>
-                    <text x="20" y="298" class="xs" style="font-size:11.5px">Java 의 extends(상속)와 같은 효과다.</text>
+                    <text x="1030" y="54" text-anchor="end" class="xs" style="font-size:11.5px">= 이 덩어리 전체 &middot; TCP slab 에서 한 번에 할당(2 KB 안팎)</text>
+                    <text x="300" y="474" class="lbl" style="font-size:12px;font-weight:700">메모리에 실제로 놓인 모양 &mdash; 주소 0 부터 한 줄 (칸 너비는 실제 비율 아님)</text>
+                    <rect x="300" y="484" width="100" height="26" class="bd lay-tcp" />
+                    <text x="350.0" y="501" text-anchor="middle" class="xs" style="font-size:11px">sock_common</text>
+                    <rect x="400" y="484" width="220" height="26" class="bd fillw" />
+                    <text x="510.0" y="501" text-anchor="middle" class="xs" style="font-size:11px">sock 의 나머지</text>
+                    <rect x="620" y="484" width="120" height="26" class="bd fillw" />
+                    <text x="680.0" y="501" text-anchor="middle" class="xs" style="font-size:11px">inet_sock 의 나머지</text>
+                    <rect x="740" y="484" width="200" height="26" class="bd fillw" />
+                    <text x="840.0" y="501" text-anchor="middle" class="xs" style="font-size:11px">inet_connection_sock 의 나머지</text>
+                    <rect x="940" y="484" width="160" height="26" class="bd fillw" />
+                    <text x="1020.0" y="501" text-anchor="middle" class="xs" style="font-size:11px">tcp_sock 의 나머지</text>
+                    <text x="300" y="526" class="xs" style="font-family:Consolas,'Courier New',monospace;font-size:11px">주소 0</text>
+                    <text x="300" y="544" class="xs" style="font-size:11.5px">다섯 구조체의 시작 주소가 같다. sock 으로 보면 앞 두 칸까지, tcp_sock 으로 보면 전체를 읽는다.</text>
+                    <rect x="20" y="30" width="250" height="62" rx="8" class="bd lay-user" />
+                    <text x="34" y="52" class="lbl" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700">fd 표 (NGINX 프로세스)</text>
+                    <text x="34" y="74" class="xs" style="font-size:11.5px">fd 9 &rarr; struct file</text>
+                    <path d="M 145 92 V 116" class="ln" marker-end="url(#fvb)" />
+                    <rect x="20" y="120" width="250" height="70" rx="8" class="bd lay-user" />
+                    <text x="34" y="142" class="lbl" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700">struct file</text>
+                    <text x="34" y="162" class="xs" style="font-size:11.5px">socket 을 파일처럼 보이게 하는 층</text>
+                    <text x="34" y="180" class="xs" style="font-size:11.5px">private_data &rarr; struct socket</text>
+                    <path d="M 145 190 V 214" class="ln" marker-end="url(#fvb)" />
+                    <rect x="20" y="218" width="250" height="124" rx="8" class="bd lay-user" />
+                    <text x="34" y="240" class="lbl" style="font-family:Consolas,'Courier New',monospace;font-size:12.5px;font-weight:700">struct socket</text>
+                    <text x="34" y="260" class="xs" style="font-size:11.5px">fd 쪽 껍데기</text>
+                    <text x="34" y="278" class="xs" style="font-size:11.5px">state &middot; type(SOCK_STREAM)</text>
+                    <text x="34" y="296" class="xs" style="font-size:11.5px">ops = inet_stream_ops</text>
+                    <text x="34" y="314" class="xs" style="font-size:11.5px">file &rarr; 위 struct file</text>
+                    <text x="34" y="332" class="xs" style="font-size:11.5px">sk &rarr; 오른쪽 TCB</text>
+                    <path d="M 270 328 H 296" class="ln" marker-end="url(#fvb)" />
+                    <text x="20" y="372" class="xs" style="font-size:11.5px">accept() 전에는 왼쪽 세 칸이 없다.</text>
+                    <text x="20" y="390" class="xs" style="font-size:11.5px">accept() 때 Kernel 이 struct socket 과</text>
+                    <text x="20" y="408" class="xs" style="font-size:11.5px">struct file 을 만들어 TCB 에 붙이고</text>
+                    <text x="20" y="426" class="xs" style="font-size:11.5px">(sock_graft()), fd 9 를 돌려준다.</text>
+                    <text x="20" y="462" class="xs" style="font-size:11.5px">C 에서는 안쪽 구조체를 첫 칸에 넣어 겹친다.</text>
+                    <text x="20" y="480" class="xs" style="font-size:11.5px">Java 의 extends(상속)와 같은 효과다.</text>
                 </svg>
             </div>
 

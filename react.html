@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>React &middot; CRA &middot; Vite &middot; Next.js &middot; 백엔드 공부</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%232f6d55%27%2F%3E%3Cg%20fill%3D%27%23ffffff%27%3E%3Crect%20x%3D%277%27%20y%3D%276%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2713%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2720%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%232f6d55%27%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%279%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2716%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2723%27%20r%3D%271.3%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="note-page">
+    <div class="top-bar">
+        <a class="back-link" href="./index.html">&larr; 뒤로가기</a>
+    </div>
+
+    <main class="note-flow">
+
+        <!-- =====================================================
+             #1 위치 관계. 이 페이지의 핵심.
+             ===================================================== -->
+        <section class="note">
+            <h2>#1 위치 관계 한눈에</h2>
+
+            <p>넷 중 <em>React 는 React 하나뿐</em>이다.
+                CRA 와 Vite 는 React 코드를 브라우저용으로 바꿔 주는 <em>빌드 도구</em>이고,
+                Next.js 는 React 를 안에 품고 기능을 더 얹은 <em>프레임워크</em>다.
+                셋은 서로 다른 층에 있다.</p>
+
+            <!-- 왼쪽 : React + Vite 조합(castleMind 프론트). 오른쪽 : Next.js 하나가 같은 일을 다 품은 모양. -->
+            <div class="cdiag wide">
+                <svg viewBox="0 0 960 440" role="img"
+                    aria-label="왼쪽은 내 코드와 React 를 Vite 가 변환해 정적 파일로 만들고 브라우저가 실행한다. 오른쪽은 Next.js 틀 안에 내 코드, React, 라우팅, 서버 렌더링, API, 빌드 도구가 함께 들어 있다">
+                    <defs>
+                        <marker id="ra" markerWidth="8" markerHeight="8" refX="6.5" refY="3"
+                            orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 6.5 3 L 0 6 z" class="ahead" />
+                        </marker>
+                    </defs>
+
+                    <!-- ===== 왼쪽 : React + Vite ===== -->
+                    <text x="40" y="40" class="ttl">React + Vite (castleMind 프론트)</text>
+
+                    <rect x="40" y="60" width="190" height="56" rx="8" class="bd fillw" />
+                    <text x="135" y="84" text-anchor="middle">내가 쓴 코드</text>
+                    <text x="135" y="103" text-anchor="middle" class="sm">App.jsx &middot; TempLogin.jsx</text>
+
+                    <path d="M 135 116 V 136" class="ln" marker-end="url(#ra)" />
+                    <text x="143" y="131" class="xs">부른다</text>
+
+                    <rect x="40" y="140" width="190" height="56" rx="8" class="bd fillt" />
+                    <text x="135" y="164" text-anchor="middle">React (라이브러리)</text>
+                    <text x="135" y="183" text-anchor="middle" class="sm">컴포넌트 &middot; useState &middot; JSX</text>
+
+                    <rect x="290" y="60" width="180" height="136" rx="8" class="bd cmd" />
+                    <text x="380" y="84" text-anchor="middle">Vite (빌드 도구)</text>
+                    <text x="380" y="114" text-anchor="middle" class="sm">개발 서버 띄우기</text>
+                    <text x="380" y="140" text-anchor="middle" class="sm">JSX &rarr; JS 변환</text>
+                    <text x="380" y="166" text-anchor="middle" class="sm">배포용 파일 묶기</text>
+
+                    <path d="M 230 128 H 286" class="ln" marker-end="url(#ra)" />
+                    <text x="258" y="122" text-anchor="middle" class="xs">읽는다</text>
+
+                    <path d="M 380 196 V 242" class="ln" marker-end="url(#ra)" />
+                    <text x="388" y="224" class="xs">빌드</text>
+
+                    <rect x="40" y="246" width="430" height="56" rx="8" class="bd fillw" />
+                    <text x="255" y="270" text-anchor="middle">결과물 dist/ : 평범한 HTML &middot; JS &middot; CSS</text>
+                    <text x="255" y="289" text-anchor="middle" class="sm">Vite 는 결과물에 남지 않는다. React 는 JS 안에 들어간다.</text>
+
+                    <path d="M 255 302 V 332" class="ln" marker-end="url(#ra)" />
+
+                    <rect x="40" y="336" width="430" height="56" rx="8" class="bd fillw" />
+                    <text x="255" y="360" text-anchor="middle">브라우저가 실행</text>
+                    <text x="255" y="379" text-anchor="middle" class="sm">NGINX 가 정적 파일로 내려준다.</text>
+
+                    <text x="40" y="424" class="lbl">CRA 는 Vite 와 같은 자리다 (2025-02-14 지원 종료).</text>
+
+                    <!-- ===== 오른쪽 : Next.js ===== -->
+                    <rect x="500" y="22" width="440" height="410" rx="10" class="bd fillw" />
+                    <text x="516" y="46" class="ttl">Next.js (프레임워크) &mdash; 이 틀 하나가 전부 품는다.</text>
+
+                    <rect x="520" y="60" width="400" height="48" rx="8" class="bd fillw" />
+                    <text x="720" y="80" text-anchor="middle">내가 쓴 코드</text>
+                    <text x="720" y="98" text-anchor="middle" class="sm">app/ladder/page.jsx &mdash; 파일 위치가 곧 주소다.</text>
+
+                    <path d="M 720 108 V 120" class="ln" marker-end="url(#ra)" />
+
+                    <rect x="520" y="124" width="400" height="48" rx="8" class="bd fillt" />
+                    <text x="720" y="144" text-anchor="middle">React (그대로 들어 있다)</text>
+                    <text x="720" y="162" text-anchor="middle" class="sm">컴포넌트 &middot; useState &middot; JSX 는 똑같이 쓴다.</text>
+
+                    <rect x="520" y="186" width="92" height="64" rx="8" class="bd cmd" />
+                    <text x="566" y="213" text-anchor="middle" class="sm">파일</text>
+                    <text x="566" y="231" text-anchor="middle" class="sm">라우팅</text>
+
+                    <rect x="622" y="186" width="92" height="64" rx="8" class="bd cmd" />
+                    <text x="668" y="213" text-anchor="middle" class="sm">서버</text>
+                    <text x="668" y="231" text-anchor="middle" class="sm">렌더링</text>
+
+                    <rect x="724" y="186" width="92" height="64" rx="8" class="bd cmd" />
+                    <text x="770" y="213" text-anchor="middle" class="sm">API &middot;</text>
+                    <text x="770" y="231" text-anchor="middle" class="sm">서버 함수</text>
+
+                    <rect x="826" y="186" width="94" height="64" rx="8" class="bd cmd" />
+                    <text x="873" y="213" text-anchor="middle" class="sm">자체</text>
+                    <text x="873" y="231" text-anchor="middle" class="sm">빌드 도구</text>
+
+                    <text x="720" y="276" text-anchor="middle" class="lbl">React 위에 틀을 얹었다 &mdash; 내 코드를 Next.js 가 부른다.</text>
+
+                    <path d="M 720 286 V 304" class="ln" marker-end="url(#ra)" />
+
+                    <rect x="520" y="308" width="400" height="56" rx="8" class="bd fillw" />
+                    <text x="720" y="332" text-anchor="middle">결과물 : Node 서버로 계속 실행</text>
+                    <text x="720" y="351" text-anchor="middle" class="sm">서버 기능을 쓰면 정적 파일만으로는 못 돌린다.</text>
+
+                    <text x="720" y="400" text-anchor="middle" class="sm">Spring 으로 치면 Spring Boot 자리다.</text>
+                </svg>
+            </div>
+
+            <h4>넷의 정체와 역할</h4>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>이름</th>
+                        <th>정체</th>
+                        <th>하는 일</th>
+                        <th>배포 결과물에</th>
+                        <th>Spring 으로 치면</th>
+                    </tr>
+                    <tr>
+                        <th>React</th>
+                        <td><em>라이브러리</em></td>
+                        <td>화면을 컴포넌트로 나눠 그리고, 상태가 바뀌면 다시 그린다.</td>
+                        <td>남는다. JS 파일 안에 들어간다.</td>
+                        <td>Spring Framework 의 핵심 기능.</td>
+                    </tr>
+                    <tr>
+                        <th>CRA</th>
+                        <td><em>빌드 도구</em></td>
+                        <td>프로젝트 틀 &middot; 개발 서버 &middot; 빌드를 해 준다.
+                            <em>2025-02-14 지원 종료.</em></td>
+                        <td>남지 않는다.</td>
+                        <td>Spring Initializr + Gradle.</td>
+                    </tr>
+                    <tr>
+                        <th>Vite</th>
+                        <td><em>빌드 도구</em></td>
+                        <td>CRA 와 같은 일을 훨씬 빠르게 한다. 지금의 표준이다.</td>
+                        <td>남지 않는다.</td>
+                        <td>Spring Initializr + Gradle.</td>
+                    </tr>
+                    <tr>
+                        <th>Next.js</th>
+                        <td><em>프레임워크</em></td>
+                        <td>React + 라우팅 + 서버 렌더링 + 간단한 백엔드 + 자체 빌드 도구를 한 틀로 묶었다.</td>
+                        <td>남는다. Node 서버로 계속 돈다.</td>
+                        <td>Spring Boot.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="callout">
+                <span class="tag">한 줄 정리</span>
+                <p><em>React 는 재료</em>, <em>CRA &middot; Vite 는 그 재료를 브라우저용으로 굽는 도구</em>,
+                    <em>Next.js 는 React 를 품고 굽는 도구까지 들고 있는 틀</em>이다.</p>
+            </div>
+
+            <div class="callout bad">
+                <span class="tag">짚을 점 &mdash; &ldquo;셋 다 React 아니냐&rdquo;</span>
+                <p>아니다. CRA 와 Vite 는 <em>React 가 아니라 React 코드를 다루는 도구</em>다.
+                    그래서 CRA 에서 Vite 로 바꿔도 컴포넌트 코드는 그대로다.
+                    Gradle 을 Maven 으로 바꿔도 Java 코드가 그대로인 것과 같다.</p>
+                <p>Next.js 는 React 를 <em>대신하는 것이 아니라 감싸는 것</em>이다.
+                    Next.js 프로젝트의 컴포넌트도 그냥 React 컴포넌트다.</p>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #2 React
+             ===================================================== -->
+        <section class="note">
+            <h2>#2 React &mdash; 화면을 그리는 라이브러리</h2>
+
+            <p>React 가 하는 일은 <em>&ldquo;화면을 어떻게 그릴지&rdquo;</em> 하나다.
+                화면을 컴포넌트로 나누고, <code>useState</code> 같은 상태가 바뀌면 그 부분을 다시 그린다.
+                castleChat 의 <code>ChatBox.jsx</code> 안에서 쓴 JSX &middot; <code>useState</code> &middot;
+                <code>useEffect</code> 가 전부 React 다.</p>
+
+            <h3>2 &mdash; React 가 하지 않는 일</h3>
+            <p>React 는 범위가 좁다. 나머지는 다른 라이브러리나 도구가 맡는다.</p>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>필요한 일</th>
+                        <th>누가 맡나</th>
+                        <th>castleChat &middot; castleMind 에서</th>
+                    </tr>
+                    <tr>
+                        <th>주소마다 다른 화면</th>
+                        <td>react-router-dom</td>
+                        <td><code>RouteBody.jsx</code> 의 <code>&lt;Route&gt;</code> 다.</td>
+                    </tr>
+                    <tr>
+                        <th>서버에 HTTP 요청</th>
+                        <td>axios (또는 브라우저 내장 fetch)</td>
+                        <td><code>userApi.js</code> 다.</td>
+                    </tr>
+                    <tr>
+                        <th>서버 데이터 캐시</th>
+                        <td>TanStack Query</td>
+                        <td>castleChat 의 <code>useMe</code> &middot; <code>useFriendList</code> 다.</td>
+                    </tr>
+                    <tr>
+                        <th>화면 전체 공용 상태</th>
+                        <td>Redux Toolkit + react-redux</td>
+                        <td>castleChat 의 <code>chatWindowsSlice</code> 다.</td>
+                    </tr>
+                    <tr>
+                        <th>JSX 를 브라우저용 JS 로 변환 &middot; 개발 서버 &middot; 빌드</th>
+                        <td><em>CRA 또는 Vite</em></td>
+                        <td>castleChat 은 CRA, castleMind 도 지금은 CRA 다.</td>
+                    </tr>
+                    <tr>
+                        <th>서버에서 미리 화면 그리기</th>
+                        <td><em>Next.js</em></td>
+                        <td>둘 다 쓰지 않는다.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>2 &mdash; 왜 빌드 도구가 꼭 필요한가</h3>
+            <p>브라우저는 <code>&lt;div&gt;</code> 를 JS 안에 섞어 쓰는 JSX 문법을 이해하지 못한다.
+                <code>import React from 'react'</code> 처럼 <code>node_modules</code> 안의 패키지를 이름으로 불러오는 것도 그대로는 못 한다.
+                그래서 <em>내가 쓴 코드를 브라우저가 읽는 평범한 JS 로 바꿔 주는 단계</em>가 반드시 필요하고,
+                그 일을 하는 것이 CRA 와 Vite 다.</p>
+
+            <div class="callout">
+                <span class="tag">라이브러리와 프레임워크를 가르는 기준</span>
+                <p>기준은 <em>누가 누구를 부르느냐</em>다.
+                    <em>라이브러리</em>는 내가 필요할 때 불러 쓴다.
+                    <em>프레임워크</em>는 정해진 틀에 내 코드를 끼워 넣으면 프레임워크가 내 코드를 부른다(제어의 역전).</p>
+                <p>Spring 이 <code>@Controller</code> 메서드를 부르는 것이 프레임워크다.
+                    React 는 스스로를 라이브러리라고 부르고, Next.js 와 Spring 은 프레임워크다.</p>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #3 CRA 와 Vite
+             ===================================================== -->
+        <section class="note">
+            <h2>#3 CRA 와 Vite &mdash; React 코드를 다루는 빌드 도구</h2>
+
+            <p>CRA 와 Vite 는 <em>완전히 같은 자리</em>에 있다. 하는 일은 세 가지다.</p>
+            <ul>
+                <li><em>프로젝트 틀 만들기</em> &mdash; 폴더 구조와 <code>package.json</code> 을 한 번에 만든다.</li>
+                <li><em>개발 서버</em> &mdash; <code>npm start</code> &middot; <code>npm run dev</code> 로 띄우고, 저장하면 화면을 바로 갱신한다.</li>
+                <li><em>빌드</em> &mdash; JSX 를 JS 로 바꾸고 파일을 묶어서 배포용 결과물을 만든다.</li>
+            </ul>
+            <p>둘 다 프레임워크가 아니다. 앱이 어떻게 돌아가는지에는 관여하지 않고, 빌드가 끝나면 결과물 안에 남지도 않는다.
+                <em>Spring 으로 치면 Gradle 쪽</em>이다.</p>
+
+            <h3>3 &mdash; CRA 와 Vite 비교</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>CRA (react-scripts)</th>
+                        <th>Vite</th>
+                    </tr>
+                    <tr>
+                        <th>상태</th>
+                        <td><em>2025-02-14 지원 종료.</em> 마지막 버전 5.0.1 은 2022년에 멈춰 있다.</td>
+                        <td>계속 개발 중이고, 지금 React 프로젝트의 표준이다.</td>
+                    </tr>
+                    <tr>
+                        <th>개발 서버</th>
+                        <td>webpack 이 전체를 먼저 묶은 뒤에 연다. 파일이 늘수록 느려진다.</td>
+                        <td>묶지 않고 브라우저가 요청한 파일만 그때그때 변환한다. 거의 바로 켜진다.</td>
+                    </tr>
+                    <tr>
+                        <th>빌드</th>
+                        <td>webpack + babel 이라 느리다.</td>
+                        <td>더 빠르다.</td>
+                    </tr>
+                    <tr>
+                        <th>설정</th>
+                        <td>숨겨져 있다. 바꾸려면 되돌릴 수 없는 <code>eject</code> 를 해야 한다.</td>
+                        <td><code>vite.config.js</code> 하나에 필요한 것만 적는다.</td>
+                    </tr>
+                    <tr>
+                        <th>TypeScript 5</th>
+                        <td>TypeScript 4 까지만 받아들이도록 묶여 있어 충돌한다.</td>
+                        <td>문제없다.</td>
+                    </tr>
+                    <tr>
+                        <th>결과물 폴더</th>
+                        <td><code>build/</code></td>
+                        <td><code>dist/</code></td>
+                    </tr>
+                    <tr>
+                        <th>환경변수</th>
+                        <td><code>process.env.REACT_APP_xxx</code></td>
+                        <td><code>import.meta.env.VITE_xxx</code></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="callout">
+                <span class="tag">CRA 에서 Vite 로 옮기면 무엇이 바뀌나</span>
+                <p><em>React 코드(컴포넌트 &middot; JSX &middot; useState)는 그대로다.</em>
+                    도구와 약속한 부분만 손본다.</p>
+                <ul>
+                    <li>JSX 가 들어 있는 <code>.js</code> 파일을 <code>.jsx</code> 로 바꾼다. 내용은 그대로다.</li>
+                    <li><code>process.env.NODE_ENV</code> 같은 환경변수 코드를 <code>import.meta.env</code> 로 바꾼다.
+                        castleChat 은 <code>wsClient.js</code> &middot; <code>aiAssistApi.js</code> 두 곳이다.</li>
+                    <li><code>public/index.html</code> 을 맨 위로 옮기고 시작 스크립트를 직접 적는다.</li>
+                    <li><code>package.json</code> 의 <code>"proxy"</code> 를 <code>vite.config.js</code> 로 옮긴다.</li>
+                    <li>배포라면 Dockerfile 의 <code>build</code> 폴더 경로를 <code>dist</code> 로 바꾼다.</li>
+                </ul>
+            </div>
+
+            <div class="callout bad">
+                <span class="tag">짚을 점 &mdash; 새 프로젝트에 CRA 를 쓰지 않는 이유</span>
+                <p>패치가 더는 나오지 않아 <code>npm audit</code> 경고가 계속 쌓인다.
+                    TypeScript 5 와 충돌한다. 개발 서버와 빌드가 느리고 설정을 고치기 어렵다.
+                    React 공식 문서도 더 이상 CRA 를 안내하지 않는다.</p>
+                <p>다만 <em>이미 잘 돌고 있는 CRA 프로젝트가 당장 깨지는 것은 아니다.</em>
+                    배포되는 결과물은 빌드된 정적 파일이라, 실제로 나가는 코드의 보안은
+                    내 코드와 react &middot; axios 같은 런타임 라이브러리에 달려 있다.</p>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #4 Next.js
+             ===================================================== -->
+        <section class="note">
+            <h2>#4 Next.js &mdash; React 위에 지은 프레임워크</h2>
+
+            <p>Next.js 는 React 를 고치거나 새로 만든 것이 아니다.
+                <em>React 를 의존성으로 그대로 쓰고</em>, 그 위에
+                &ldquo;화면을 언제 어디서 그릴지 &middot; 주소를 어떻게 연결할지 &middot; 데이터를 어디서 가져올지&rdquo;를
+                정해 주는 틀을 얹었다.</p>
+            <p><em>React 가 Spring Framework 라면 Next.js 는 Spring Boot</em>다.
+                Spring Boot 는 Spring 을 그대로 쓰면서 자동 설정 &middot; 내장 서버 &middot; 정해진 규칙을 얹었다.
+                Spring 을 알면 Boot 가 쉽지만 Boot 만의 규칙은 따로 익혀야 하는 것처럼,
+                Next.js 도 React 를 그대로 가져가고 그 위의 규칙을 더 배운다.</p>
+
+            <h3>4 &mdash; React + Vite 와 Next.js 는 무엇이 다른가</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>React + Vite</th>
+                        <th>Next.js</th>
+                    </tr>
+                    <tr>
+                        <th>주소 연결</th>
+                        <td>react-router-dom 의 <code>&lt;Route&gt;</code> 로 직접 연결한다.</td>
+                        <td>파일 위치가 곧 주소다. <code>app/ladder/page.jsx</code> 가 <code>/ladder</code> 가 된다.</td>
+                    </tr>
+                    <tr>
+                        <th>컴포넌트가 도는 곳</th>
+                        <td>전부 브라우저에서 돈다.</td>
+                        <td><em>기본이 서버</em>다. <code>useState</code> &middot; <code>onClick</code> 이 필요한 파일은
+                            맨 위에 <code>"use client"</code> 를 적어야 브라우저에서 돈다.</td>
+                    </tr>
+                    <tr>
+                        <th>데이터 가져오기</th>
+                        <td>화면이 뜬 뒤 <code>useEffect</code> + axios 로 가져온다.</td>
+                        <td>서버 컴포넌트 안에서 바로 <code>await</code> 로 DB 나 API 를 부른다.</td>
+                    </tr>
+                    <tr>
+                        <th>첫 화면</th>
+                        <td>빈 HTML 이 먼저 오고, JS 가 실행된 뒤에 그려진다.</td>
+                        <td>서버에서 그린 HTML 이 바로 온다. 첫 화면이 빠르고 검색 엔진에 잘 잡힌다.</td>
+                    </tr>
+                    <tr>
+                        <th>백엔드</th>
+                        <td>Express 같은 서버를 따로 둔다.</td>
+                        <td>Route Handler &middot; Server Action 으로 간단한 API 를 같은 프로젝트에 둔다.</td>
+                    </tr>
+                    <tr>
+                        <th>빌드 도구</th>
+                        <td>Vite.</td>
+                        <td>Next.js 가 자체적으로 들고 있다. CRA &middot; Vite 자리를 대신한다.</td>
+                    </tr>
+                    <tr>
+                        <th>배포</th>
+                        <td>정적 파일을 NGINX 에 올리면 끝난다.</td>
+                        <td>서버 기능을 쓰면 Node 서버로 계속 띄워 둬야 한다.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="callout">
+                <span class="tag">배우는 입장에서는 &ldquo;확장&rdquo; 에 가깝다</span>
+                <p>JSX &middot; props &middot; <code>useState</code> &middot; <code>useEffect</code> 같은 React 기본기는
+                    <em>100% 그대로</em> 가져간다. 파일 라우팅과 API 기능은 금방 익힌다.</p>
+                <p>진짜 학습량은 <em>서버 컴포넌트와 클라이언트 컴포넌트의 구분</em>,
+                    서버에서 데이터를 가져오는 흐름, 렌더링 방식과 캐시 규칙이다.
+                    지금까지 쓴 React 는 전부 브라우저에서만 돌았기 때문에 이 감각이 새롭다.</p>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             #5 정리
+             ===================================================== -->
+        <section class="note">
+            <h2>#5 정리 &mdash; 무엇을 쓰나</h2>
+
+            <ul>
+                <li><em>castleMind</em> &mdash; React + Vite + Express 가 맞다.
+                    Express 와 WebSocket 서버를 따로 만들기 때문에 Next.js 의 서버 기능은 Express 와 역할이 겹친다.
+                    프론트가 아직 작아서 CRA 에서 Vite 로 옮기는 비용도 지금이 가장 싸다.</li>
+                <li><em>castleChat</em> &mdash; CRA 로 만들어져 배포되어 있다.
+                    당장 깨지지 않으니 여유 있을 때 Vite 로 옮기면 된다.</li>
+                <li><em>다른 프로젝트</em> &mdash; 어떤 도구를 쓰는지는 <code>package.json</code> 을 보면 바로 안다.</li>
+            </ul>
+
+            <h4>package.json 에서 찾는 이름</h4>
+            <pre class="code"><code>"react-scripts"   &lt;- CRA
+"vite"            &lt;- Vite
+"next"            &lt;- Next.js
+"react"           &lt;- React itself. always there</code></pre>
+        </section>
+
+    </main>
+</body>
+
+</html>

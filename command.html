@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>명령어 모음 &middot; 백엔드 공부</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%232f6d55%27%2F%3E%3Cg%20fill%3D%27%23ffffff%27%3E%3Crect%20x%3D%277%27%20y%3D%276%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2713%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3Crect%20x%3D%277%27%20y%3D%2720%27%20width%3D%2718%27%20height%3D%276%27%20rx%3D%272%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%232f6d55%27%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%279%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2716%27%20r%3D%271.3%27%2F%3E%3Ccircle%20cx%3D%2710.6%27%20cy%3D%2723%27%20r%3D%271.3%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="note-page cmd-page">
+    <div class="top-bar">
+        <a class="back-link" href="./index.html">&larr; 뒤로가기</a>
+        <div class="tab-group" role="tablist" aria-label="명령어 구분">
+            <button type="button" class="tab-btn is-active" role="tab" id="tabbtn-front"
+                data-tab="front" aria-controls="tab-front" aria-selected="true">Front-End</button>
+            <button type="button" class="tab-btn" role="tab" id="tabbtn-back"
+                data-tab="back" aria-controls="tab-back" aria-selected="false">Back-End</button>
+            <button type="button" class="tab-btn" role="tab" id="tabbtn-command"
+                data-tab="command" aria-controls="tab-command" aria-selected="false">Command</button>
+        </div>
+    </div>
+
+    <main class="note-flow">
+
+        <!-- =====================================================
+             Front-End : castle_mind_front 설치 명령
+             명령어 줄을 누르면 아래 template 의 상세가 모달로 뜬다.
+             ===================================================== -->
+        <div class="tab-panel" id="tab-front" role="tabpanel" aria-labelledby="tabbtn-front">
+            <section class="note">
+                <h2>#1 Front-End 설치</h2>
+                <div class="cmd-list">
+                    <div class="cmd-row" data-detail="front-1" role="button" tabindex="0">
+                        <code class="cmd-text">npm install axios</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-2" role="button" tabindex="0">
+                        <code class="cmd-text">npm install react-router-dom</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-3" role="button" tabindex="0">
+                        <code class="cmd-text">npx create-react-app castlechat</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-4" role="button" tabindex="0">
+                        <code class="cmd-text">npm install</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-5" role="button" tabindex="0">
+                        <code class="cmd-text">npm install @tanstack/react-query</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-6" role="button" tabindex="0">
+                        <code class="cmd-text">npm install @reduxjs/toolkit</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-7" role="button" tabindex="0">
+                        <code class="cmd-text">npm install react-redux</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-8" role="button" tabindex="0">
+                        <code class="cmd-text">npm install react-calendar</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- =====================================================
+             Back-End : express_server 설치 명령
+             ===================================================== -->
+        <div class="tab-panel" id="tab-back" role="tabpanel" aria-labelledby="tabbtn-back" hidden>
+            <section class="note">
+                <h2>#2 Back-End 설치</h2>
+                <div class="cmd-list">
+                    <div class="cmd-row" data-detail="back-1" role="button" tabindex="0">
+                        <code class="cmd-text">npm init -y</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="back-2" role="button" tabindex="0">
+                        <code class="cmd-text">npm install express</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="back-3" role="button" tabindex="0">
+                        <code class="cmd-text">npm install express-session</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="back-4" role="button" tabindex="0">
+                        <code class="cmd-text">npm install mysql2</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="back-5" role="button" tabindex="0">
+                        <code class="cmd-text">npm install connect-redis</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="back-6" role="button" tabindex="0">
+                        <code class="cmd-text">npm install redis</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- =====================================================
+             Command : 설치가 아닌 일반 명령
+             ===================================================== -->
+        <div class="tab-panel" id="tab-command" role="tabpanel" aria-labelledby="tabbtn-command" hidden>
+            <section class="note">
+                <h2>#3 Command</h2>
+                <div class="cmd-list">
+                    <div class="cmd-row" data-detail="cmd-1" role="button" tabindex="0">
+                        <code class="cmd-text">cd D:\castleDragonProjects\castleMind\express_server</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-2" role="button" tabindex="0">
+                        <code class="cmd-text">mkdir castle_mind_server</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-3" role="button" tabindex="0">
+                        <code class="cmd-text">rmdir /s /q castle_mind_server</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-4" role="button" tabindex="0">
+                        <code class="cmd-text">cls</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-5" role="button" tabindex="0">
+                        <code class="cmd-text">npm start</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-6" role="button" tabindex="0">
+                        <code class="cmd-text">npm run dev</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-7" role="button" tabindex="0">
+                        <code class="cmd-text">docker ps -a</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-8" role="button" tabindex="0">
+                        <code class="cmd-text">docker start castle-redis</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-9" role="button" tabindex="0">
+                        <code class="cmd-text">docker compose up -d chatRedis</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-10" role="button" tabindex="0">
+                        <code class="cmd-text">docker exec castle-redis redis-cli ping</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-11" role="button" tabindex="0">
+                        <code class="cmd-text">docker run -d --name mind-castle -p 6380:6379 -v mind-castle-data:/data redis:7 redis-server --appendonly yes</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-12" role="button" tabindex="0">
+                        <code class="cmd-text">docker exec mind-castle redis-cli ping</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- 명령어 상세 모달. 배경을 막지 않으려고 showModal() 이 아니라 show() 로 연다.
+         내용은 아래 template 중 하나를 복제해서 채운다. -->
+    <dialog id="cmdModal" class="cmd-modal" aria-labelledby="cmdModalTitle">
+        <button type="button" class="hdr-close" id="cmdModalClose" aria-label="닫기">&times;</button>
+        <div class="note modal-note" id="cmdModalBody"></div>
+    </dialog>
+
+    <!-- ===================================================== 상세 : Front-End -->
+    <template id="front-1">
+        <h2 id="cmdModalTitle">1 &mdash; axios 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>프론트에서 서버로 HTTP 요청을 보내는 <em>axios</em> 라이브러리를 설치하고
+                        <code>package.json</code> 의 dependencies 에 기록한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>npm = <b class="abbr">N</b>ode <b class="abbr">P</b>ackage <b class="abbr">M</b>anager. axios 는 패키지 이름이다(약어 아님).</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>역할은 <code>RestTemplate</code> &middot; <code>RestClient</code> 같은 HTTP 클라이언트다.
+                        설치는 <code>build.gradle</code> 에 <code>implementation</code> 한 줄을 추가하고 Gradle 이 jar 를 받아오는 것과 같다.</td>
+                </tr>
+            </table>
+        </div>
+        <p class="cmd-note">※ <code>npm uninstall axios</code> 명령을 실행하면 <code>node_modules</code> 와 <code>package.json</code> dependencies 에서 삭제된다.</p>
+    </template>
+
+    <template id="front-2">
+        <h2 id="cmdModalTitle">2 &mdash; react-router-dom 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>주소(URL)에 따라 다른 화면을 보여주는 <em>react-router-dom</em>(페이지 이동 &middot; 주소 라우팅 라이브러리)을 설치하고
+                        <code>package.json</code> 의 dependencies 에 기록한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>npm = <b class="abbr">N</b>ode <b class="abbr">P</b>ackage <b class="abbr">M</b>anager. react-router-dom 은 패키지 이름이다. dom = <b class="abbr">D</b>ocument <b class="abbr">O</b>bject <b class="abbr">M</b>odel.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td><code>@RequestMapping</code> 으로 URL 마다 다른 Controller 를 연결하는 일을 브라우저 안에서 하는 것과 비슷하다.
+                        설치는 <code>build.gradle</code> 에 <code>implementation</code> 한 줄을 추가하는 것과 같다.</td>
+                </tr>
+            </table>
+        </div>
+        <p class="cmd-note">※ <code>npm uninstall react-router-dom</code> 명령을 실행하면 <code>node_modules</code> 와 <code>package.json</code> dependencies 에서 삭제된다.</p>
+    </template>
+
+    <template id="front-3">
+        <h2 id="cmdModalTitle">3 &mdash; React 프로젝트 만들기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td>프로젝트 폴더를 만들 상위 폴더</td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>React 프로젝트 틀(폴더 구조, <code>package.json</code>, react &middot; react-dom &middot; react-scripts &middot; web-vitals &middot; @testing-library 같은 기본 패키지)을 한 번에 만든다. castlechat 이 이렇게 만들어졌다. CRA 는 2025년에 공식 지원이 끝나서 새 프로젝트는 Vite 로 만드는 추세다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>npx = <b class="abbr">N</b>ode <b class="abbr">P</b>ackage e<b class="abbr">X</b>ecute. 설치하지 않고 패키지를 한 번 실행한다. create-react-app(CRA) = <b class="abbr">C</b>reate <b class="abbr">R</b>eact <b class="abbr">A</b>pp.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>start.spring.io(Spring Initializr)로 프로젝트 틀을 받는 것과 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-4">
+        <h2 id="cmdModalTitle">4 &mdash; package.json 목록 전부 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castlechat</code> &middot; <code>castle_mind_front</code> (<code>package.json</code> 이 있는 폴더)</td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>패키지 이름 없이 실행하면 <code>package.json</code> dependencies 목록에 있는 패키지를 전부 <code>node_modules</code> 에 받는다. git clone 직후나 <code>node_modules</code> 를 지운 뒤에 쓴다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>npm = <b class="abbr">N</b>ode <b class="abbr">P</b>ackage <b class="abbr">M</b>anager.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>Gradle refresh 로 <code>build.gradle</code> 의 의존성을 전부 받아오는 것과 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-5">
+        <h2 id="cmdModalTitle">5 &mdash; TanStack Query 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castlechat</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>서버에서 받아온 데이터(내 정보, 친구 목록 등)를 캐시하고 다시 불러오는 일을 관리한다. castleChat 의 <code>useMe</code> &middot; <code>useFriendList</code> 가 이것으로 만들어졌다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>@tanstack 은 패키지 묶음(scope) 이름이다. react-query 는 약어가 아니다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>조회 결과를 캐시해 두는 <code>@Cacheable</code> 과 비슷한 일을 브라우저 쪽에서 한다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-6">
+        <h2 id="cmdModalTitle">6 &mdash; Redux Toolkit 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castlechat</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>화면 전체가 같이 쓰는 상태 저장소(Redux)를 쉽게 만드는 도구를 설치한다. castleChat 의 <code>chatWindowsSlice</code> &middot; <code>store.js</code> 가 이것으로 만들어졌다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>@reduxjs 는 패키지 묶음(scope) 이름이다. toolkit 은 약어가 아니다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>여러 곳에서 같이 쓰는 상태를 싱글톤 빈 하나에 모아 두는 것과 비슷하다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-7">
+        <h2 id="cmdModalTitle">7 &mdash; react-redux 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castlechat</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>React 컴포넌트가 Redux 저장소를 읽고 쓰게 이어주는 연결 부품을 설치한다. <code>Provider</code> &middot; <code>useSelector</code> &middot; <code>useDispatch</code> 가 여기서 나온다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>react-redux 는 패키지 이름이다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>컴포넌트가 <code>@Autowired</code> 로 공유 빈을 주입받는 것과 비슷하다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-8">
+        <h2 id="cmdModalTitle">8 &mdash; react-calendar 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castlechat</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>날짜를 고르는 달력 컴포넌트를 설치한다. castleChat 회원가입 페이지에서 CSS 를 불러오지만, 생년월일 입력 부분은 주석 처리되어 지금은 쓰지 않는다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>react-calendar 는 패키지 이름이다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <!-- ===================================================== 상세 : Back-End -->
+    <template id="back-1">
+        <h2 id="cmdModalTitle">1 &mdash; Node 프로젝트 만들기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>express_server</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>이 폴더를 Node 프로젝트로 선언하는 <code>package.json</code> 을 새로 만든다.
+                        질문(이름, 버전 등)에 전부 기본값으로 답한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>init = <b class="abbr">init</b>ialize. -y = --<b class="abbr">y</b>es.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td><code>build.gradle</code> &middot; <code>settings.gradle</code> 을 처음 만드는 것과 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="back-2">
+        <h2 id="cmdModalTitle">2 &mdash; Express 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>express_server</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td><em>Express</em>(웹 서버 프레임워크)를 <code>node_modules</code> 에 설치하고
+                        <code>package.json</code> dependencies 에 기록한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>npm = <b class="abbr">N</b>ode <b class="abbr">P</b>ackage <b class="abbr">M</b>anager. express 는 패키지 이름이다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td><code>implementation 'spring-boot-starter-web'</code> 과 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="back-3">
+        <h2 id="cmdModalTitle">3 &mdash; express-session 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>express_server</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>로그인 세션(쿠키 + 서버 저장소)을 다루는 Express 미들웨어를 설치한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>express-session 은 패키지 이름이다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td><code>HttpSession</code> 기능이다. Spring 은 내장되어 있고, Express 는 따로 설치한다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="back-4">
+        <h2 id="cmdModalTitle">4 &mdash; MariaDB 드라이버 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>express_server</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>MariaDB &middot; MySQL 접속 드라이버를 설치한다.
+                        커넥션 풀(<code>createPool</code>) 기능도 들어 있다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>mysql2 는 mysql 드라이버 패키지의 2번째 세대 이름이다.
+                        MariaDB 도 같은 프로토콜이라 그대로 쓴다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td><code>runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'</code> + HikariCP 와 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="back-5">
+        <h2 id="cmdModalTitle">5 &mdash; connect-redis 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>express_server</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>express-session 이 세션을 Redis 에 저장하도록 이어주는 연결 부품을 설치한다.
+                        Redis 접속 자체는 <code>redis</code> 패키지가 한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>connect-redis 는 패키지 이름이다.
+                        connect 는 Express 의 원조 미들웨어 프레임워크 이름에서 왔다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td><code>spring-session-data-redis</code> 와 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="back-6">
+        <h2 id="cmdModalTitle">6 &mdash; Redis 드라이버 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>express_server</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>Node 에서 Redis 에 접속하는 드라이버를 설치한다.
+                        connect-redis 가 이 드라이버로 세션을 읽고 쓴다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>redis = <b class="abbr">RE</b>mote <b class="abbr">DI</b>ctionary <b class="abbr">S</b>erver.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>Lettuce(<code>spring-boot-starter-data-redis</code>)와 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <!-- ===================================================== 상세 : Command -->
+    <template id="cmd-1">
+        <h2 id="cmdModalTitle">1 &mdash; 폴더 이동</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>현재 작업 폴더를 이동한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>cd = <b class="abbr">c</b>hange <b class="abbr">d</b>irectory.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-2">
+        <h2 id="cmdModalTitle">2 &mdash; 폴더 만들기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>새 폴더를 만든다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>mkdir = <b class="abbr">m</b>a<b class="abbr">k</b>e <b class="abbr">dir</b>ectory.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-3">
+        <h2 id="cmdModalTitle">3 &mdash; 폴더 지우기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>폴더를 안의 내용까지 전부, 확인 질문 없이 삭제한다.
+                        <em>휴지통을 거치지 않는 영구 삭제다.</em></td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>rmdir = <b class="abbr">r</b>e<b class="abbr">m</b>ove <b class="abbr">dir</b>ectory. /s = <b class="abbr">s</b>ubdirectories(하위 폴더 &middot; 파일 포함).
+                        /q = <b class="abbr">q</b>uiet(확인 질문 안 함).</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-4">
+        <h2 id="cmdModalTitle">4 &mdash; 터미널 화면 지우기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>VS Code 터미널 화면을 지운다. Linux &middot; Git Bash 의 <code>clear</code> 와 같다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>cls = <b class="abbr">cl</b>ear <b class="abbr">s</b>creen.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-5">
+        <h2 id="cmdModalTitle">5 &mdash; 프론트 개발 서버 실행</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td><code>package.json</code> 의 "start" 스크립트(<code>react-scripts start</code>)를 실행해
+                        프론트 개발 서버(3000)를 띄운다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>start 는 약어가 아니다. <code>package.json</code> scripts 에 정의된 이름이다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td><code>bootRun</code> 과 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-6">
+        <h2 id="cmdModalTitle">6 &mdash; Express 서버 실행</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>express_server</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td><code>package.json</code> 의 "dev" 스크립트(<code>node --watch src/server.js</code>)를 실행해
+                        Express 서버(4000)를 띄운다. 파일을 저장하면 서버가 자동으로 재시작된다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>run = <b class="abbr">run</b>-script. dev = <b class="abbr">dev</b>elopment(개발용이라는 뜻으로 붙인 스크립트 이름).
+                        --watch = 파일 변경 감시 모드.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td><code>spring-boot-devtools</code> 를 켠 상태의 <code>bootRun</code> 과 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-7">
+        <h2 id="cmdModalTitle">7 &mdash; 컨테이너 목록 보기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>컨테이너 목록을 보여준다. <code>-a</code> 를 붙이면 꺼진(정지된) 컨테이너까지 전부 보여준다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>ps = <b class="abbr">p</b>rocess <b class="abbr">s</b>tatus. Linux 의 프로세스 목록 명령 <code>ps</code> 에서 따온 이름이고,
+                        <code>docker container ls</code> 와 같은 명령이다. -a = --<b class="abbr">a</b>ll.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-8">
+        <h2 id="cmdModalTitle">8 &mdash; 정지된 컨테이너 다시 켜기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>이미 만들어져 있는 정지된 컨테이너(castle-redis)를 다시 켠다. 새로 만들지 않는다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>start 는 약어가 아니다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-9">
+        <h2 id="cmdModalTitle">9 &mdash; compose 파일에서 서비스 하나만 띄우기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castleChat\infra</code> (<code>docker-compose.yml</code> 이 있는 폴더)</td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td><code>docker-compose.yml</code> 에 정의된 서비스 중 chatRedis 만 골라서
+                        컨테이너를 만들고 백그라운드로 실행한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>compose = 여러 컨테이너를 설정 파일 하나로 묶어 관리하는 도구. up = 생성 + 실행.
+                        -d = --<b class="abbr">d</b>etach(터미널에서 떼어내 백그라운드 실행).</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-10">
+        <h2 id="cmdModalTitle">10 &mdash; castle-redis 상태 확인</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>실행 중인 castle-redis 컨테이너 안에서 redis-cli 로 ping 을 보낸다.
+                        <em>PONG 이 오면 Redis 가 정상이다.</em></td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>exec = <b class="abbr">exec</b>ute. redis-cli = Redis <b class="abbr">c</b>ommand <b class="abbr">l</b>ine <b class="abbr">i</b>nterface.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-11">
+        <h2 id="cmdModalTitle">11 &mdash; castleMind 전용 Redis 만들기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>castleMind 전용 Redis 컨테이너(mind-castle)를 새로 만들고 백그라운드로 실행한다.
+                        castle-redis(6379)와 동시에 켜도 겹치지 않게 PC 쪽 포트는 6380 을 쓴다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>run = 이미지로 컨테이너 생성 + 실행. -d = --<b class="abbr">d</b>etach(백그라운드 실행).
+                        --name = 컨테이너 이름. -p = --<b class="abbr">p</b>ublish(PC 포트:컨테이너 포트 연결).
+                        -v = --<b class="abbr">v</b>olume(데이터를 볼륨 mind-castle-data 에 저장해 컨테이너를 지워도 남김).
+                        redis:7 = 이미지 이름:버전.
+                        --appendonly yes = AOF(<b class="abbr">A</b>ppend <b class="abbr">O</b>nly <b class="abbr">F</b>ile) 저장 켜기(재시작해도 데이터 유지).</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>castleChat <code>infra/docker-compose.yml</code> 의 chatRedis 설정 한 덩어리를
+                        명령 한 줄로 쓴 것이다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="cmd-12">
+        <h2 id="cmdModalTitle">12 &mdash; mind-castle 상태 확인</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>mind-castle 컨테이너 안에서 redis-cli 로 ping 을 보낸다. <em>PONG 이 오면 정상이다.</em></td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>exec = <b class="abbr">exec</b>ute. redis-cli = Redis <b class="abbr">c</b>ommand <b class="abbr">l</b>ine <b class="abbr">i</b>nterface.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <script>
+        // 탭 전환. clntserv.html 과 같은 방식. 주소 끝을 #front / #back / #command 로 남겨 새로고침해도 같은 탭이 열린다.
+        (function () {
+            var btns = document.querySelectorAll('.tab-btn');
+            var tabIds = ['front', 'back', 'command'];
+            function show(id) {
+                document.querySelectorAll('.tab-panel').forEach(function (p) {
+                    p.hidden = p.id !== 'tab-' + id;
+                });
+                btns.forEach(function (b) {
+                    var on = b.dataset.tab === id;
+                    b.classList.toggle('is-active', on);
+                    b.setAttribute('aria-selected', on ? 'true' : 'false');
+                });
+                history.replaceState(null, '', '#' + id);
+            }
+            btns.forEach(function (b) {
+                b.addEventListener('click', function () {
+                    window.closeCmdModal();
+                    show(b.dataset.tab);
+                    window.scrollTo(0, 0);
+                });
+            });
+            var hashId = location.hash.slice(1);
+            show(tabIds.indexOf(hashId) >= 0 ? hashId : 'front');
+        })();
+    </script>
+    <script>
+        // 명령어 줄 클릭 -> 상세 모달 토글. 복사 버튼 클릭 -> 명령어만 클립보드에 복사.
+        (function () {
+            var modal = document.getElementById('cmdModal');
+            var body = document.getElementById('cmdModalBody');
+            var openRow = null;
+
+            var COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            var CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+
+            function closeModal() {
+                if (modal.open) modal.close();
+                if (openRow) openRow.classList.remove('is-open');
+                openRow = null;
+            }
+            window.closeCmdModal = closeModal;
+
+            function toggleModal(row) {
+                if (openRow === row) {
+                    closeModal();
+                    return;
+                }
+                if (openRow) openRow.classList.remove('is-open');
+                body.innerHTML = '';
+                body.appendChild(document.getElementById(row.dataset.detail).content.cloneNode(true));
+                body.scrollTop = 0;
+                modal.scrollTop = 0;
+                openRow = row;
+                row.classList.add('is-open');
+                if (!modal.open) modal.show();
+            }
+
+            // http 로 열리는 경우 navigator.clipboard 가 없어서 textarea 로 한 번 더 시도한다.
+            function copyText(text) {
+                if (navigator.clipboard && window.isSecureContext) {
+                    return navigator.clipboard.writeText(text);
+                }
+                return new Promise(function (resolve, reject) {
+                    var ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    var ok = document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    ok ? resolve() : reject(new Error('복사 실패'));
+                });
+            }
+
+            document.querySelectorAll('.cmd-row').forEach(function (row) {
+                var copyBtn = row.querySelector('.cmd-copy');
+                copyBtn.innerHTML = COPY_ICON;
+
+                copyBtn.addEventListener('click', function (e) {
+                    e.stopPropagation(); // 복사만 하고 모달은 건드리지 않는다.
+                    copyText(row.querySelector('.cmd-text').textContent).then(function () {
+                        copyBtn.innerHTML = CHECK_ICON;
+                        setTimeout(function () { copyBtn.innerHTML = COPY_ICON; }, 1200);
+                    });
+                });
+
+                row.addEventListener('click', function () { toggleModal(row); });
+                row.addEventListener('keydown', function (e) {
+                    if (e.target !== row) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleModal(row);
+                    }
+                });
+            });
+
+            document.getElementById('cmdModalClose').addEventListener('click', closeModal);
+
+            // show() 로 연 모달은 ESC 를 브라우저가 처리해 주지 않아서 직접 닫는다.
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal.open) closeModal();
+            });
+        })();
+    </script>
+</body>
+
+</html>

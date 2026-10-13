@@ -1986,3 +1986,181 @@ html {
 .farch-head.hot {
     fill: #d0312d;
 }
+
+/* ===== 명령어 모음 (command.html) ===== */
+/* 뒤로가기 · 메뉴 줄 위 여백은 10px 만 둔다. 다른 페이지는 그대로 둔다. */
+.cmd-page {
+    padding-top: 10px;
+}
+
+.cmd-page .top-bar {
+    padding-top: 0;
+}
+
+.cmd-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+/* 한 줄 = 명령어 하나. 줄을 누르면 상세 모달이 열리고, 오른쪽 검은 버튼은 복사만 한다. */
+.cmd-row {
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f7f9f8;
+    cursor: pointer;
+}
+
+.cmd-row:hover,
+.cmd-row.is-open {
+    border-color: var(--accent);
+}
+
+.cmd-row.is-open {
+    background: var(--accent-soft);
+}
+
+.cmd-row .cmd-text {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 16px;
+    overflow-x: auto;
+    border-radius: 0;
+    background: none;
+    font-size: 17px;
+    white-space: nowrap;
+    word-break: normal;
+}
+
+.cmd-copy {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    border: none;
+    background: #000000;
+    color: #ffffff;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.cmd-copy:hover {
+    background: #333333;
+}
+
+.cmd-copy svg {
+    display: block;
+    width: 1em;
+    height: 1em;
+}
+
+/* show() 로 여는 비모달 dialog. 배경을 덮지 않아 뒤의 화면도 그대로 클릭된다.
+   가로는 화면의 1/2, 세로는 2/3, 위치는 정중앙. */
+.cmd-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    width: 50vw;
+    height: 66.667vh;
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 28px 30px 30px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 16px 40px rgba(29, 42, 36, 0.18);
+}
+
+/* 공용 규칙 html:has(dialog[open]) 이 배경 스크롤을 막는데, 이 모달은 배경을 그대로 쓰게 둔다. */
+html:has(dialog.cmd-modal[open]) {
+    overflow: visible;
+}
+
+/* 폰에서는 화면 1/2 폭이면 표가 읽히지 않아서 넓힌다. */
+@media (max-width: 760px) {
+    .cmd-modal {
+        width: 92vw;
+        padding: 26px 18px 22px;
+    }
+}
+
+/* 풀네임 칸의 약어. 굵게 + 1px 크게 + 빨간색. */
+.cmd-modal .abbr {
+    color: red;
+    font-size: calc(1em + 1px);
+    font-weight: 700;
+}
+
+/* 표 아래 작은 보충 설명 (예: uninstall 안내). */
+.cmd-modal .cmd-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* 명령어 박스는 목록 폭의 절반. 그보다 긴 명령어는 넘치는 만큼만 넓어지고, 목록 폭을 넘으면 박스 안에서 가로 스크롤한다. */
+.cmd-list {
+    justify-items: start;
+}
+
+.cmd-row {
+    width: max-content;
+    min-width: 50%;
+    max-width: 100%;
+}
+
+/* Front-End · Back-End · Command 메뉴바. clntserv 의 탭 버튼을 이 페이지에서만 붙어 있는 메뉴 모양으로 바꾼다.
+   선택된 메뉴는 테마색 배경(React 하늘색 · Node 초록 · 검정), 나머지는 옅은 회색 + 투명도. */
+.cmd-page .tab-group {
+    gap: 0;
+}
+
+.cmd-page .tab-btn {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 0;
+    background: #d1d5db;
+    color: #374151;
+    font-size: 18px;
+    text-align: center;
+    opacity: 0.5;
+}
+
+.cmd-page .tab-btn:first-child {
+    border-radius: 12px 0 0 12px;
+}
+
+.cmd-page .tab-btn:last-child {
+    border-radius: 0 12px 12px 0;
+}
+
+.cmd-page .tab-btn:hover {
+    opacity: 0.8;
+}
+
+.cmd-page .tab-btn.is-active {
+    opacity: 1;
+}
+
+.cmd-page .tab-btn.is-active[data-tab="front"] {
+    background: #61dafb;
+    color: #20232a;
+}
+
+.cmd-page .tab-btn.is-active[data-tab="back"] {
+    background: #5fa04e;
+    color: #ffffff;
+}
+
+.cmd-page .tab-btn.is-active[data-tab="command"] {
+    background: #000000;
+    color: #ffffff;
+}
