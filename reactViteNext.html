@@ -20,7 +20,10 @@
              #1 위치 관계. 이 페이지의 핵심.
              ===================================================== -->
         <section class="note">
-            <h2>#1 위치 관계 한눈에</h2>
+            <h2 class="h3-btn">#1 위치 관계 한눈에
+                <button type="button" class="note-btn"
+                    onclick="document.getElementById('viteModal').showModal()">castleMind Vite 변경</button>
+            </h2>
 
             <p>넷 중 <em>React 는 React 하나뿐</em>이다.
                 CRA 와 Vite 는 React 코드를 브라우저용으로 바꿔 주는 <em>빌드 도구</em>이고,
@@ -426,6 +429,152 @@
         </section>
 
     </main>
+    <!-- castleMind 프론트를 CRA 에서 Vite 로 바꾼 기록. 명령어는 command.html 에 있다. -->
+    <dialog id="viteModal" class="hdr-modal" aria-labelledby="viteModalTitle">
+        <form method="dialog">
+            <button type="submit" class="hdr-close" aria-label="닫기">&times;</button>
+        </form>
+        <div class="note modal-note">
+            <h2 id="viteModalTitle">castleMind 프론트 &mdash; CRA 에서 Vite 로 변경</h2>
+            <p><em>React 코드(컴포넌트 &middot; <code>userApi.js</code> &middot; CSS)는 한 줄도 바뀌지 않았다.</em>
+                도구와 약속한 부분만 바꿨다. Java 코드는 그대로 두고 <code>build.gradle</code> 만 다른 빌드 도구 설정으로 갈아 끼운 것과 같다.</p>
+
+            <h3>1 &mdash; 바뀐 대상</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>대상</th>
+                        <th>무엇을</th>
+                        <th>어떻게</th>
+                    </tr>
+                    <tr>
+                        <th><code>index.html</code></th>
+                        <td>앱의 시작 HTML</td>
+                        <td><code>public/index.html</code> 을 프로젝트 맨 위로 옮겼다.
+                            CRA 전용 표기 <code>%PUBLIC_URL%</code> 와 CRA 안내 주석을 지우고,
+                            <code>&lt;script type="module" src="/src/index.jsx"&gt;</code> 를 직접 적었다.
+                            CRA 가 몰래 해 주던 &ldquo;JS 끼워 넣기&rdquo; 를 Vite 에서는 HTML 에 명시한다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>src/index.js</code></th>
+                        <td>앱 시작 파일</td>
+                        <td><code>index.jsx</code> 로 확장자를 바꿨다. Vite 는 JSX 가 든 파일이 <code>.jsx</code> 여야 한다.
+                            CRA 성능 측정 코드 <code>reportWebVitals()</code> 호출도 지웠다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>src/App.js</code></th>
+                        <td>최상위 컴포넌트</td>
+                        <td><code>App.jsx</code> 로 확장자만 바꿨다. 내용은 그대로다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>vite.config.js</code></th>
+                        <td>Vite 설정 (새 파일)</td>
+                        <td>React 플러그인을 등록하고, 개발 서버 포트를 3000 으로 두고,
+                            <code>/user</code> 요청을 Express(4000)로 넘기는 proxy 를 넣었다.
+                            CRA 때 <code>package.json</code> 의 <code>"proxy"</code> 가 하던 일이다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>package.json</code></th>
+                        <td>실행 명령과 설정</td>
+                        <td><code>scripts</code> 를 <code>dev</code> &middot; <code>build</code> &middot; <code>preview</code> &middot; <code>lint</code> 로 바꿨다.
+                            <code>"type": "module"</code> 을 넣었다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>eslint.config.js</code></th>
+                        <td>코드 검사 설정 (새 파일)</td>
+                        <td>CRA 의 react-scripts 안에 숨어 있던 ESLint 를 Vite 공식 템플릿과 같은 구성으로 다시 붙였다.
+                            JS 기본 규칙 &middot; Hook 규칙 &middot; Vite 화면 갱신 규칙을 쓰고, <code>npm run lint</code> 로 실행한다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>.gitignore</code></th>
+                        <td>빌드 결과 폴더</td>
+                        <td><code>/dist</code> 를 추가했다. CRA 는 <code>build/</code>, Vite 는 <code>dist/</code> 에 결과물을 만든다.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>2 &mdash; 설치한 것</h3>
+            <div class="scroll-x">
+                <table>
+                    <tr>
+                        <th>패키지</th>
+                        <th>역할</th>
+                    </tr>
+                    <tr>
+                        <th><code>vite</code></th>
+                        <td>개발 서버 &middot; 빌드 도구 본체다. <code>-D</code> 로 설치해서 <code>devDependencies</code> 에 들어가고 배포 결과물에는 들어가지 않는다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>@vitejs/plugin-react</code></th>
+                        <td>Vite 가 JSX 를 변환하고, 저장하면 화면 상태를 유지한 채 바로 갱신하게 해 준다. 역시 <code>-D</code> 로 설치한다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>eslint</code></th>
+                        <td>코드 검사 도구 본체다. <code>-D</code> 로 설치한다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>@eslint/js</code></th>
+                        <td>JS 기본 규칙 묶음이다. 안 쓰는 변수, 선언 안 된 변수 같은 실수를 잡는다. <code>-D</code> 로 설치한다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>globals</code></th>
+                        <td><code>window</code> &middot; <code>document</code> 같은 브라우저 전역 변수를 &ldquo;선언 안 된 변수&rdquo; 로 오해하지 않게 알려 준다. <code>-D</code> 로 설치한다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>eslint-plugin-react-hooks</code></th>
+                        <td>Hook 규칙을 검사한다. 조건문 안의 Hook, <code>useEffect</code> 의존성 배열 누락을 잡는다. <code>-D</code> 로 설치한다.</td>
+                    </tr>
+                    <tr>
+                        <th><code>eslint-plugin-react-refresh</code></th>
+                        <td>Vite 의 화면 즉시 갱신이 깨지는 export 방식을 경고한다. <code>-D</code> 로 설치한다.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>3 &mdash; 삭제한 것</h3>
+            <ul>
+                <li><code>package.json</code> 의 <code>eslintConfig</code> &middot; <code>browserslist</code> &middot; <code>proxy</code> 설정을 지웠다.
+                    셋 다 CRA(react-scripts)가 읽던 설정이라 Vite 에서는 쓰이지 않는다. proxy 는 <code>vite.config.js</code> 로 옮겼다.</li>
+                <li>CRA 와 함께 깔려 있던 패키지 6개(react-scripts &middot; web-vitals &middot; @testing-library 4개)를 지웠다.
+                    <em>CRA 에 내장되어 있던 ESLint 도 react-scripts 와 함께 빠졌고</em>, 새로 설치한 ESLint 와 <code>eslint.config.js</code> 로 대신한다.</li>
+                <li>CRA 기본 파일 4개를 지웠다. 어디서도 쓰지 않던 견본 파일이라 앱 동작에는 영향이 없다.
+                    <code>reportWebVitals.js</code>(성능 측정 견본) &middot; <code>setupTests.js</code>(Jest 테스트 설정) &middot;
+                    <code>App.test.js</code>(견본 테스트) &middot; <code>logo.svg</code>(CRA 로고 그림).</li>
+                <li><code>public/index.html</code> 은 지운 것이 아니라 프로젝트 맨 위로 옮긴 것이다.
+                    <code>public/</code> 의 favicon &middot; 아이콘 &middot; <code>manifest.json</code> 은 그대로 쓴다.</li>
+            </ul>
+
+            <h3>4 &mdash; 실행한 명령어</h3>
+            <p>모두 <code>castle_mind_front</code> 에서 실행했다.</p>
+            <h4>삭제 &mdash; CRA 와 함께 깔려 있던 패키지</h4>
+            <pre class="code"><code>npm uninstall react-scripts
+npm uninstall web-vitals
+npm uninstall @testing-library/dom
+npm uninstall @testing-library/jest-dom
+npm uninstall @testing-library/react
+npm uninstall @testing-library/user-event</code></pre>
+            <h4>삭제 &mdash; CRA 기본 파일</h4>
+            <pre class="code"><code>del src\reportWebVitals.js
+del src\setupTests.js
+del src\App.test.js
+del src\logo.svg</code></pre>
+            <h4>설치 &mdash; Vite &middot; ESLint</h4>
+            <pre class="code"><code>npm install -D vite
+npm install -D @vitejs/plugin-react
+npm install -D eslint
+npm install -D @eslint/js
+npm install -D globals
+npm install -D eslint-plugin-react-hooks
+npm install -D eslint-plugin-react-refresh</code></pre>
+
+            <div class="callout">
+                <span class="tag">실행 명령이 바뀌었다</span>
+                <p>프론트 개발 서버는 <code>npm start</code> 대신 <code>npm run dev</code> 로 띄운다.
+                    Vite 프로젝트의 표준 이름이고, <code>express_server</code> 의 <code>npm run dev</code> 와 이름도 맞춰진다.
+                    주소는 그대로 <code>http://localhost:3000</code> 이다.</p>
+            </div>
+        </div>
+    </dialog>
 </body>
 
 </html>

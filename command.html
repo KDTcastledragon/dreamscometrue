@@ -64,6 +64,38 @@
                         <code class="cmd-text">npm install react-calendar</code>
                         <button type="button" class="cmd-copy" aria-label="복사"></button>
                     </div>
+                    <div class="cmd-row" data-detail="front-9" role="button" tabindex="0">
+                        <code class="cmd-text">npm install -D vite</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-10" role="button" tabindex="0">
+                        <code class="cmd-text">npm install -D @vitejs/plugin-react</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-11" role="button" tabindex="0">
+                        <code class="cmd-text">npm install -D eslint</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-12" role="button" tabindex="0">
+                        <code class="cmd-text">npm install -D @eslint/js</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-13" role="button" tabindex="0">
+                        <code class="cmd-text">npm install -D globals</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-14" role="button" tabindex="0">
+                        <code class="cmd-text">npm install -D eslint-plugin-react-hooks</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-15" role="button" tabindex="0">
+                        <code class="cmd-text">npm install -D eslint-plugin-react-refresh</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="front-16" role="button" tabindex="0">
+                        <code class="cmd-text">del src\reportWebVitals.js</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
                 </div>
             </section>
         </div>
@@ -156,6 +188,10 @@
                     </div>
                     <div class="cmd-row" data-detail="cmd-12" role="button" tabindex="0">
                         <code class="cmd-text">docker exec mind-castle redis-cli ping</code>
+                        <button type="button" class="cmd-copy" aria-label="복사"></button>
+                    </div>
+                    <div class="cmd-row" data-detail="cmd-13" role="button" tabindex="0">
+                        <code class="cmd-text">docker ps -a --filter name=mind-castle</code>
                         <button type="button" class="cmd-copy" aria-label="복사"></button>
                     </div>
                 </div>
@@ -364,6 +400,184 @@
                 </tr>
             </table>
         </div>
+    </template>
+
+    <template id="front-9">
+        <h2 id="cmdModalTitle">9 &mdash; Vite 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>개발 서버 &middot; 빌드 도구 Vite 를 설치한다. CRA(react-scripts) 자리를 대신한다. <code>-D</code> 라서 <code>devDependencies</code> 에 기록되고 배포 결과물에는 들어가지 않는다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>npm = <b class="abbr">N</b>ode <b class="abbr">P</b>ackage <b class="abbr">M</b>anager. -D = --save-<b class="abbr">d</b>ev. vite 는 프랑스어로 &ldquo;빠르다&rdquo; 는 뜻이다(약어 아님).</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>Gradle 같은 빌드 도구를 프로젝트에 넣는 것이다. <code>-D</code> 는 <code>developmentOnly</code> 처럼 개발할 때만 쓴다는 표시다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-10">
+        <h2 id="cmdModalTitle">10 &mdash; Vite React 플러그인 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>Vite 가 JSX 를 변환하고, 저장하면 화면 상태를 유지한 채 바로 갱신하게 해 준다. <code>vite.config.js</code> 의 <code>plugins: [react()]</code> 가 이것이다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>-D = --save-<b class="abbr">d</b>ev. @vitejs 는 패키지 묶음(scope) 이름이다. plugin-react 는 약어가 아니다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td><code>build.gradle</code> 의 <code>plugins { }</code> 에 플러그인을 추가하는 것과 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-11">
+        <h2 id="cmdModalTitle">11 &mdash; ESLint 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>코드 검사 도구 ESLint 본체를 설치한다. CRA 때는 react-scripts 안에 숨어 있었고, Vite 로 바꾸면서 따로 설치한다. <code>npm run lint</code> 로 실행한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>npm = <b class="abbr">N</b>ode <b class="abbr">P</b>ackage <b class="abbr">M</b>anager. -D = --save-<b class="abbr">d</b>ev. ESLint = ECMAScript(JS 의 표준 이름) + lint(코드의 실수를 찾아내는 일).</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>Checkstyle &middot; IntelliJ 코드 검사와 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-12">
+        <h2 id="cmdModalTitle">12 &mdash; ESLint JS 기본 규칙 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>JS 기본 규칙 묶음을 설치한다. 안 쓰는 변수, 선언 안 된 변수 같은 실수를 잡는다. <code>eslint.config.js</code> 의 <code>js.configs.recommended</code> 가 이것이다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>-D = --save-<b class="abbr">d</b>ev. @eslint 는 패키지 묶음(scope) 이름이다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>Checkstyle 의 기본 규칙 세트(google_checks.xml 등)와 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-13">
+        <h2 id="cmdModalTitle">13 &mdash; 전역 변수 목록 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td><code>window</code> &middot; <code>document</code> 같은 브라우저 전역 변수 목록을 설치한다. ESLint 가 이것들을 &ldquo;선언 안 된 변수&rdquo; 로 오해하지 않게 한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>-D = --save-<b class="abbr">d</b>ev. globals 는 패키지 이름이다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-14">
+        <h2 id="cmdModalTitle">14 &mdash; Hook 규칙 플러그인 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>Hook 규칙을 검사한다. 조건문 안에서 Hook 을 부르는 실수, <code>useEffect</code> 의존성 배열 누락을 잡는다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>-D = --save-<b class="abbr">d</b>ev. eslint-plugin-react-hooks 는 패키지 이름이다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-15">
+        <h2 id="cmdModalTitle">15 &mdash; Vite 화면 갱신 규칙 플러그인 설치</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>Vite 의 화면 즉시 갱신(저장하면 상태를 유지한 채 바로 반영)이 깨지는 export 방식을 경고한다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>-D = --save-<b class="abbr">d</b>ev. eslint-plugin-react-refresh 는 패키지 이름이다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="front-16">
+        <h2 id="cmdModalTitle">16 &mdash; CRA 기본 파일 지우기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>위치</th>
+                    <td><code>castle_mind_front</code></td>
+                </tr>
+                <tr>
+                    <th>기능</th>
+                    <td>파일 하나를 삭제한다. <em>휴지통을 거치지 않는 영구 삭제다.</em>
+                        Vite 로 바꾸면서 쓰지 않게 된 CRA 기본 파일을 지울 때 썼다. cmd 는 경로 구분에 <code>\</code> 를 쓴다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>del = <b class="abbr">del</b>ete.</td>
+                </tr>
+            </table>
+        </div>
+        <p class="cmd-note">※ <code>src\setupTests.js</code> &middot; <code>src\App.test.js</code> &middot; <code>src\logo.svg</code> 도 같은 명령어로 삭제할 수 있다.</p>
     </template>
 
     <!-- ===================================================== 상세 : Back-End -->
@@ -586,12 +800,12 @@
     </template>
 
     <template id="cmd-5">
-        <h2 id="cmdModalTitle">5 &mdash; 프론트 개발 서버 실행</h2>
+        <h2 id="cmdModalTitle">5 &mdash; CRA 프론트 개발 서버 실행</h2>
         <div class="scroll-x">
             <table>
                 <tr>
                     <th>위치</th>
-                    <td><code>castle_mind_front</code></td>
+                    <td><code>castlechat</code> (CRA 프로젝트). castle_mind_front 는 Vite 로 바꿔서 <code>npm run dev</code> 를 쓴다.</td>
                 </tr>
                 <tr>
                     <th>기능</th>
@@ -611,16 +825,16 @@
     </template>
 
     <template id="cmd-6">
-        <h2 id="cmdModalTitle">6 &mdash; Express 서버 실행</h2>
+        <h2 id="cmdModalTitle">6 &mdash; 개발 서버 실행 (Express &middot; Vite)</h2>
         <div class="scroll-x">
             <table>
                 <tr>
                     <th>위치</th>
-                    <td><code>express_server</code></td>
+                    <td><code>express_server</code> &middot; <code>castle_mind_front</code></td>
                 </tr>
                 <tr>
                     <th>기능</th>
-                    <td><code>package.json</code> 의 "dev" 스크립트(<code>node --watch src/server.js</code>)를 실행해
+                    <td><code>castle_mind_front</code> 에서는 Vite 개발 서버(3000)를 띄운다. <code>express_server</code> 에서는 <code>package.json</code> 의 "dev" 스크립트(<code>node --watch src/server.js</code>)를 실행해
                         Express 서버(4000)를 띄운다. 파일을 저장하면 서버가 자동으로 재시작된다.</td>
                 </tr>
                 <tr>
@@ -750,6 +964,27 @@
         </div>
     </template>
 
+    <template id="cmd-13">
+        <h2 id="cmdModalTitle">13 &mdash; 이름으로 컨테이너 찾기</h2>
+        <div class="scroll-x">
+            <table>
+                <tr>
+                    <th>기능</th>
+                    <td>컨테이너 목록 중 이름에 <code>mind-castle</code> 이 들어간 것만 보여준다. 꺼진 것까지 본다.
+                        새로 만들기 전에 같은 이름의 컨테이너가 이미 있는지 확인할 때 쓴다. 아무것도 안 나오면 없는 것이다.</td>
+                </tr>
+                <tr>
+                    <th>풀네임</th>
+                    <td>ps = <b class="abbr">p</b>rocess <b class="abbr">s</b>tatus. -a = --<b class="abbr">a</b>ll. --filter = 조건에 맞는 것만 거르는 옵션(약어 아님). name= 은 컨테이너 이름 조건이다.</td>
+                </tr>
+                <tr>
+                    <th>Spring 비유</th>
+                    <td>SQL 의 <code>WHERE name LIKE '%mind-castle%'</code> 처럼 목록을 조건으로 거르는 것과 같다.</td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
     <script>
         // 탭 전환. clntserv.html 과 같은 방식. 주소 끝을 #front / #back / #command 로 남겨 새로고침해도 같은 탭이 열린다.
         (function () {
@@ -770,6 +1005,7 @@
                 b.addEventListener('click', function () {
                     window.closeCmdModal();
                     show(b.dataset.tab);
+                    if (window.layoutCmdRows) window.layoutCmdRows();
                     window.scrollTo(0, 0);
                 });
             });
@@ -793,6 +1029,28 @@
                 openRow = null;
             }
             window.closeCmdModal = closeModal;
+
+            // 2열 배치. 먼저 전부 한 칸(절반)에 넣어 보고, 글자가 칸을 넘치는 명령어만 is-wide 로 한 줄 전체를 쓰게 한다.
+            // 숨겨진 탭은 폭이 0 이라 잴 수 없어서, 보이는 목록만 계산하고 탭을 바꿀 때 다시 계산한다.
+            function layoutCmdRows() {
+                document.querySelectorAll('.cmd-list').forEach(function (list) {
+                    if (!list.offsetParent) return;
+                    var rows = list.querySelectorAll('.cmd-row');
+                    rows.forEach(function (row) { row.classList.remove('is-wide'); });
+                    rows.forEach(function (row) {
+                        var text = row.querySelector('.cmd-text');
+                        if (text.scrollWidth > text.clientWidth) row.classList.add('is-wide');
+                    });
+                });
+            }
+            window.layoutCmdRows = layoutCmdRows;
+            layoutCmdRows();
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutCmdRows);
+            var resizeTimer = null;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(layoutCmdRows, 100);
+            });
 
             function toggleModal(row) {
                 if (openRow === row) {
